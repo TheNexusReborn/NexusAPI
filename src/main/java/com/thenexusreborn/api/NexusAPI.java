@@ -45,7 +45,7 @@ public abstract class NexusAPI {
             return;
         }
         
-        playerManager.setupMysql();
+        dataManager.setupMysql();
     }
     
     public abstract Connection getConnection() throws SQLException;
