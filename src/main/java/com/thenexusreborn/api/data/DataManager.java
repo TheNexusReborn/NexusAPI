@@ -190,7 +190,6 @@ public class DataManager {
     }
     
     public void refreshPlayerStats(NexusPlayer nexusPlayer) {
-        System.out.println("Refreshing stats for " + nexusPlayer.getName());
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet statsResultSet = statement.executeQuery("select * from stats where uuid='" + nexusPlayer.getUniqueId() + "';");
             while (statsResultSet.next()) {
@@ -201,8 +200,6 @@ public class DataManager {
                 long modified = Long.parseLong(statsResultSet.getString("modified"));
                 UUID uuid = UUID.fromString(statsResultSet.getString("uuid"));
     
-                System.out.println("Found stat with id " + id + " with name " + name + " for player " + uuid);
-        
                 if (!StatRegistry.isValidStat(name)) {
                     continue;
                 }
@@ -236,8 +233,6 @@ public class DataManager {
                     continue;
                 }
     
-                System.out.println("Found stat change for " + uuid + " with name " + name + " with id " + id);
-        
                 StatChange<Number> statChange = new StatChange<>(id, nexusPlayer.getUniqueId(), name, value, operator, timestamp);
                 nexusPlayer.addStatChange(statChange);
             }
