@@ -2,8 +2,9 @@ package com.thenexusreborn.api.data;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.tags.Tag;
+import com.thenexusreborn.api.server.ServerInfo;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.util.Operator;
 
 import java.sql.*;
@@ -17,7 +18,8 @@ public class DataManager {
             statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(10000));");
             statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
             statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
-        
+            statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
+            
             int version = 0;
             boolean convert = false;
             ResultSet versionSet = statement.executeQuery("select version from players;");
@@ -52,6 +54,94 @@ public class DataManager {
                 players.clear();
             }
         }
+    }
+    
+    public List<ServerInfo> getAllServers() {
+        List<ServerInfo> servers = new ArrayList<>();
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select multicraftId from serverinfo;");
+            while (resultSet.next()) {
+                int multicraftId = resultSet.getInt("multicraftId");
+                ServerInfo serverInfo = getServerInfo(multicraftId);
+                if (serverInfo != null) {
+                    servers.add(serverInfo);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return servers;
+    }
+    
+    public void getAllServersAsync(Consumer<List<ServerInfo>> action) {
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            List<ServerInfo> allServers = getAllServers();
+            if (allServers != null && !allServers.isEmpty()) {
+                action.accept(allServers);
+            }
+        });
+    }
+    
+    public ServerInfo getServerInfo(int multicraftId) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select * from serverinfo where multicraftId='" + multicraftId + "';");
+            if (resultSet.next()) {
+                String ip = resultSet.getString("ip");
+                String name = resultSet.getString("name");
+                int port = resultSet.getInt("port");
+                int players = resultSet.getInt("players");
+                int maxPlayers = resultSet.getInt("maxPlayers"); 
+                int hiddenPlayers = resultSet.getInt("hiddenPlayers");
+                String type = resultSet.getString("type");
+                String status = resultSet.getString("status");
+                String state = resultSet.getString("state");
+                return new ServerInfo(multicraftId, ip, name, port, players, maxPlayers, hiddenPlayers, type, status, state);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public void getServerInfoAsync(int multicraftId, Consumer<ServerInfo> action) {
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            ServerInfo serverInfo = getServerInfo(multicraftId);
+            if (serverInfo != null) {
+                action.accept(serverInfo);
+            }
+        });
+    }
+    
+    public void pushServerInfo(ServerInfo serverInfo) {
+        try (Connection connection = NexusAPI.getApi().getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery("select * from serverinfo where multicraftId='" + serverInfo.getMulticraftId() + "';");
+                PreparedStatement preparedStatement;
+                if (resultSet.next()) {
+                    preparedStatement = connection.prepareStatement("update serverinfo set ip=?, name=?, port=?, players=?, maxPlayers=?, hiddenPlayers=?, type=?, status=?, state=? where multicraftId='" + serverInfo.getMulticraftId() + "';");
+                } else {
+                    preparedStatement = connection.prepareStatement("insert into serverinfo(multicraftId, ip, name, port, players, maxPlayers, hiddenPlayers, type, status, state) values (" + serverInfo.getMulticraftId() + ", ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                }
+                preparedStatement.setString(1, serverInfo.getIp());
+                preparedStatement.setString(2, serverInfo.getName());
+                preparedStatement.setInt(3, serverInfo.getPort());
+                preparedStatement.setInt(4, serverInfo.getPlayers());
+                preparedStatement.setInt(5, serverInfo.getMaxPlayers());
+                preparedStatement.setInt(6, serverInfo.getHiddenPlayers());
+                preparedStatement.setString(7, serverInfo.getType());
+                preparedStatement.setString(8, serverInfo.getStatus());
+                preparedStatement.setString(9, serverInfo.getState());
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void pushServerInfoAsync(ServerInfo serverInfo) {
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> pushServerInfo(serverInfo));
     }
     
     public <T extends Number> void pushStatChangeAsync(StatChange<T> statChange) {
