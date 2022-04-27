@@ -96,7 +96,9 @@ public abstract class NexusScoreboard {
 
     public void refreshPlayerTeam(NexusPlayer nexusPlayer) {
         ITeam team = getExistingPlayerTeam(nexusPlayer);
-        team.unregister();
+        if (team != null) {
+            team.unregister();
+        }
         createPlayerTeam(nexusPlayer);
     }
     
@@ -105,25 +107,35 @@ public abstract class NexusScoreboard {
     }
 
     private ITeam getExistingPlayerTeam(NexusPlayer nexusPlayer) {
+        System.out.println("Getting existing player team");
         ITeam team = getTeam(getPlayerTeamName(nexusPlayer));
-        String playerName;
-        if (nexusPlayer.getName().length() > 13) {
-            playerName = nexusPlayer.getName().substring(0, 14);
-        } else {
-            playerName = nexusPlayer.getName();
-        }
         if (team == null) {
+            System.out.println("initial team is null, probably a longer username");
+            String playerName;
+            if (nexusPlayer.getName().length() > 13) {
+                playerName = nexusPlayer.getName().substring(0, 14);
+            } else {
+                playerName = nexusPlayer.getName();
+            }
+            System.out.println("Determined the effective player name to be " + playerName);
             for (ITeam scoreboardTeam : this.scoreboard.getTeams()) {
+                System.out.println("Searching existing team " + scoreboardTeam.getName());
                 if (scoreboardTeam.getName().contains(playerName)) {
+                    System.out.println("The scoreboard team name contains the player name");
                     team = scoreboardTeam;
                     break;
                 }
             }
         }
+        System.out.println(team);
         return team;
     }
     
     public Map<UUID, ITeam> getPlayerTeams() {
         return playerTeams;
+    }
+    
+    public NexusPlayer getPlayer() {
+        return player;
     }
 }

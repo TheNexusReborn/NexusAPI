@@ -267,4 +267,19 @@ public abstract class NexusPlayer {
                 ", lastKnownName='" + lastKnownName + '\'' +
                 '}';
     }
+    
+    public double getStatValue(String statName) {
+        Number value = 0;
+        Stat<Number> stat = this.stats.get(statName);
+        if (stat != null) {
+            value = stat.getValue();
+        }
+    
+        for (StatChange<Number> statChange : this.statChanges) {
+            if (statChange.getStatName().equalsIgnoreCase(statName)) {
+                value = statChange.getOperator().calculate(value, statChange.getValue());
+            }
+        }
+        return value.doubleValue();
+    }
 }
