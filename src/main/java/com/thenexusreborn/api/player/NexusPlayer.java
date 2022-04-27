@@ -21,7 +21,7 @@ public abstract class NexusPlayer {
     protected Map<Rank, Long> ranks = new TreeMap<>();
     
     protected Map<String, Stat<Number>> stats = new HashMap<>();
-    protected List<StatChange<Number>> statChanges = new ArrayList<>();
+    protected Set<StatChange<Number>> statChanges = new HashSet<>();
     
     protected NexusScoreboard scoreboard;
     
@@ -252,7 +252,7 @@ public abstract class NexusPlayer {
         this.statChanges.add(statChange);
     }
     
-    public List<StatChange<Number>> getStatChanges() {
+    public Set<StatChange<Number>> getStatChanges() {
         return statChanges;
     }
     

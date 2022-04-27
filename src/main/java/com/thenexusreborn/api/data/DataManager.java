@@ -189,6 +189,63 @@ public class DataManager {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> pushPlayer(player));
     }
     
+    public void refreshPlayerStats(NexusPlayer nexusPlayer) {
+        System.out.println("Refreshing stats for " + nexusPlayer.getName());
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet statsResultSet = statement.executeQuery("select * from stats where uuid='" + nexusPlayer.getUniqueId() + "';");
+            while (statsResultSet.next()) {
+                int id = statsResultSet.getInt("id");
+                String name = statsResultSet.getString("name");
+                String rawValue = statsResultSet.getString("value");
+                long created = Long.parseLong(statsResultSet.getString("created"));
+                long modified = Long.parseLong(statsResultSet.getString("modified"));
+                UUID uuid = UUID.fromString(statsResultSet.getString("uuid"));
+    
+                System.out.println("Found stat with id " + id + " with name " + name + " for player " + uuid);
+        
+                if (!StatRegistry.isValidStat(name)) {
+                    continue;
+                }
+        
+                Stat<? extends Number> stat;
+                if (StatRegistry.isIntegerStat(name)) {
+                    stat = StatRegistry.instantiateIntegerStat(id, name, nexusPlayer.getUniqueId(), Integer.parseInt(rawValue), created, modified);
+                } else if (StatRegistry.isDoubleStat(name)) {
+                    stat = StatRegistry.instantiateDoubleStat(id, name, nexusPlayer.getUniqueId(), Double.parseDouble(rawValue), created, modified);
+                } else {
+                    continue;
+                }
+        
+                nexusPlayer.addStat((Stat<Number>) stat);
+            }
+    
+            ResultSet statChangesResultSet = statement.executeQuery("select * from statchanges where uuid='" + nexusPlayer.getUniqueId() + "'");
+            while (statChangesResultSet.next()) {
+                int id = statChangesResultSet.getInt("id");
+                String name = statChangesResultSet.getString("statName");
+                String rawValue = statChangesResultSet.getString("value");
+                Operator operator = Operator.valueOf(statChangesResultSet.getString("operator"));
+                long timestamp = Long.parseLong(statChangesResultSet.getString("timestamp"));
+                UUID uuid = UUID.fromString(statChangesResultSet.getString("uuid"));
+                Number value;
+                if (StatRegistry.isIntegerStat(name)) {
+                    value = Integer.parseInt(rawValue);
+                } else if (StatRegistry.isDoubleStat(name)) {
+                    value = Double.parseDouble(rawValue);
+                } else {
+                    continue;
+                }
+    
+                System.out.println("Found stat change for " + uuid + " with name " + name + " with id " + id);
+        
+                StatChange<Number> statChange = new StatChange<>(id, nexusPlayer.getUniqueId(), name, value, operator, timestamp);
+                nexusPlayer.addStatChange(statChange);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public NexusPlayer loadPlayer(UUID uuid) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet playerResultSet = statement.executeQuery("SELECT * FROM players WHERE uuid='" + uuid.toString() + "';");
@@ -222,50 +279,7 @@ public class DataManager {
                 }
             
                 NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag);
-            
-                ResultSet statsResultSet = statement.executeQuery("select * from stats where '" + uuid + "';");
-                while (statsResultSet.next()) {
-                    int id = statsResultSet.getInt("id");
-                    String name = statsResultSet.getString("name");
-                    String rawValue = statsResultSet.getString("value");
-                    long created = Long.parseLong(statsResultSet.getString("created"));
-                    long modified = Long.parseLong(statsResultSet.getString("modified"));
-                
-                    if (!StatRegistry.isValidStat(name)) {
-                        continue;
-                    }
-                
-                    Stat<? extends Number> stat;
-                    if (StatRegistry.isIntegerStat(name)) {
-                        stat = StatRegistry.instantiateIntegerStat(id, name, uuid, Integer.parseInt(rawValue), created, modified);
-                    } else if (StatRegistry.isDoubleStat(name)) {
-                        stat = StatRegistry.instantiateDoubleStat(id, name, uuid, Double.parseDouble(rawValue), created, modified);
-                    } else {
-                        continue;
-                    }
-                
-                    nexusPlayer.addStat((Stat<Number>) stat);
-                }
-            
-                ResultSet statChangesResultSet = statement.executeQuery("select * from statchanges where '" + uuid + "'");
-                while (statChangesResultSet.next()) {
-                    int id = statChangesResultSet.getInt("id");
-                    String name = statChangesResultSet.getString("statName");
-                    String rawValue = statChangesResultSet.getString("value");
-                    Operator operator = Operator.valueOf(statChangesResultSet.getString("operator"));
-                    long timestamp = Long.parseLong(statChangesResultSet.getString("timestamp"));
-                    Number value;
-                    if (StatRegistry.isIntegerStat(name)) {
-                        value = Integer.parseInt(rawValue);
-                    } else if (StatRegistry.isDoubleStat(name)) {
-                        value = Double.parseDouble(rawValue);
-                    } else {
-                        continue;
-                    }
-                
-                    StatChange<Number> statChange = new StatChange<>(id, uuid, name, value, operator, timestamp);
-                    nexusPlayer.addStatChange(statChange);
-                }
+                refreshPlayerStats(nexusPlayer);
                 return nexusPlayer;
             }
         } catch (SQLException e) {
