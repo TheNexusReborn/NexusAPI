@@ -120,6 +120,7 @@ public class DataManager {
     }
     
     public void pushPlayer(NexusPlayer player) {
+        NexusAPI.getApi().getPlayerManager().updateNexusTeamRank(player);
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             boolean exists = false;
             try (Statement queryStatement = connection.createStatement()) {
@@ -128,8 +129,13 @@ public class DataManager {
                 for (Entry<Rank, Long> entry : player.getRanks().entrySet()) {
                     sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
                 }
-            
-                String ranks = sb.substring(0, sb.toString().length() - 1);
+    
+                String ranks;
+                if (sb.length() > 0) {
+                    ranks = sb.substring(0, sb.toString().length() - 1);
+                } else {
+                    ranks = "";
+                }
                 String sql;
                 if (!existingResultSet.next()) {
                     sql = "INSERT INTO players(version, uuid, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, ranks, tag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";

@@ -28,6 +28,8 @@ public abstract class NexusPlayer {
     public NexusPlayer(UUID uniqueId, String name) {
         this.uniqueId = uniqueId;
         this.lastKnownName = name;
+        this.ranks.put(Rank.MEMBER, -1L);
+        this.firstJoined = System.currentTimeMillis();
     }
     
     public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag) {

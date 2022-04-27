@@ -57,7 +57,10 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
     
     @Override
     public int compareTo(StatChange<?> o) {
-        return Long.compare(this.getTimestamp(), o.getTimestamp());
+        if (timestamp <= o.timestamp) {
+            return 1;
+        }
+        return -1;
     }
     
     @Override
@@ -69,11 +72,11 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
             return false;
         }
         StatChange<?> that = (StatChange<?>) o;
-        return timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(statName, that.statName);
+        return id == that.id;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, statName, timestamp);
+        return Objects.hash(id);
     }
 }

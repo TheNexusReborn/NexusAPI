@@ -49,16 +49,14 @@ public abstract class PlayerManager {
                 if (hasData(uniqueId)) {
                     nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
                 } else {
-                    String name = MojangHelper.getNameFromUUID(uniqueId);
-                    try {
-                        nexusPlayer = createPlayerData(uniqueId, name);
-                    } catch (Exception e) {
-                        return;
-                    }
+                    do {
+                        nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
+                    } while (nexusPlayer == null);
                 }
+                NexusPlayer finalNexusPlayer = nexusPlayer;
                 NexusAPI.getApi().getThreadFactory().runSync(() -> {
-                    players.put(nexusPlayer.getUniqueId(), nexusPlayer);
-                    action.accept(nexusPlayer);
+                    players.put(finalNexusPlayer.getUniqueId(), finalNexusPlayer);
+                    action.accept(finalNexusPlayer);
                 });
             });
         }
@@ -106,7 +104,7 @@ public abstract class PlayerManager {
         });
     }
     
-    private void updateNexusTeamRank(NexusPlayer nexusPlayer) {
+    public void updateNexusTeamRank(NexusPlayer nexusPlayer) {
         if (NEXUS_TEAM.contains(nexusPlayer.getUniqueId()) && nexusPlayer.getRank() != Rank.NEXUS) {
             nexusPlayer.setRank(Rank.NEXUS, -1);
         }
