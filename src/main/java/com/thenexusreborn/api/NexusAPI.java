@@ -52,6 +52,7 @@ public abstract class NexusAPI {
         StatRegistry.registerDoubleStat("nexites", 0);
         StatRegistry.registerDoubleStat("credits", 0);
         StatRegistry.registerDoubleStat("xp", 0);
+        StatRegistry.registerIntegerStat("sg_score", 100);
         
         dataManager.setupMysql();
         serverManager.setupCurrentServer();

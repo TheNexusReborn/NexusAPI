@@ -31,10 +31,7 @@ public abstract class NexusPlayer {
                 int totalXp = levels.get(i - 1) + 5000;
                 levels.put(i, totalXp);
             }
-            System.out.println("Level " + i + ": " + levels.get(i));
         }
-        
-        //System.out.println("XP: " + (100 * (level * 3.4)));
     }
     
     protected final UUID uniqueId;
@@ -228,7 +225,7 @@ public abstract class NexusPlayer {
         this.lastLogout = lastLogout;
     }
     
-    public <T extends Number> void setStat(String statName, T statValue, Operator operator) {
+    public <T extends Number> void changeStat(String statName, T statValue, Operator operator) {
         StatChange<T> statChange = new StatChange<>(this.uniqueId, statName, statValue, operator, System.currentTimeMillis());
         NexusAPI.getApi().getDataManager().pushStatChangeAsync(statChange);
         this.statChanges.add((StatChange<Number>) statChange);

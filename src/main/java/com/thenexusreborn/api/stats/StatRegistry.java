@@ -23,6 +23,14 @@ public final class StatRegistry {
         return null;
     }
     
+    public static Number getDefaultValue(String statName) {
+        if (isIntegerStat(statName)) {
+            return integerStats.get(statName.toLowerCase().replace(" ", "_"));
+        } else {
+            return doubleStats.get(statName.toLowerCase().replace(" ", "_"));
+        }
+    }
+    
     public static Stat<Integer> instantiateIntegerStat(int id, String name, UUID player, int value, long created, long modified) {
         String statName = formatStatName(name);
         if (integerStats.containsKey(statName)) {
