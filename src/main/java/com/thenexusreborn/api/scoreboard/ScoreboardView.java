@@ -30,4 +30,10 @@ public abstract class ScoreboardView {
     public IObjective getObjective() {
         return objective;
     }
+    
+    public abstract ITeam createTeam(String teamName, String entry, int score);
+    
+    public abstract ITeam createTeam(String teamName, String entry, String prefix, int score);
+    
+    public abstract ITeam createTeam(String teamName, String entry, String prefix, String suffix, int score);
 }
