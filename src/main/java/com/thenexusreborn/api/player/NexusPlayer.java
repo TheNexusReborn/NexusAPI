@@ -3,8 +3,8 @@ package com.thenexusreborn.api.player;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.helper.MojangHelper;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.util.Operator;
 
 import java.util.*;
@@ -12,6 +12,30 @@ import java.util.Map.Entry;
 
 public abstract class NexusPlayer {
     public static final int version = 3;
+    
+    private static final Map<Integer, Integer> levels = new HashMap<>();
+    
+    static {
+        int xp = 5000;
+        for (int i = 1; i <= 100; i++) {
+            if (i <= 5) {
+                int xpToLevel = i * 1000;
+                int totalXp;
+                if (i > 1) {
+                    totalXp = levels.get(i - 1) + xpToLevel;
+                } else {
+                    totalXp = xpToLevel;
+                }
+                levels.put(i, totalXp);
+            } else {
+                int totalXp = levels.get(i - 1) + 5000;
+                levels.put(i, totalXp);
+            }
+            System.out.println("Level " + i + ": " + levels.get(i));
+        }
+        
+        //System.out.println("XP: " + (100 * (level * 3.4)));
+    }
     
     protected final UUID uniqueId;
     protected long firstJoined, lastLogin, lastLogout, playTime;
@@ -71,7 +95,7 @@ public abstract class NexusPlayer {
         if (ranks.size() == 0) {
             return Rank.MEMBER;
         }
-    
+        
         Rank highestRank = null;
         Iterator<Entry<Rank, Long>> iterator = ranks.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -91,7 +115,7 @@ public abstract class NexusPlayer {
                 }
             }
         }
-    
+        
         return highestRank;
     }
     
@@ -152,7 +176,7 @@ public abstract class NexusPlayer {
     }
     
     public abstract String getNameFromServer();
-    
+
 //    public Player getPlayer() {
 //        return Bukkit.getPlayer(uniqueId);
 //    }
@@ -229,11 +253,11 @@ public abstract class NexusPlayer {
                 this.stats.put(stat.getName(), stat);
             }
         }
-    
+        
         for (Stat<?> stat : this.stats.values()) {
             NexusAPI.getApi().getDataManager().pushStatAsync(stat);
         }
-    
+        
         for (StatChange<?> statChange : statChanges) {
             this.statChanges.remove(statChange);
             NexusAPI.getApi().getDataManager().removeStatChangeAsync(statChange);
@@ -274,12 +298,39 @@ public abstract class NexusPlayer {
         if (stat != null) {
             value = stat.getValue();
         }
-    
+        
         for (StatChange<Number> statChange : this.statChanges) {
             if (statChange.getStatName().equalsIgnoreCase(statName)) {
                 value = statChange.getOperator().calculate(value, statChange.getValue());
             }
         }
         return value.doubleValue();
+    }
+    
+    public int getLevel() {
+        double xp = getStatValue("xp");
+    
+        long playtimeMinutes = (this.playTime / 20) / 60;
+        long playtimeIntervals = playtimeMinutes / 10;
+        
+        xp += playtimeIntervals * (2 * getRank().getMultiplier());
+    
+        int playerLevel = 0;
+        for (int i = 1; i < levels.size(); i++) {
+            if (i == 1) {
+                if (xp > levels.get(i)) {
+                    playerLevel = i;
+                    continue;
+                } else {
+                    break;
+                }
+            }
+    
+            if (xp >= levels.get(i - 1) && xp < levels.get(i)) {
+                playerLevel = i;
+            }
+        }
+        
+        return playerLevel;
     }
 }

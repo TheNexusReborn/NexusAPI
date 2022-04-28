@@ -122,7 +122,6 @@ public abstract class NexusScoreboard {
                 }
             }
         }
-        System.out.println(team);
         return team;
     }
     
