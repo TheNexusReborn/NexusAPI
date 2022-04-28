@@ -56,6 +56,26 @@ public class DataManager {
         }
     }
     
+    public void updateAllServers(List<ServerInfo> servers) {
+        if (servers == null || servers.isEmpty()) {
+            return;
+        }
+    
+        for (ServerInfo server : servers) {
+            updateServerInfo(server);
+        }
+    }
+    
+    public void updateServerInfo(ServerInfo serverInfo) {
+        ServerInfo infoFromDatabase = getServerInfo(serverInfo.getMulticraftId());
+        serverInfo.setHiddenPlayers(infoFromDatabase.getHiddenPlayers());
+        serverInfo.setMaxPlayers(infoFromDatabase.getMaxPlayers());
+        serverInfo.setPlayers(infoFromDatabase.getPlayers());
+        serverInfo.setState(infoFromDatabase.getState());
+        serverInfo.setStatus(infoFromDatabase.getStatus());
+        serverInfo.setType(infoFromDatabase.getType());
+    }
+    
     public List<ServerInfo> getAllServers() {
         List<ServerInfo> servers = new ArrayList<>();
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
