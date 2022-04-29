@@ -330,4 +330,8 @@ public abstract class NexusPlayer {
         
         return playerLevel;
     }
+    
+    public void setRanks(Map<Rank, Long> ranks) {
+        this.ranks = ranks;
+    }
 }

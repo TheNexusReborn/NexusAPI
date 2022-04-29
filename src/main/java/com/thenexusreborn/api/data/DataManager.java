@@ -358,7 +358,7 @@ public class DataManager {
                 int version = Integer.parseInt(playerResultSet.getString("version"));
                 long firstJoined = 0, lastLogin = 0, lastLogout = 0, playtime = 0;
                 String lastKnownName = "", rawRanks;
-                Map<Rank, Long> ranks = new TreeMap<>();
+                Map<Rank, Long> ranks = null;
                 Tag tag = null;
                 if (version >= 2) {
                     firstJoined = Long.parseLong(playerResultSet.getString("firstJoined"));
@@ -366,16 +366,7 @@ public class DataManager {
                     playtime = Long.parseLong(playerResultSet.getString("playtime"));
                     lastKnownName = playerResultSet.getString("lastKnownName");
                     rawRanks = playerResultSet.getString("ranks");
-                    if (rawRanks.contains(",")) {
-                        String[] rankList = rawRanks.split(",");
-                        for (String rl : rankList) {
-                            String[] rankSplit = rl.split("=");
-                            ranks.put(Rank.valueOf(rankSplit[0]), Long.parseLong(rankSplit[1]));
-                        }
-                    } else {
-                        String[] rankSplit = rawRanks.split("=");
-                        ranks.put(Rank.valueOf(rankSplit[0]), Long.parseLong(rankSplit[1]));
-                    }
+                    ranks = parseRanks(rawRanks);
                 }
             
                 if (version >= 3) {
@@ -391,6 +382,21 @@ public class DataManager {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public Map<Rank, Long> parseRanks(String rawRanks) {
+        Map<Rank, Long> ranks = new TreeMap<>();
+        if (rawRanks.contains(",")) {
+            String[] rankList = rawRanks.split(",");
+            for (String rl : rankList) {
+                String[] rankSplit = rl.split("=");
+                ranks.put(Rank.valueOf(rankSplit[0]), Long.parseLong(rankSplit[1]));
+            }
+        } else {
+            String[] rankSplit = rawRanks.split("=");
+            ranks.put(Rank.valueOf(rankSplit[0]), Long.parseLong(rankSplit[1]));
+        }
+        return ranks;
     }
     
     public void loadPlayerAsync(UUID uuid, Consumer<NexusPlayer> consumer) {
