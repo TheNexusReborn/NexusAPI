@@ -9,6 +9,18 @@ public class TagManager {
     public TagManager() {
         addTag(new Tag("dev"));
         addTag(new Tag("prealpha"));
+        addTag(new Tag("alpha"));
+        addTag(new Tag("beta"));
+        addTag(new Tag("thicc"));
+        addTag(new Tag("son"));
+        addTag(new Tag("e-girl"));
+        addTag(new Tag("god"));
+        addTag(new Tag("e-dater"));
+        addTag(new Tag("lord"));
+        addTag(new Tag("epic"));
+        addTag(new Tag("bacca"));
+        addTag(new Tag("benja"));
+        addTag(new Tag("milk man"));
     }
     
     public Tag getTag(String name) {
