@@ -157,15 +157,23 @@ public abstract class NexusPlayer {
     }
     
     public String getName() {
+        //System.out.println("Getting name for player " + this.uniqueId);
+        //System.out.println("Existing name " + this.lastKnownName);
         String nameFromServer = getNameFromServer();
-        if (nameFromServer == null || !nameFromServer.equals("")) {
+        //System.out.println("Name from server is " + nameFromServer);
+        if (nameFromServer != null && !nameFromServer.equals("")) {
+            //System.out.println("Checking for name updates");
             if (this.lastKnownName == null || !this.lastKnownName.equalsIgnoreCase(nameFromServer)) {
+                //System.out.println("Stored name is not equal to the name form the server, updating");
                 this.lastKnownName = nameFromServer;
             }
         } else if (this.lastKnownName == null || this.lastKnownName.equals("") || this.lastKnownName.equalsIgnoreCase("null")) {
+            //System.out.println("Stored name is invalid, updating from Mojang API");
             String nameFromApi = MojangHelper.getNameFromUUID(this.uniqueId);
+            //System.out.println("Name from Mojang is " + nameFromApi);
             if (nameFromApi != null && !nameFromApi.equals("")) {
                 this.lastKnownName = nameFromApi;
+                //System.out.println("Updated stored name.");
             }
         }
         

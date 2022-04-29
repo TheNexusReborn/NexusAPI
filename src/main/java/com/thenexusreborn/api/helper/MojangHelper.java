@@ -26,7 +26,7 @@ public final class MojangHelper {
     public static JsonObject getJsonObject(String urlString) {
         try {
             StringBuilder buffer = getJsonBuffer(urlString);
-            return (JsonObject) JsonParser.parseString(buffer.toString());
+            return JsonParser.parseString(buffer.toString()).getAsJsonObject();
         } catch (Exception e) {
             
         }
