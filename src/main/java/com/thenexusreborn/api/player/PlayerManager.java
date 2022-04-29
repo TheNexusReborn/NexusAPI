@@ -64,9 +64,11 @@ public abstract class PlayerManager {
     
     public void getNexusPlayerAsync(String name, Consumer<NexusPlayer> action) {
         for (NexusPlayer player : players.values()) {
-            if (player.getName().equalsIgnoreCase(name)) {
-                action.accept(player);
-                return;
+            if (player != null) {
+                if (player.getName().equalsIgnoreCase(name)) {
+                    action.accept(player);
+                    return;
+                }
             }
         }
         

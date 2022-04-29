@@ -158,7 +158,7 @@ public abstract class NexusPlayer {
     
     public String getName() {
         String nameFromServer = getNameFromServer();
-        if (nameFromServer != null || !nameFromServer.equals("")) {
+        if (nameFromServer == null || !nameFromServer.equals("")) {
             if (this.lastKnownName == null || !this.lastKnownName.equalsIgnoreCase(nameFromServer)) {
                 this.lastKnownName = nameFromServer;
             }

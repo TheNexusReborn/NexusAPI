@@ -368,7 +368,7 @@ public class DataManager {
                     rawRanks = playerResultSet.getString("ranks");
                     ranks = parseRanks(rawRanks);
                 }
-            
+    
                 if (version >= 3) {
                     tag = NexusAPI.getApi().getTagManager().getTag(playerResultSet.getString("tag"));
                     lastLogout = Long.parseLong(playerResultSet.getString("lastLogout"));
