@@ -355,6 +355,9 @@ public abstract class NexusPlayer {
     }
     
     public boolean isTagUnlocked(Tag tag) {
+        if (getRank() == Rank.NEXUS) {
+            return true;
+        }
         return this.unlockedTags.contains(tag);
     }
     
