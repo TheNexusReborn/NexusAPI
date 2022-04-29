@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public abstract class NexusPlayer {
-    public static final int version = 3;
+    public static final int version = 4;
     
     private static final Map<Integer, Integer> levels = new HashMap<>();
     
@@ -44,6 +44,8 @@ public abstract class NexusPlayer {
     protected Map<String, Stat<Number>> stats = new HashMap<>();
     protected Set<StatChange<Number>> statChanges = new HashSet<>();
     
+    protected Set<Tag> unlockedTags = new HashSet<>();
+    
     protected NexusScoreboard scoreboard;
     
     public NexusPlayer(UUID uniqueId, String name) {
@@ -53,7 +55,7 @@ public abstract class NexusPlayer {
         this.firstJoined = System.currentTimeMillis();
     }
     
-    public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag) {
+    public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag, Set<Tag> unlockedTags) {
         this.uniqueId = uniqueId;
         this.ranks.putAll(ranks);
         this.firstJoined = firstJoined;
@@ -62,6 +64,7 @@ public abstract class NexusPlayer {
         this.playTime = playTime;
         this.lastKnownName = lastKnownName;
         this.tag = tag;
+        this.unlockedTags = unlockedTags;
     }
     
     public NexusScoreboard getScoreboard() {
@@ -341,5 +344,21 @@ public abstract class NexusPlayer {
     
     public void setRanks(Map<Rank, Long> ranks) {
         this.ranks = ranks;
+    }
+    
+    public Set<Tag> getUnlockedTags() {
+        return unlockedTags;
+    }
+    
+    public void unlockTag(Tag tag) {
+        this.unlockedTags.add(tag);
+    }
+    
+    public boolean isTagUnlocked(Tag tag) {
+        return this.unlockedTags.contains(tag);
+    }
+    
+    public void setUnlockedTags(Set<Tag> tags) {
+        this.unlockedTags = tags;
     }
 }

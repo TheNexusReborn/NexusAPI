@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class DataManager {
     public void setupMysql() throws SQLException {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(10000));");
+            statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000));");
             statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
             statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
             statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
@@ -31,8 +31,9 @@ public class DataManager {
                     break;
                 }
             }
-        
+            
             if (convert) {
+                NexusAPI.getApi().getLogger().info("Converting existing player data due to a new model version.");
                 Map<UUID, NexusPlayer> players = new HashMap<>();
                 ResultSet resultSet = statement.executeQuery("select uuid from players;");
                 while (resultSet.next()) {
@@ -41,17 +42,22 @@ public class DataManager {
                     NexusPlayer nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uuid);
                     players.put(nexusPlayer.getUniqueId(), nexusPlayer);
                 }
-            
+                
                 if (version == 2) {
                     statement.execute("alter table players add column tag VARCHAR(30) after lastKnownName;");
                     statement.execute("alter table players add column lastLogout varchar(100) after lastLogin");
                 }
-            
+                
+                if (version == 3) {
+                    statement.execute("alter table players add column unlockedTags varchar(1000) after ranks;");
+                }
+                
                 for (NexusPlayer player : players.values()) {
                     NexusAPI.getApi().getDataManager().pushPlayer(player);
                 }
-            
+                
                 players.clear();
+                NexusAPI.getApi().getLogger().info("Conversion complete");
             }
         }
     }
@@ -60,7 +66,7 @@ public class DataManager {
         if (servers == null || servers.isEmpty()) {
             return;
         }
-    
+        
         for (ServerInfo server : servers) {
             updateServerInfo(server);
         }
@@ -110,7 +116,7 @@ public class DataManager {
                 String name = resultSet.getString("name");
                 int port = resultSet.getInt("port");
                 int players = resultSet.getInt("players");
-                int maxPlayers = resultSet.getInt("maxPlayers"); 
+                int maxPlayers = resultSet.getInt("maxPlayers");
                 int hiddenPlayers = resultSet.getInt("hiddenPlayers");
                 String type = resultSet.getString("type");
                 String status = resultSet.getString("status");
@@ -173,7 +179,7 @@ public class DataManager {
                 statement.setString(4, statChange.getOperator().name());
                 statement.setString(5, statChange.getTimestamp() + "");
                 statement.executeUpdate();
-        
+                
                 ResultSet generatedKeys = statement.getGeneratedKeys();
                 generatedKeys.next();
                 int key = generatedKeys.getInt(1);
@@ -191,7 +197,7 @@ public class DataManager {
                     try (Statement statement = connection.createStatement()) {
                         ResultSet resultSet = statement.executeQuery("select * from stats where id='" + stat.getId() + "';");
                         if (resultSet.next()) {
-                            try (PreparedStatement preparedStatement = connection.prepareStatement("update stats set value=?, modified=? where id='" +stat.getId() + "'")) {
+                            try (PreparedStatement preparedStatement = connection.prepareStatement("update stats set value=?, modified=? where id='" + stat.getId() + "'")) {
                                 preparedStatement.setString(1, stat.getValue().toString());
                                 preparedStatement.setString(2, stat.getModified() + "");
                                 preparedStatement.executeUpdate();
@@ -200,7 +206,7 @@ public class DataManager {
                         }
                     }
                 }
-        
+                
                 try (PreparedStatement statement = connection.prepareStatement("insert into stats(uuid, name, value, created, modified) values (?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
                     statement.setString(1, stat.getUuid().toString());
                     statement.setString(2, stat.getName());
@@ -208,7 +214,7 @@ public class DataManager {
                     statement.setString(4, stat.getCreated() + "");
                     statement.setString(5, stat.getModified() + "");
                     statement.executeUpdate();
-            
+                    
                     ResultSet generatedKeys = statement.getGeneratedKeys();
                     generatedKeys.next();
                     stat.setId(generatedKeys.getInt(1));
@@ -239,20 +245,23 @@ public class DataManager {
                 for (Entry<Rank, Long> entry : player.getRanks().entrySet()) {
                     sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
                 }
-    
+                
                 String ranks;
                 if (sb.length() > 0) {
                     ranks = sb.substring(0, sb.toString().length() - 1);
                 } else {
                     ranks = "";
                 }
+                
+                String unlockedTags = convertTags(player);
+                
                 String sql;
                 if (!existingResultSet.next()) {
-                    sql = "INSERT INTO players(version, uuid, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, ranks, tag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    sql = "INSERT INTO players(version, uuid, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, ranks, tag, unlockedTags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 } else {
-                    sql = "UPDATE players SET version=?, uuid=?, firstJoined=?, lastLogin=?, lastLogout=?, playtime=?, lastKnownName=?, ranks=?, tag=? WHERE uuid='" + player.getUniqueId() + "';";
+                    sql = "UPDATE players SET version=?, uuid=?, firstJoined=?, lastLogin=?, lastLogout=?, playtime=?, lastKnownName=?, ranks=?, tag=?, unlockedTags=? WHERE uuid='" + player.getUniqueId() + "';";
                 }
-            
+                
                 try (PreparedStatement insertStatement = connection.prepareStatement(sql)) {
                     insertStatement.setString(1, NexusPlayer.version + "");
                     insertStatement.setString(2, player.getUniqueId().toString());
@@ -267,9 +276,11 @@ public class DataManager {
                     } else {
                         insertStatement.setString(9, "null");
                     }
+    
+                    insertStatement.setString(10, unlockedTags);
                     insertStatement.execute();
                 }
-            
+                
                 for (Stat<?> stat : player.getStats().values()) {
                     String statSql;
                     if (stat.getId() > 0) {
@@ -299,6 +310,34 @@ public class DataManager {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> pushPlayer(player));
     }
     
+    public String convertTags(NexusPlayer player) {
+        StringBuilder sb = new StringBuilder();
+        for (Tag tag : player.getUnlockedTags()) {
+            sb.append(tag.getName()).append(",");
+        }
+        String unlockedTags;
+        if (sb.length() > 1) {
+            unlockedTags = sb.substring(0, sb.toString().length() - 1);
+        } else {
+            unlockedTags = "";
+        }
+        return unlockedTags;
+    }
+    
+    public Set<Tag> parseTags(String rawUnlockedTags) {
+        Set<Tag> unlockedTags = new HashSet<>();
+        if (rawUnlockedTags != null && !rawUnlockedTags.equals("")) {
+            String[] split = rawUnlockedTags.split(",");
+            for (String s : split) {
+                Tag t = NexusAPI.getApi().getTagManager().getTag(s);
+                if (t != null) {
+                    unlockedTags.add(t);
+                }
+            }
+        }
+        return unlockedTags;
+    }
+    
     public void refreshPlayerStats(NexusPlayer nexusPlayer) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet statsResultSet = statement.executeQuery("select * from stats where uuid='" + nexusPlayer.getUniqueId() + "';");
@@ -309,11 +348,11 @@ public class DataManager {
                 long created = Long.parseLong(statsResultSet.getString("created"));
                 long modified = Long.parseLong(statsResultSet.getString("modified"));
                 UUID uuid = UUID.fromString(statsResultSet.getString("uuid"));
-    
+                
                 if (!StatRegistry.isValidStat(name)) {
                     continue;
                 }
-        
+                
                 Stat<? extends Number> stat;
                 if (StatRegistry.isIntegerStat(name)) {
                     stat = StatRegistry.instantiateIntegerStat(id, name, nexusPlayer.getUniqueId(), Integer.parseInt(rawValue), created, modified);
@@ -322,10 +361,10 @@ public class DataManager {
                 } else {
                     continue;
                 }
-        
+                
                 nexusPlayer.addStat((Stat<Number>) stat);
             }
-    
+            
             ResultSet statChangesResultSet = statement.executeQuery("select * from statchanges where uuid='" + nexusPlayer.getUniqueId() + "'");
             while (statChangesResultSet.next()) {
                 int id = statChangesResultSet.getInt("id");
@@ -342,7 +381,7 @@ public class DataManager {
                 } else {
                     continue;
                 }
-    
+                
                 StatChange<Number> statChange = new StatChange<>(id, nexusPlayer.getUniqueId(), name, value, operator, timestamp);
                 nexusPlayer.addStatChange(statChange);
             }
@@ -360,6 +399,7 @@ public class DataManager {
                 String lastKnownName = "", rawRanks;
                 Map<Rank, Long> ranks = null;
                 Tag tag = null;
+                Set<Tag> unlockedTags = new HashSet<>();
                 if (version >= 2) {
                     firstJoined = Long.parseLong(playerResultSet.getString("firstJoined"));
                     lastLogin = Long.parseLong(playerResultSet.getString("lastLogin"));
@@ -368,13 +408,17 @@ public class DataManager {
                     rawRanks = playerResultSet.getString("ranks");
                     ranks = parseRanks(rawRanks);
                 }
-    
+                
                 if (version >= 3) {
                     tag = NexusAPI.getApi().getTagManager().getTag(playerResultSet.getString("tag"));
                     lastLogout = Long.parseLong(playerResultSet.getString("lastLogout"));
                 }
-            
-                NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag);
+                
+                if (version >= 4) {
+                    unlockedTags = parseTags(playerResultSet.getString("unlockedTags"));
+                }
+                
+                NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag, unlockedTags);
                 refreshPlayerStats(nexusPlayer);
                 return nexusPlayer;
             }
