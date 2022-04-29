@@ -47,11 +47,17 @@ public abstract class PlayerManager {
             NexusAPI.getApi().getThreadFactory().runAsync(() -> {
                 NexusPlayer nexusPlayer;
                 if (hasData(uniqueId)) {
-                    nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
-                } else {
                     do {
                         nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
                     } while (nexusPlayer == null);
+                } else {
+                    try {
+                        nexusPlayer = createPlayerData(uniqueId, MojangHelper.getNameFromUUID(uniqueId));
+                    } catch (Exception e) {
+                        do {
+                            nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
+                        } while (nexusPlayer == null);
+                    }
                 }
                 NexusPlayer finalNexusPlayer = nexusPlayer;
                 NexusAPI.getApi().getThreadFactory().runSync(() -> {
