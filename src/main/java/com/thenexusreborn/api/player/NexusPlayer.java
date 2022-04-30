@@ -13,9 +13,10 @@ import java.util.Map.Entry;
 public abstract class NexusPlayer {
     public static final int version = 4;
     
-    private static final Map<Integer, Integer> levels = new HashMap<>();
+    protected static final Map<Integer, Integer> levels = new HashMap<>();
     
     static {
+        levels.put(0, 0);
         int xp = 5000;
         for (int i = 1; i <= 100; i++) {
             if (i <= 5) {
@@ -317,13 +318,20 @@ public abstract class NexusPlayer {
         return value.doubleValue();
     }
     
+    public double getPlayTimeXp() {
+        long playtimeMinutes = (this.playTime / 20) / 60;
+        long playtimeIntervals = playtimeMinutes / 10;
+    
+        return playtimeIntervals * (2 * getRank().getMultiplier());
+    }
+    
     public int getLevel() {
         double xp = getStatValue("xp");
     
         long playtimeMinutes = (this.playTime / 20) / 60;
         long playtimeIntervals = playtimeMinutes / 10;
         
-        xp += playtimeIntervals * (2 * getRank().getMultiplier());
+        xp += getPlayTimeXp();
     
         int playerLevel = 0;
         for (int i = 1; i < levels.size(); i++) {
@@ -337,7 +345,7 @@ public abstract class NexusPlayer {
             }
     
             if (xp >= levels.get(i - 1) && xp < levels.get(i)) {
-                playerLevel = i;
+                playerLevel = i - 1;
             }
         }
         
