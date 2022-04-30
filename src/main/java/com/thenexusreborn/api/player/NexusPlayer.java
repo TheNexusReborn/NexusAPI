@@ -48,7 +48,7 @@ public abstract class NexusPlayer {
     
     protected NexusScoreboard scoreboard;
     
-    private UUID lastMessageBy;
+    private UUID lastMessage;
     
     public NexusPlayer(UUID uniqueId, String name) {
         this.uniqueId = uniqueId;
@@ -365,5 +365,13 @@ public abstract class NexusPlayer {
     
     public void setUnlockedTags(Set<Tag> tags) {
         this.unlockedTags = tags;
+    }
+    
+    public NexusPlayer getLastMessage() {
+        return NexusAPI.getApi().getPlayerManager().getNexusPlayer(this.lastMessage);
+    }
+    
+    public void setLastMessage(NexusPlayer nexusPlayer) {
+        this.lastMessage = nexusPlayer.getUniqueId();
     }
 }
