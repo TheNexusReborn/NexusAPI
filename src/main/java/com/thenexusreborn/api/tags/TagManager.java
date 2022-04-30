@@ -21,6 +21,7 @@ public class TagManager {
         addTag(new Tag("bacca"));
         addTag(new Tag("benja"));
         addTag(new Tag("milk man"));
+        addTag(new Tag("champion"));
     }
     
     public Tag getTag(String name) {
