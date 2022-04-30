@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class DataManager {
     public void setupMysql() throws SQLException {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000));");
+            statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), lastPlaytimeNotification int);");
             statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
             statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
             statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
@@ -50,6 +50,10 @@ public class DataManager {
                 
                 if (version == 3) {
                     statement.execute("alter table players add column unlockedTags varchar(1000) after ranks;");
+                }
+                
+                if (version == 4) {
+                    statement.execute("alter table players add column lastPlaytimeNotification int");
                 }
                 
                 for (NexusPlayer player : players.values()) {
@@ -257,9 +261,9 @@ public class DataManager {
                 
                 String sql;
                 if (!existingResultSet.next()) {
-                    sql = "INSERT INTO players(version, uuid, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, ranks, tag, unlockedTags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    sql = "INSERT INTO players(version, uuid, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, ranks, tag, unlockedTags, lastPlaytimeNotification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 } else {
-                    sql = "UPDATE players SET version=?, uuid=?, firstJoined=?, lastLogin=?, lastLogout=?, playtime=?, lastKnownName=?, ranks=?, tag=?, unlockedTags=? WHERE uuid='" + player.getUniqueId() + "';";
+                    sql = "UPDATE players SET version=?, uuid=?, firstJoined=?, lastLogin=?, lastLogout=?, playtime=?, lastKnownName=?, ranks=?, tag=?, unlockedTags=?, lastPlaytimeNotification=? WHERE uuid='" + player.getUniqueId() + "';";
                 }
                 
                 try (PreparedStatement insertStatement = connection.prepareStatement(sql)) {
@@ -278,6 +282,7 @@ public class DataManager {
                     }
     
                     insertStatement.setString(10, unlockedTags);
+                    insertStatement.setInt(11, player.getLastPlaytimeNotification());
                     insertStatement.execute();
                 }
                 
@@ -418,7 +423,9 @@ public class DataManager {
                     unlockedTags = parseTags(playerResultSet.getString("unlockedTags"));
                 }
                 
-                NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag, unlockedTags);
+                int lastPlaytimeNotification = playerResultSet.getInt("lastPlaytimeNotification");
+                
+                NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag, unlockedTags, lastPlaytimeNotification);
                 refreshPlayerStats(nexusPlayer);
                 return nexusPlayer;
             }
