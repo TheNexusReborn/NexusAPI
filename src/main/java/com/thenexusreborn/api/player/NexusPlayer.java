@@ -48,6 +48,8 @@ public abstract class NexusPlayer {
     
     protected NexusScoreboard scoreboard;
     
+    private UUID lastMessageBy;
+    
     public NexusPlayer(UUID uniqueId, String name) {
         this.uniqueId = uniqueId;
         this.lastKnownName = name;
