@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public abstract class NexusPlayer {
-    public static final int version = 5;
+    public static final int version = 4;
     
     public static final Map<Integer, Integer> levels = new HashMap<>();
     
@@ -39,7 +39,6 @@ public abstract class NexusPlayer {
     protected long firstJoined, lastLogin, lastLogout, playTime;
     protected String lastKnownName;
     protected Tag tag;
-    protected int lastPlaytimeNotification = 0;
     
     protected Map<Rank, Long> ranks = new TreeMap<>();
     
@@ -59,7 +58,7 @@ public abstract class NexusPlayer {
         this.firstJoined = System.currentTimeMillis();
     }
     
-    public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag, Set<Tag> unlockedTags, int lastPlaytimeNotification) {
+    public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag, Set<Tag> unlockedTags) {
         this.uniqueId = uniqueId;
         this.ranks.putAll(ranks);
         this.firstJoined = firstJoined;
@@ -69,7 +68,6 @@ public abstract class NexusPlayer {
         this.lastKnownName = lastKnownName;
         this.tag = tag;
         this.unlockedTags = unlockedTags;
-        this.lastPlaytimeNotification = lastPlaytimeNotification;
     }
     
     public NexusScoreboard getScoreboard() {
@@ -383,13 +381,5 @@ public abstract class NexusPlayer {
     
     public void setLastMessage(NexusPlayer nexusPlayer) {
         this.lastMessage = nexusPlayer.getUniqueId();
-    }
-    
-    public int getLastPlaytimeNotification() {
-        return lastPlaytimeNotification;
-    }
-    
-    public void setLastPlaytimeNotification(int lastPlaytimeNotification) {
-        this.lastPlaytimeNotification = lastPlaytimeNotification;
     }
 }
