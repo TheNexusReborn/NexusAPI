@@ -227,10 +227,12 @@ public class DataManager {
     
     public void removeStatChangeAsync(StatChange<?> statChange) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
-            try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-                statement.executeUpdate("delete from statchanges where id='" + statChange.getId() + "'");
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (statChange.getId() != 0) {
+                try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+                    statement.executeUpdate("delete from statchanges where id='" + statChange.getId() + "'");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

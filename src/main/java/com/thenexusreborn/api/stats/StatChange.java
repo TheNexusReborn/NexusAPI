@@ -72,11 +72,11 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
             return false;
         }
         StatChange<?> that = (StatChange<?>) o;
-        return id == that.id;
+        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(statName, that.statName) && Objects.equals(value, that.value) && operator == that.operator;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, uuid, statName, value, operator, timestamp);
     }
 }
