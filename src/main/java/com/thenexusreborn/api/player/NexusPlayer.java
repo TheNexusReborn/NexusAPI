@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 public abstract class NexusPlayer {
     public static final int version = 4;
     
-    protected static final Map<Integer, Integer> levels = new HashMap<>();
+    public static final Map<Integer, Integer> levels = new HashMap<>();
     
     static {
         levels.put(0, 0);
