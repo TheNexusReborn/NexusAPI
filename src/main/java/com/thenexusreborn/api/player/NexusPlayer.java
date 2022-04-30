@@ -315,6 +315,14 @@ public abstract class NexusPlayer {
                 value = statChange.getOperator().calculate(value, statChange.getValue());
             }
         }
+        
+        if (statName.equalsIgnoreCase("xp")) {
+            long playtimeMinutes = (this.playTime / 20) / 60;
+            long playtimeIntervals = playtimeMinutes / 10;
+    
+            value = Operator.ADD.calculate(value, getPlayTimeXp());
+        }
+        
         return value.doubleValue();
     }
     
@@ -327,11 +335,6 @@ public abstract class NexusPlayer {
     
     public int getLevel() {
         double xp = getStatValue("xp");
-    
-        long playtimeMinutes = (this.playTime / 20) / 60;
-        long playtimeIntervals = playtimeMinutes / 10;
-        
-        xp += getPlayTimeXp();
     
         int playerLevel = 0;
         for (int i = 1; i < levels.size(); i++) {
