@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public abstract class NexusPlayer {
-    public static final int version = 4;
+    public static final int version = 5;
     
     public static final Map<Integer, Integer> levels = new HashMap<>();
     
@@ -50,6 +50,7 @@ public abstract class NexusPlayer {
     protected NexusScoreboard scoreboard;
     
     private UUID lastMessage;
+    protected boolean prealpha, alpha, beta;
     
     public NexusPlayer(UUID uniqueId, String name) {
         this.uniqueId = uniqueId;
@@ -58,7 +59,7 @@ public abstract class NexusPlayer {
         this.firstJoined = System.currentTimeMillis();
     }
     
-    public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag, Set<Tag> unlockedTags) {
+    public NexusPlayer(UUID uniqueId, Map<Rank, Long> ranks, long firstJoined, long lastLogin, long lastLogout, long playTime, String lastKnownName, Tag tag, Set<Tag> unlockedTags, boolean prealpha, boolean alpha, boolean beta) {
         this.uniqueId = uniqueId;
         this.ranks.putAll(ranks);
         this.firstJoined = firstJoined;
@@ -68,6 +69,9 @@ public abstract class NexusPlayer {
         this.lastKnownName = lastKnownName;
         this.tag = tag;
         this.unlockedTags = unlockedTags;
+        this.prealpha = prealpha;
+        this.alpha = alpha;
+        this.beta = beta;
     }
     
     public NexusScoreboard getScoreboard() {
@@ -384,5 +388,29 @@ public abstract class NexusPlayer {
     
     public void setLastMessage(NexusPlayer nexusPlayer) {
         this.lastMessage = nexusPlayer.getUniqueId();
+    }
+    
+    public boolean isPrealpha() {
+        return prealpha;
+    }
+    
+    public void setPrealpha(boolean prealpha) {
+        this.prealpha = prealpha;
+    }
+    
+    public boolean isAlpha() {
+        return alpha;
+    }
+    
+    public void setAlpha(boolean alpha) {
+        this.alpha = alpha;
+    }
+    
+    public boolean isBeta() {
+        return beta;
+    }
+    
+    public void setBeta(boolean beta) {
+        this.beta = beta;
     }
 }
