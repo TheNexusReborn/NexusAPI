@@ -37,7 +37,7 @@ public class MulticraftAPI {
             try (BufferedReader input = new BufferedReader(new FileReader(mcFile))) {
                 String line = input.readLine();
                 if (line != null && !line.isEmpty()) {
-                    INSTANCE = new MulticraftAPI("https://firecraftmc.net/multicraft/api.php", "api", line);
+                    INSTANCE = new MulticraftAPI("https://firecraftmc.net/multicraft/api.php", "admin", line);
                 }
             } catch (Exception e) {
                 System.out.println("Error loading MulcraftAPI: " + e.getMessage());
@@ -164,6 +164,7 @@ public class MulticraftAPI {
     }
     
     public void restartServer(int id) {
+        System.out.println("Restarting server");
         Map<String, String> parameters = new HashMap<>();
         parameters.put("id", id + "");
         call("restartServer", parameters);
