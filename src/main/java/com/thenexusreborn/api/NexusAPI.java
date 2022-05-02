@@ -53,22 +53,22 @@ public abstract class NexusAPI {
             return;
         }
     
-        StatRegistry.registerDoubleStat("nexites", 0);
-        StatRegistry.registerDoubleStat("credits", 0);
-        StatRegistry.registerDoubleStat("xp", 0);
-        StatRegistry.registerIntegerStat("sg_score", 100);
-        StatRegistry.registerIntegerStat("sg_highest_kill_streak", 0);
-        StatRegistry.registerIntegerStat("sg_wins", 0);
-        StatRegistry.registerIntegerStat("sg_deaths", 0);
+        StatRegistry.registerDoubleStat("nexites", 0); //done
+        StatRegistry.registerDoubleStat("credits", 0); //done
+        StatRegistry.registerDoubleStat("xp", 0); //done
+        StatRegistry.registerIntegerStat("sg_score", 100); //done
+        StatRegistry.registerIntegerStat("sg_kills", 0); //done
+        StatRegistry.registerIntegerStat("sg_highest_kill_streak", 0); //done
+        StatRegistry.registerIntegerStat("sg_games", 0); //done
+        StatRegistry.registerIntegerStat("sg_win_streak", 0); //done
+        StatRegistry.registerIntegerStat("sg_wins", 0); //done
+        StatRegistry.registerIntegerStat("sg_deaths", 0); //done
+        StatRegistry.registerIntegerStat("sg_deathmatches_reached", 0); //done
+        StatRegistry.registerIntegerStat("sg_chests_looted", 0);
+        StatRegistry.registerIntegerStat("sg_assists", 0);
         StatRegistry.registerIntegerStat("sg_times_mutated", 0);
         StatRegistry.registerIntegerStat("sg_mutation_kills", 0);
         StatRegistry.registerIntegerStat("sg_mutation_deaths", 0);
-        StatRegistry.registerIntegerStat("sg_deathmatches_reached", 0);
-        StatRegistry.registerIntegerStat("sg_chests_looted", 0);
-        StatRegistry.registerIntegerStat("sg_games", 0);
-        StatRegistry.registerIntegerStat("sg_kills", 0);
-        StatRegistry.registerIntegerStat("sg_win_streak", 0);
-        StatRegistry.registerIntegerStat("sg_assists", 0);
         StatRegistry.registerIntegerStat("sg_mutation_passes", 0);
         StatRegistry.registerIntegerStat("sg_sponsored_others", 0);
         StatRegistry.registerIntegerStat("sg_sponsor_received", 0);
