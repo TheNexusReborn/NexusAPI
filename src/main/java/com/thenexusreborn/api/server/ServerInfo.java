@@ -1,5 +1,7 @@
 package com.thenexusreborn.api.server;
 
+import java.util.Objects;
+
 /**
  * The IP and Port is taken from the ServerProperties utility
  * The Multicraft id is set via a config
@@ -98,5 +100,22 @@ public class ServerInfo {
     
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ServerInfo that = (ServerInfo) o;
+        return Objects.equals(name, that.name);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

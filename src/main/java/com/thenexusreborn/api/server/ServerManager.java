@@ -20,7 +20,11 @@ public abstract class ServerManager {
     }
     
     public void addServer(int multicraftId) {
-        this.servers.add(NexusAPI.getApi().getDataManager().getServerInfo(multicraftId)); //This will be useful later.
+        this.servers.add(NexusAPI.getApi().getDataManager().getServerInfo(multicraftId));
+    }
+    
+    public void addServer(ServerInfo info) {
+        this.servers.add(info);
     }
     
     public void updateStoredData() {
