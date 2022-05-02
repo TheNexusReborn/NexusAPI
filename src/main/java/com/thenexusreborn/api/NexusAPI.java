@@ -28,8 +28,10 @@ public abstract class NexusAPI {
     protected ThreadFactory threadFactory;
     protected PlayerFactory playerFactory;
     protected ServerManager serverManager;
+    private final Environment environment;
     
-    public NexusAPI(Logger logger, DataManager dataManager, TagManager tagManager, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
+    public NexusAPI(Environment environment, Logger logger, DataManager dataManager, TagManager tagManager, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
+        this.environment = environment;
         this.logger = logger;
         this.dataManager = dataManager;
         this.tagManager = tagManager;
@@ -37,6 +39,10 @@ public abstract class NexusAPI {
         this.threadFactory = threadFactory;
         this.playerFactory = playerFactory;
         this.serverManager = serverManager;
+    }
+    
+    public Environment getEnvironment() {
+        return environment;
     }
     
     public void init() throws Exception {
