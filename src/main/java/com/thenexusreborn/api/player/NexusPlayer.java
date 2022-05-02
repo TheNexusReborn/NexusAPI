@@ -370,6 +370,19 @@ public abstract class NexusPlayer {
                 this.unlockedTags.add(new Tag(presetTag));
             }
         }
+        
+        if (isPrealpha()) {
+            this.unlockedTags.add(new Tag("prealpha"));
+        }
+        
+        if (isAlpha()) {
+            this.unlockedTags.add(new Tag("alpha"));
+        }
+        
+        if (isBeta()) {
+            this.unlockedTags.add(new Tag("beta"));
+        }
+        
         return unlockedTags;
     }
     
@@ -381,7 +394,7 @@ public abstract class NexusPlayer {
         if (getRank() == Rank.NEXUS) {
             return true;
         }
-        return this.unlockedTags.contains(tag);
+        return getUnlockedTags().contains(tag);
     }
     
     public void setUnlockedTags(Set<Tag> tags) {
