@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 public abstract class NexusAPI {
     private static NexusAPI instance;
+    public static final Phase PHASE = Phase.ALPHA;
     
     public static void setApi(NexusAPI api) {
         instance = api;
