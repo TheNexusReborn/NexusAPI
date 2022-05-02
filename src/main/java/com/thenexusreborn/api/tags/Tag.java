@@ -1,8 +1,15 @@
 package com.thenexusreborn.api.tags;
 
-import java.util.Objects;
+import java.util.*;
 
 public class Tag {
+    
+    public static final Set<String> presetTags;
+    
+    static {
+        presetTags = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("thicc", "son", "e-girl", "god", "e-dater", "lord", "epic", "bacca", "benja", "milk man", "champion")));
+    }
+    
     private final String name;
     
     public Tag(String name) {

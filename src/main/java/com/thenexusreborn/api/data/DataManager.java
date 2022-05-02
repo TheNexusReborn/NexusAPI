@@ -284,7 +284,7 @@ public class DataManager {
                     } else {
                         insertStatement.setString(9, "null");
                     }
-    
+                    
                     insertStatement.setString(10, unlockedTags);
                     insertStatement.setString(11, player.isPrealpha() + "");
                     insertStatement.setString(12, player.isAlpha() + "");
@@ -340,10 +340,7 @@ public class DataManager {
         if (rawUnlockedTags != null && !rawUnlockedTags.equals("")) {
             String[] split = rawUnlockedTags.split(",");
             for (String s : split) {
-                Tag t = NexusAPI.getApi().getTagManager().getTag(s);
-                if (t != null) {
-                    unlockedTags.add(t);
-                }
+                unlockedTags.add(new Tag(s));
             }
         }
         return unlockedTags;
@@ -422,7 +419,10 @@ public class DataManager {
                 }
                 
                 if (version >= 3) {
-                    tag = NexusAPI.getApi().getTagManager().getTag(playerResultSet.getString("tag"));
+                    String rawTag = playerResultSet.getString("tag");
+                    if (rawTag != null && !rawTag.equalsIgnoreCase("null")) {
+                        tag = new Tag(rawTag);
+                    }
                     lastLogout = Long.parseLong(playerResultSet.getString("lastLogout"));
                 }
                 

@@ -364,6 +364,12 @@ public abstract class NexusPlayer {
     }
     
     public Set<Tag> getUnlockedTags() {
+        if (getRank() == Rank.NEXUS) {
+            for (String presetTag : Tag.presetTags) {
+                Tag preset = new Tag(presetTag);
+                this.unlockedTags.add(new Tag(presetTag));
+            }
+        }
         return unlockedTags;
     }
     
@@ -412,5 +418,9 @@ public abstract class NexusPlayer {
     
     public void setBeta(boolean beta) {
         this.beta = beta;
+    }
+    
+    public void removeTag(Tag tag) {
+        this.unlockedTags.remove(tag);
     }
 }
