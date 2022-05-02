@@ -89,4 +89,8 @@ public abstract class NexusAPI {
     public PlayerFactory getPlayerFactory() {
         return playerFactory;
     }
+    
+    public ServerManager getServerManager() {
+        return serverManager;
+    }
 }
