@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.data;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.server.ServerInfo;
 import com.thenexusreborn.api.stats.*;
@@ -19,6 +20,8 @@ public class DataManager {
             statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
             statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
             statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
+            statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
+            statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
             
             int version = 0;
             boolean convert = false;
@@ -66,6 +69,89 @@ public class DataManager {
                 NexusAPI.getApi().getLogger().info("Conversion complete");
             }
         }
+    }
+    
+    public GameInfo getGameInfo(int id) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select * from games where id='" + id + "';");
+            if (resultSet.next()) {
+                long gameStart = resultSet.getLong("start");
+                long gameEnd = resultSet.getLong("end");
+                String[] players = resultSet.getString("players").split(",");
+                String winner = resultSet.getString("winner");
+                String mapName = resultSet.getString("mapName");
+                String settings = resultSet.getString("settings");
+                String firstBlood = resultSet.getString("firstBlood");
+                int playerCount = resultSet.getInt("playerCount");
+                long length = resultSet.getLong("length");
+                GameInfo gameInfo = new GameInfo(id, gameStart, gameEnd, players, winner, mapName, settings, firstBlood, playerCount, length);
+                ResultSet actionSet = statement.executeQuery("select * from gameactions where gameId='" + id + "';");
+                while (actionSet.next()) {
+                    long timestamp = actionSet.getLong("timestamp");
+                    String type = actionSet.getString("type");
+                    String value = actionSet.getString("value");
+                    GameAction gameAction = new GameAction(id, timestamp, type, value);
+                    gameInfo.getActions().add(gameAction);
+                }
+                return gameInfo;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public void pushGameInfo(GameInfo gameInfo) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement gameStatement = connection.prepareStatement("insert into games(start, end, players, winner, mapName, settings, firstBlood, playerCount, length) values(?, ?, ?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+            gameStatement.setLong(1, gameInfo.getGameStart());
+            gameStatement.setLong(2, gameInfo.getGameEnd());
+            StringBuilder sb = new StringBuilder();
+            for (String player : gameInfo.getPlayers()) {
+                sb.append(player).append(",");
+            }
+            gameStatement.setString(3, sb.substring(0, sb.length() - 1));
+            gameStatement.setString(4, gameInfo.getWinner());
+            gameStatement.setString(5, gameInfo.getMapName());
+            gameStatement.setString(6, gameInfo.getSettings());
+            gameStatement.setString(7, gameInfo.getFirstBlood());
+            gameStatement.setInt(8, gameInfo.getPlayerCount());
+            gameStatement.setLong(9, gameInfo.getLength());
+            gameStatement.executeUpdate();
+            ResultSet generatedKeys = gameStatement.getGeneratedKeys();
+            generatedKeys.next();
+            gameInfo.setId(generatedKeys.getInt(1));
+    
+            PreparedStatement actionStatement = connection.prepareStatement("insert into gameactions(gameId, timestamp, type, value) values (?, ?, ?, ?);");
+            for (GameAction action : gameInfo.getActions()) {
+                actionStatement.setInt(1, gameInfo.getId());
+                actionStatement.setLong(2, action.getTimestamp());
+                actionStatement.setString(3, action.getType());
+                actionStatement.setString(4, action.getValue());
+                actionStatement.addBatch();
+            }
+            actionStatement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void pushGameInfoAsync(GameInfo gameInfo, Consumer<GameInfo> action) {
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            pushGameInfo(gameInfo);
+            if (action != null) {
+                action.accept(gameInfo);
+            }
+        });
+    }
+    
+    public void getGameInfoAsync(int id, Consumer<GameInfo> action) {
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            GameInfo gameInfo = getGameInfo(id);
+            if (action != null) {
+                action.accept(gameInfo);
+            }
+        });
     }
     
     public void updateAllServers(List<ServerInfo> servers) {
