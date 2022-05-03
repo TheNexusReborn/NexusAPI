@@ -64,7 +64,7 @@ public abstract class NexusAPI {
         StatRegistry.registerIntegerStat("sg_wins", 0); //done
         StatRegistry.registerIntegerStat("sg_deaths", 0); //done
         StatRegistry.registerIntegerStat("sg_deathmatches_reached", 0); //done
-        StatRegistry.registerIntegerStat("sg_chests_looted", 0);
+        StatRegistry.registerIntegerStat("sg_chests_looted", 0); //done
         StatRegistry.registerIntegerStat("sg_assists", 0);
         StatRegistry.registerIntegerStat("sg_times_mutated", 0);
         StatRegistry.registerIntegerStat("sg_mutation_kills", 0);
