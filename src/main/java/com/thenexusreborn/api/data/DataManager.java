@@ -20,7 +20,7 @@ public class DataManager {
             statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
             statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
             statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
-            statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
+            statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, serverName varchar(100), players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
             statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
             
             int version = 0;
@@ -77,6 +77,7 @@ public class DataManager {
             if (resultSet.next()) {
                 long gameStart = resultSet.getLong("start");
                 long gameEnd = resultSet.getLong("end");
+                String serverName = resultSet.getString("serverName");
                 String[] players = resultSet.getString("players").split(",");
                 String winner = resultSet.getString("winner");
                 String mapName = resultSet.getString("mapName");
@@ -84,7 +85,7 @@ public class DataManager {
                 String firstBlood = resultSet.getString("firstBlood");
                 int playerCount = resultSet.getInt("playerCount");
                 long length = resultSet.getLong("length");
-                GameInfo gameInfo = new GameInfo(id, gameStart, gameEnd, players, winner, mapName, settings, firstBlood, playerCount, length);
+                GameInfo gameInfo = new GameInfo(id, gameStart, gameEnd, serverName, players, winner, mapName, settings, firstBlood, playerCount, length);
                 ResultSet actionSet = statement.executeQuery("select * from gameactions where gameId='" + id + "';");
                 while (actionSet.next()) {
                     long timestamp = actionSet.getLong("timestamp");
@@ -103,20 +104,21 @@ public class DataManager {
     }
     
     public void pushGameInfo(GameInfo gameInfo) {
-        try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement gameStatement = connection.prepareStatement("insert into games(start, end, players, winner, mapName, settings, firstBlood, playerCount, length) values(?, ?, ?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement gameStatement = connection.prepareStatement("insert into games(start, end, serverName, players, winner, mapName, settings, firstBlood, playerCount, length) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
             gameStatement.setLong(1, gameInfo.getGameStart());
             gameStatement.setLong(2, gameInfo.getGameEnd());
+            gameStatement.setString(3, gameInfo.getServerName());
             StringBuilder sb = new StringBuilder();
             for (String player : gameInfo.getPlayers()) {
                 sb.append(player).append(",");
             }
-            gameStatement.setString(3, sb.substring(0, sb.length() - 1));
-            gameStatement.setString(4, gameInfo.getWinner());
-            gameStatement.setString(5, gameInfo.getMapName());
-            gameStatement.setString(6, gameInfo.getSettings());
-            gameStatement.setString(7, gameInfo.getFirstBlood());
-            gameStatement.setInt(8, gameInfo.getPlayerCount());
-            gameStatement.setLong(9, gameInfo.getLength());
+            gameStatement.setString(4, sb.substring(0, sb.length() - 1));
+            gameStatement.setString(5, gameInfo.getWinner());
+            gameStatement.setString(6, gameInfo.getMapName());
+            gameStatement.setString(7, gameInfo.getSettings());
+            gameStatement.setString(8, gameInfo.getFirstBlood());
+            gameStatement.setInt(9, gameInfo.getPlayerCount());
+            gameStatement.setLong(10, gameInfo.getLength());
             gameStatement.executeUpdate();
             ResultSet generatedKeys = gameStatement.getGeneratedKeys();
             generatedKeys.next();

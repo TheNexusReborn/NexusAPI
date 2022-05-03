@@ -5,6 +5,7 @@ import java.util.*;
 public class GameInfo {
     private int id;
     private long gameStart, gameEnd;
+    private String serverName;
     private String[] players;
     private String winner, mapName, settings, firstBlood;
     private int playerCount;
@@ -14,10 +15,11 @@ public class GameInfo {
     public GameInfo() {
     }
     
-    public GameInfo(int id, long gameStart, long gameEnd, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
+    public GameInfo(int id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
         this.id = id;
         this.gameStart = gameStart;
         this.gameEnd = gameEnd;
+        this.serverName = serverName;
         this.players = players;
         this.winner = winner;
         this.mapName = mapName;
@@ -25,6 +27,14 @@ public class GameInfo {
         this.firstBlood = firstBlood;
         this.playerCount = playerCount;
         this.length = length;
+    }
+    
+    public String getServerName() {
+        return serverName;
+    }
+    
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
     }
     
     public String getWinner() {
