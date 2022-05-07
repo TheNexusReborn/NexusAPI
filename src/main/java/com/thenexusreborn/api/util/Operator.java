@@ -1,7 +1,5 @@
 package com.thenexusreborn.api.util;
 
-import com.sun.javafx.css.CalculatedValue;
-
 /**
  * An enum to represent basic mathematical operations and performs that operation.
  * This is mainly used with some abstraction based on saving a type of thing and then when loading, just performs it instead of having to account for it
@@ -76,5 +74,18 @@ public enum Operator {
      */
     public Number calculate(Number number1, Number number2) {
         return 0;
+    }
+    
+    public static Operator getOperator(String input) {
+        if (input.startsWith("+")) {
+            return Operator.ADD;
+        } else if (input.startsWith("-")) {
+            return Operator.SUBTRACT;
+        } else if (input.startsWith("*")) {
+            return Operator.MULTIPLY;
+        } else if (input.startsWith("/")) {
+            return Operator.DIVIDE;
+        }
+        return null;
     }
 }
