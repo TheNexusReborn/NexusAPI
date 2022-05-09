@@ -108,7 +108,7 @@ public abstract class NexusPlayer {
         while (iterator.hasNext()) {
             Entry<Rank, Long> entry = iterator.next();
             if (entry.getValue() < System.currentTimeMillis()) {
-                if (entry.getValue() != -1) {
+                if (entry.getValue() > 0) {
                     iterator.remove();
                     continue;
                 }
