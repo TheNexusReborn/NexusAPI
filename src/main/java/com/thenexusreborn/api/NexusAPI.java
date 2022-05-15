@@ -1,6 +1,8 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.DataManager;
+import com.thenexusreborn.api.networking.*;
+import com.thenexusreborn.api.networking.manager.SocketManager;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.server.ServerManager;
 import com.thenexusreborn.api.stats.StatRegistry;
@@ -27,9 +29,11 @@ public abstract class NexusAPI {
     protected ThreadFactory threadFactory;
     protected PlayerFactory playerFactory;
     protected ServerManager serverManager;
-    private final Environment environment;
+    protected final Environment environment;
+    protected SocketContext socketContext;
+    protected SocketManager socketManager;
     
-    public NexusAPI(Environment environment, Logger logger, DataManager dataManager, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
+    public NexusAPI(Environment environment, Logger logger, DataManager dataManager, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager, SocketContext socketContext) {
         this.environment = environment;
         this.logger = logger;
         this.dataManager = dataManager;
@@ -37,6 +41,7 @@ public abstract class NexusAPI {
         this.threadFactory = threadFactory;
         this.playerFactory = playerFactory;
         this.serverManager = serverManager;
+        this.socketContext = socketContext;
     }
     
     public Environment getEnvironment() {
@@ -81,6 +86,12 @@ public abstract class NexusAPI {
         
         dataManager.setupMysql();
         serverManager.setupCurrentServer();
+    
+        this.socketManager = NetworkManager.init(socketContext, "127.0.0.1", 6000);
+    }
+    
+    public SocketManager getSocketManager() {
+        return socketManager;
     }
     
     public abstract Connection getConnection() throws SQLException;
