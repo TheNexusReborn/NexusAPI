@@ -8,8 +8,10 @@ public class NetworkManager {
 
     private static SocketCommandHandler socketCommandHandler;
     private static SocketManager socketManager;
+    private static String host;
+    private static int port;
     
-    public static SocketManager init(SocketContext context, String host, int port) {
+    public static SocketManager create(SocketContext context, String host, int port) {
         if (context == SocketContext.SERVER) {
             socketManager = new ServerSocketManager();
         } else if (context == SocketContext.CLIENT) {
@@ -18,13 +20,18 @@ public class NetworkManager {
             NexusAPI.getApi().getLogger().severe("Could not find a valid socket context");
             return null;
         }
+        
+        NetworkManager.host = host;
+        NetworkManager.port = port;
 
         socketCommandHandler = new SocketCommandHandler();
-        socketManager.init(host, port);
         NexusAPI.getApi().getLogger().info("Initiated a socket with the context " + context.name());
         return socketManager;
     }
     
+    public static void init() {
+        socketManager.init(host, port);
+    }
     
     public static SocketCommandHandler getSocketCommandHandler() {
         return socketCommandHandler;

@@ -87,7 +87,8 @@ public abstract class NexusAPI {
         dataManager.setupMysql();
         serverManager.setupCurrentServer();
     
-        this.socketManager = NetworkManager.init(socketContext, "127.0.0.1", 6000);
+        this.socketManager = NetworkManager.create(socketContext, "127.0.0.1", 6000);
+        NetworkManager.init();
     }
     
     public SocketManager getSocketManager() {

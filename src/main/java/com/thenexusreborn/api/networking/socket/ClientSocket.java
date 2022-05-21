@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.networking.socket;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.networking.manager.SocketManager;
 
 import java.io.IOException;
 import java.net.*;
@@ -26,7 +27,10 @@ public class ClientSocket extends NetworkSocket {
             this.socket = new Socket(host, port);
             active.set(true);
             String serverName = NexusAPI.getApi().getServerManager().getCurrentServer().getName();
-            NexusAPI.getApi().getSocketManager().sendSocketCommand("register", serverName.toLowerCase().replace(" ", "_"), serverName);
+            System.out.println("Server Name: " + serverName);
+            SocketManager socketManager = NexusAPI.getApi().getSocketManager();
+            System.out.println("Socket Manager: " + socketManager);
+            socketManager.sendSocketCommand("register", serverName.toLowerCase().replace(" ", "_"), serverName);
         } catch (IOException e) {
             e.printStackTrace();
         }

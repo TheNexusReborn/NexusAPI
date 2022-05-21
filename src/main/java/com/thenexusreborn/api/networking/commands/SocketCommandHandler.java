@@ -28,7 +28,7 @@ public class SocketCommandHandler {
         addCommand(new SocketCommand("register", null, "Command to tell the proxy which server a connection currently is.").setExecutor((cmd, sender, args) -> {
             String serverName = StringHelper.join(args, " ");
             SocketManager socketManager = NetworkManager.getSocketManager();
-            NetworkSocket socket = socketManager.getSocket(sender);
+            NetworkSocket socket = socketManager.getSocket(serverName);
             if (socket instanceof HandlerSocket) {
                 HandlerSocket handlerSocket = (HandlerSocket) socket;
                 for (ServerInfo server : NexusAPI.getApi().getServerManager().getServers()) {
