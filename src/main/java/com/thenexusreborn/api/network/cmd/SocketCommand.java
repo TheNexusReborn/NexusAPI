@@ -15,11 +15,19 @@ public class SocketCommand {
         this.name = name;
     }
     
+    public String getName() {
+        return name;
+    }
+    
+    public String[] getAliases() {
+        return aliases;
+    }
+    
     /*
-    The socket is the connection from where it was received, but may not be the original source as the ServerSocket will forward messages
-    The source is taken from the command itself as the syntax is <cmd> <source> <args> 
-    The args are derived from the rest
-     */
+        The socket is the connection from where it was received, but may not be the original source as the ServerSocket will forward messages
+        The source is taken from the command itself as the syntax is <cmd> <source> <args> 
+        The args are derived from the rest
+         */
     public void onCommand(NexusSocket socket, String source, String[] args) {
         
     }

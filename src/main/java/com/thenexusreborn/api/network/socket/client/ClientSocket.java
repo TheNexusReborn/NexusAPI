@@ -6,4 +6,9 @@ public class ClientSocket extends NexusSocket {
     public ClientSocket(String host, int port) {
         super(host, port);
     }
+    
+    @Override
+    public void handleCommand(String command) {
+        
+    }
 }

@@ -1,6 +1,7 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.DataManager;
+import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.server.ServerManager;
 import com.thenexusreborn.api.stats.StatRegistry;
@@ -28,6 +29,7 @@ public abstract class NexusAPI {
     protected PlayerFactory playerFactory;
     protected ServerManager serverManager;
     protected final Environment environment;
+    private NetworkManager networkManager;
     public NexusAPI(Environment environment, Logger logger, DataManager dataManager, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
         this.logger = logger;
@@ -107,5 +109,9 @@ public abstract class NexusAPI {
     
     public ServerManager getServerManager() {
         return serverManager;
+    }
+    
+    public NetworkManager getNetworkManager() {
+        return networkManager;
     }
 }
