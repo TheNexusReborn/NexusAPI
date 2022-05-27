@@ -2,6 +2,8 @@ package com.thenexusreborn.api.network.netty.model;
 
 import io.netty.buffer.ByteBuf;
 
+import java.util.Arrays;
+
 public class NexusPacket {
     private String origin;
     private String action;
@@ -40,5 +42,14 @@ public class NexusPacket {
         }
         
         return sb.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return "NexusPacket{" +
+                "origin='" + origin + '\'' +
+                ", action='" + action + '\'' +
+                ", data=" + Arrays.toString(data) +
+                '}';
     }
 }

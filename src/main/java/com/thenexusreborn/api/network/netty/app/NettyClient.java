@@ -1,6 +1,8 @@
-package com.thenexusreborn.api.network.netty;
+package com.thenexusreborn.api.network.netty.app;
 
+import com.thenexusreborn.api.network.netty.codec.ProcessingHandler;
 import com.thenexusreborn.api.network.netty.codec.*;
+import com.thenexusreborn.api.network.netty.model.NexusPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -9,14 +11,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.net.InetSocketAddress;
 
-public class NettyClient {
+public class NettyClient extends NettyApp {
     
-    private String host;
-    private int port;
+    private SocketChannel channel;
     
     public NettyClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+        super(host, port);
     }
     
     public void init() throws Exception {
@@ -29,8 +29,9 @@ public class NettyClient {
                     .remoteAddress(new InetSocketAddress(host, port))
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        protected void initChannel(SocketChannel channel) {
-                            channel.pipeline().addLast(new PacketDecoder(), new PacketEncoder(), new ProcessingHandler());
+                        protected void initChannel(SocketChannel socketChannel) {
+                            setChannel(socketChannel);
+                            socketChannel.pipeline().addLast(new PacketDecoder(), new PacketEncoder(), new ProcessingHandler());
                         }
                     });
             ChannelFuture channelFuture = clientBootstrap.connect().sync();
@@ -38,5 +39,18 @@ public class NettyClient {
         } finally {
             group.shutdownGracefully();
         }
+    }
+    
+    public SocketChannel getChannel() {
+        return channel;
+    }
+    
+    private void setChannel(SocketChannel channel) {
+        this.channel = channel;
+    }
+    
+    @Override
+    public void send(NexusPacket packet) {
+        channel.writeAndFlush(packet);
     }
 }

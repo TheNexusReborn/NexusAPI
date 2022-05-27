@@ -1,22 +1,23 @@
-package com.thenexusreborn.api.network.netty;
+package com.thenexusreborn.api.network.netty.app;
 
 import com.thenexusreborn.api.network.netty.codec.*;
+import com.thenexusreborn.api.network.netty.model.NexusPacket;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
+import io.netty.channel.group.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetSocketAddress;
 
-public class NettyServer {
+public class NettyServer extends NettyApp {
     
-    private String host;
-    private int port;
+    private ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     
     public NettyServer(String host, int port) {
-        this.host = host;
-        this.port = port;
+        super(host, port);
     }
     
     public void init() throws Exception {
@@ -29,6 +30,7 @@ public class NettyServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel channel) {
+                    channels.add(channel);
                     channel.pipeline().addLast(new PacketDecoder(), new PacketEncoder(), new ProcessingHandler());
                 }
             });
@@ -37,5 +39,14 @@ public class NettyServer {
         } finally {
             group.shutdownGracefully().sync();
         }
+    }
+    
+    public ChannelGroup getChannels() {
+        return channels;
+    }
+    
+    @Override
+    public void send(NexusPacket packet) {
+        channels.writeAndFlush(packet);
     }
 }

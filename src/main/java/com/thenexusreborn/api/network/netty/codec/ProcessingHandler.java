@@ -1,4 +1,4 @@
-package com.thenexusreborn.api.network.netty;
+package com.thenexusreborn.api.network.netty.codec;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.network.netty.model.NexusPacket;
