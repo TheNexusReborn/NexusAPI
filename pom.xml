@@ -44,8 +44,10 @@
                                     <pattern>com.google.gson</pattern>
                                     <shadedPattern>com.thenexusreborn.gson</shadedPattern>
                                 </relocation>
-                                <relocation>io.netty</relocation>
-                                <shadedPattern>com.thenexusreborn.io.netty</shadedPattern>
+                                <relocation>
+                                    <pattern>io.netty</pattern>
+                                    <shadedPattern>com.thenexusreborn.io.netty</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -74,7 +76,7 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
-    
+
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>

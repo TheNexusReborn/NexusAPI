@@ -1,11 +1,16 @@
 package com.thenexusreborn.api.network.netty.app;
 
 import com.thenexusreborn.api.network.netty.model.NexusPacket;
+import io.netty.channel.EventLoopGroup;
+
+import java.util.*;
 
 public abstract class NettyApp {
     
     protected final String host;
     protected final int port;
+    
+    protected List<EventLoopGroup> groups = new ArrayList<>();
     
     public NettyApp(String host, int port) {
         this.host = host;
@@ -26,5 +31,11 @@ public abstract class NettyApp {
     
     public int getPort() {
         return port;
+    }
+    
+    public void close() {
+        for (EventLoopGroup group : groups) {
+            group.shutdownGracefully();
+        }
     }
 }

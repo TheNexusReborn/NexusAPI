@@ -37,7 +37,7 @@ public class NetworkManager {
         return commandMap.get(name.toLowerCase());
     }
     
-    public void send(String action, String[] data) {
+    public void send(String action, String... data) {
         nettyApp.send(NexusAPI.getApi().getServerManager().getCurrentServer().getName(), action, data);
     }
     
@@ -54,5 +54,9 @@ public class NetworkManager {
                 NexusAPI.getApi().getLogger().warning("Command " + command.getName() + " does not have an executor.");
             }
         }
+    }
+    
+    public void close() {
+        nettyApp.close();
     }
 }
