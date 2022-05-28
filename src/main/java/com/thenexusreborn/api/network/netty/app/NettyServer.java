@@ -21,10 +21,11 @@ public class NettyServer extends NettyApp {
     }
     
     public void init() throws Exception {
-        EventLoopGroup group = new NioEventLoopGroup();
+        EventLoopGroup boss = new NioEventLoopGroup();
+        EventLoopGroup worker = new NioEventLoopGroup();
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(group)
+            serverBootstrap.group(boss, worker)
                     .channel(NioServerSocketChannel.class)
                     .localAddress(new InetSocketAddress(host, port))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -35,9 +36,10 @@ public class NettyServer extends NettyApp {
                 }
             });
             ChannelFuture channelFuture = serverBootstrap.bind().sync();
-            channelFuture.channel().closeFuture();
+            channelFuture.channel().closeFuture().sync();
         } finally {
-            group.shutdownGracefully().sync();
+            boss.shutdownGracefully();
+            worker.shutdownGracefully();
         }
     }
     
