@@ -35,7 +35,6 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            
                             <relocations>
                                 <relocation>
                                     <pattern>com.mysql</pattern>
@@ -45,6 +44,8 @@
                                     <pattern>com.google.gson</pattern>
                                     <shadedPattern>com.thenexusreborn.gson</shadedPattern>
                                 </relocation>
+                                <relocation>io.netty</relocation>
+                                <shadedPattern>com.thenexusreborn.io.netty</shadedPattern>
                             </relocations>
                         </configuration>
                     </execution>
@@ -106,8 +107,8 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.0.23.Final</version>
-            <scope>provided</scope>
+            <version>4.1.77.Final</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
