@@ -58,7 +58,7 @@ public final class StaffChat {
         } else if (event.equals("anticheat")) {
             String hack = args[2];
             int violation = Integer.parseInt(args[3]);
-            format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7dis suspected of using &e" + hack + " &bVL:" + violation;
+            format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
         }
         
         format = format.replace("{prefix}", prefix).replace("{displayName}", displayName).replace("{origin}", origin);
