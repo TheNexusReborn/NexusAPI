@@ -13,7 +13,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class NettyServer extends NettyApp {
     
-    private ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private ChannelGroup channels = new DefaultChannelGroup("channels", GlobalEventExecutor.INSTANCE);
     
     public NettyServer(String host, int port) {
         super(host, port);
@@ -31,7 +31,6 @@ public class NettyServer extends NettyApp {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel channel) {
-                            NexusAPI.getApi().getLogger().info("Init channel on server.");
                             channels.add(channel);
                             channel.pipeline().addLast(new PacketDecoder(), new PacketEncoder(), new ProcessingHandler());
                         }
@@ -58,6 +57,6 @@ public class NettyServer extends NettyApp {
     @Override
     public void send(NexusPacket packet) {
         ChannelGroupFuture future = channels.writeAndFlush(packet);
-        future.addListener((ChannelFutureListener) f -> NexusAPI.getApi().getLogger().info("Send packet to all servers: " + packet));
+        future.addListener((ChannelGroupFutureListener) f -> NexusAPI.getApi().getLogger().info("Send packet to all servers: " + packet));
     }
 }
