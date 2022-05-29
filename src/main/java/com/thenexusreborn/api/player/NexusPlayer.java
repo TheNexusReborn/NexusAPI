@@ -436,4 +436,6 @@ public abstract class NexusPlayer {
     public void removeTag(Tag tag) {
         this.unlockedTags.remove(tag);
     }
+    
+    public abstract boolean isOnline();
 }

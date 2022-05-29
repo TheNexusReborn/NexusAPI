@@ -6,7 +6,7 @@
 
     <groupId>com.thenexusreborn</groupId>
     <artifactId>NexusAPI</artifactId>
-    <version>1.1-ALPHA</version>
+    <version>1.2-ALPHA</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -35,7 +35,6 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            
                             <relocations>
                                 <relocation>
                                     <pattern>com.mysql</pattern>
@@ -44,6 +43,10 @@
                                 <relocation>
                                     <pattern>com.google.gson</pattern>
                                     <shadedPattern>com.thenexusreborn.gson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>io.netty</pattern>
+                                    <shadedPattern>com.thenexusreborn.io.netty</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -73,7 +76,7 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
-    
+
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
@@ -102,6 +105,12 @@
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <version>2.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.77.Final</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

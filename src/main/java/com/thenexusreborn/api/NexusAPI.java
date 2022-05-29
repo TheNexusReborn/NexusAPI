@@ -1,6 +1,7 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.DataManager;
+import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.server.ServerManager;
 import com.thenexusreborn.api.stats.StatRegistry;
@@ -27,12 +28,14 @@ public abstract class NexusAPI {
     protected ThreadFactory threadFactory;
     protected PlayerFactory playerFactory;
     protected ServerManager serverManager;
-    private final Environment environment;
+    protected final Environment environment;
+    private NetworkManager networkManager;
     
-    public NexusAPI(Environment environment, Logger logger, DataManager dataManager, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
+    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
         this.logger = logger;
-        this.dataManager = dataManager;
+        this.networkManager = new NetworkManager(context);
+        this.dataManager = new DataManager();
         this.playerManager = playerManager;
         this.threadFactory = threadFactory;
         this.playerFactory = playerFactory;
@@ -81,6 +84,7 @@ public abstract class NexusAPI {
         
         dataManager.setupMysql();
         serverManager.setupCurrentServer();
+        networkManager.init("localhost", 3408);
     }
     
     public abstract Connection getConnection() throws SQLException;
@@ -107,5 +111,9 @@ public abstract class NexusAPI {
     
     public ServerManager getServerManager() {
         return serverManager;
+    }
+    
+    public NetworkManager getNetworkManager() {
+        return this.networkManager;
     }
 }
