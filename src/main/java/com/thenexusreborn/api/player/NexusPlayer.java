@@ -437,5 +437,19 @@ public abstract class NexusPlayer {
         this.unlockedTags.remove(tag);
     }
     
+    public String serializeRanks() {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Rank, Long> entry : getRanks().entrySet()) {
+            sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
+        }
+    
+        String ranks;
+        if (sb.length() > 0) {
+            return sb.substring(0, sb.toString().length() - 1);
+        } else {
+            return "";
+        }
+    }
+    
     public abstract boolean isOnline();
 }

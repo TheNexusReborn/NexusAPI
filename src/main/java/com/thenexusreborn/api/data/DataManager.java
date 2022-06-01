@@ -2,7 +2,9 @@ package com.thenexusreborn.api.data;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.helper.MojangHelper;
 import com.thenexusreborn.api.player.*;
+import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.server.ServerInfo;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
@@ -10,9 +12,9 @@ import com.thenexusreborn.api.util.Operator;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+@SuppressWarnings("DuplicatedCode")
 public class DataManager {
     public void setupMysql() throws SQLException {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
@@ -22,7 +24,9 @@ public class DataManager {
             statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
             statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, serverName varchar(100), players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
             statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
-           
+            statement.execute("create table if not exists punishments(id int primary key not null auto_increment, date varchar(100), length varchar(100), actor varchar(100), target varchar(100), server varchar(100), reason varchar(200), type varchar(30), visibility varchar(30), pardonInfo varchar(500), acknowledgeInfo varchar(500));");
+            statement.execute("create table if not exists iphistory(ip varchar(100), uuid varchar(36))");
+            
             int version = 0;
             boolean convert = false;
             ResultSet versionSet = statement.executeQuery("select version from players;");
@@ -69,6 +73,28 @@ public class DataManager {
                 NexusAPI.getApi().getLogger().info("Conversion complete");
             }
         }
+    }
+    
+    public NexusPlayer loadPlayer(String name) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet nameSet = statement.executeQuery("select uuid from players where lastKnownName='" + name + "';");
+            if (nameSet.next()) {
+                return loadPlayer(UUID.fromString(nameSet.getString("uuid")));
+            }
+        
+            UUID uuid = MojangHelper.getUUIDFromName(name);
+            if (uuid == null) {
+                return null;
+            }
+        
+            ResultSet uuidSet = statement.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
+            if (uuidSet.next()) {
+                return loadPlayer(uuid);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public GameInfo getGameInfo(int id) {
@@ -123,7 +149,7 @@ public class DataManager {
             ResultSet generatedKeys = gameStatement.getGeneratedKeys();
             generatedKeys.next();
             gameInfo.setId(generatedKeys.getInt(1));
-    
+            
             PreparedStatement actionStatement = connection.prepareStatement("insert into gameactions(gameId, timestamp, type, value) values (?, ?, ?, ?);");
             for (GameAction action : gameInfo.getActions()) {
                 actionStatement.setInt(1, gameInfo.getId());
@@ -337,18 +363,8 @@ public class DataManager {
             boolean exists = false;
             try (Statement queryStatement = connection.createStatement()) {
                 ResultSet existingResultSet = queryStatement.executeQuery("SELECT * FROM players WHERE uuid='" + player.getUniqueId() + "';");
-                StringBuilder sb = new StringBuilder();
-                for (Entry<Rank, Long> entry : player.getRanks().entrySet()) {
-                    sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
-                }
                 
-                String ranks;
-                if (sb.length() > 0) {
-                    ranks = sb.substring(0, sb.toString().length() - 1);
-                } else {
-                    ranks = "";
-                }
-                
+                String ranks = player.serializeRanks();
                 String unlockedTags = convertTags(player);
                 
                 String sql;
@@ -556,5 +572,189 @@ public class DataManager {
                 NexusAPI.getApi().getThreadFactory().runSync(() -> consumer.accept(nexusPlayer));
             }
         });
+    }
+    
+    public void pushPunishment(Punishment punishment) {
+        try (Connection connection = NexusAPI.getApi().getConnection()) {
+            String sql;
+            int returnGeneratedKeys = Statement.NO_GENERATED_KEYS;
+            if (punishment.getId() > 0) {
+                sql = "update punishments set date=?, length=?, actor=?, target=?, server=?, reason=?, type=?, visibility=?, pardonInfo=?, acknowledgeInfo=? where id='" + punishment.getId() + "';";
+            } else {
+                sql = "insert into punishments (date, length, actor, target, server, reason, type, visibility, pardonInfo, acknowledgeInfo) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                returnGeneratedKeys = Statement.RETURN_GENERATED_KEYS;
+            }
+            
+            try (PreparedStatement ps = connection.prepareStatement(sql, returnGeneratedKeys)) {
+                ps.setString(1, punishment.getDate() + "");
+                ps.setString(2, punishment.getLength() + "");
+                ps.setString(3, punishment.getActor());
+                ps.setString(4, punishment.getTarget());
+                ps.setString(5, punishment.getServer());
+                ps.setString(6, punishment.getReason());
+                ps.setString(7, punishment.getType().name());
+                ps.setString(8, punishment.getVisibility().name());
+                String piv = "";
+                PardonInfo pardonInfo = punishment.getPardonInfo();
+                if (pardonInfo != null) {
+                    piv = "date=" + pardonInfo.getDate() + ",actor=" + pardonInfo.getActor() + ",reason=" + pardonInfo.getReason();
+                }
+                ps.setString(9, piv);
+                String aiv = "";
+                AcknowledgeInfo acknowledgeInfo = punishment.getAcknowledgeInfo();
+                if (acknowledgeInfo != null) {
+                    aiv = "code=" + acknowledgeInfo.getCode() + ",time=" + acknowledgeInfo.getTime();
+                }
+                ps.setString(10, aiv);
+                ps.executeUpdate();
+                if (returnGeneratedKeys == Statement.RETURN_GENERATED_KEYS) {
+                    ResultSet generatedKeys = ps.getGeneratedKeys();
+                    generatedKeys.next();
+                    int key = generatedKeys.getInt(1);
+                    punishment.setId(key);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public Punishment getPunishment(int id) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select * from punishments where id='" + id + "';");
+            if (resultSet.next()) {
+                long date = Long.parseLong(resultSet.getString("date"));
+                long length = Long.parseLong(resultSet.getString("length"));
+                String actor = resultSet.getString("actor");
+                String target = resultSet.getString("target");
+                String server = resultSet.getString("server");
+                String reason = resultSet.getString("reason");
+                PunishmentType type = PunishmentType.valueOf(resultSet.getString("type"));
+                Visibility visibility = Visibility.valueOf(resultSet.getString("visibility"));
+                String rawPardonInfo = resultSet.getString("pardonInfo");
+                PardonInfo pardonInfo = null;
+                if (rawPardonInfo != null && !rawPardonInfo.equals("")) {
+                    String[] piSplit = rawPardonInfo.split(",");
+                    long pardonDate = 0;
+                    String pardonActor = "";
+                    String pardonReason = "";
+                    if (piSplit != null && piSplit.length == 3) {
+                        for (String d : piSplit) {
+                            String[] dSplit = d.split("=");
+                            if (dSplit != null && dSplit.length == 2) {
+                                if (dSplit[0].equalsIgnoreCase("date")) {
+                                    pardonDate = Long.parseLong(dSplit[1]);
+                                } else if (dSplit[0].equalsIgnoreCase("actor")) {
+                                    pardonActor = dSplit[1];
+                                } else if (dSplit[0].equalsIgnoreCase("reason")) {
+                                    pardonReason = dSplit[1];
+                                }
+                            }
+                        }
+                    }
+                    pardonInfo = new PardonInfo(pardonDate, pardonActor, pardonReason);
+                }
+                
+                String rawAcknowledgeInfo = resultSet.getString("acknowledgeInfo");
+                AcknowledgeInfo acknowledgeInfo = null;
+                if (rawAcknowledgeInfo != null && !rawAcknowledgeInfo.equals("")) {
+                    String[] piSplit = rawAcknowledgeInfo.split(",");
+                    long ackTime = 0;
+                    String ackCode = "";
+                    if (piSplit != null && piSplit.length == 2) {
+                        for (String d : piSplit) {
+                            String[] dSplit = d.split("=");
+                            if (dSplit != null && dSplit.length == 2) {
+                                if (dSplit[0].equalsIgnoreCase("time")) {
+                                    ackTime = Long.parseLong(dSplit[1]);
+                                } else if (dSplit[0].equalsIgnoreCase("code")) {
+                                    ackCode = dSplit[1];
+                                }
+                            }
+                        }
+                    }
+                    acknowledgeInfo = new AcknowledgeInfo(ackCode, ackTime);
+                }
+                
+                Punishment punishment = new Punishment(date, length, actor, target, server, reason, type, visibility);
+                punishment.setId(id);
+                punishment.setPardonInfo(pardonInfo);
+                punishment.setAcknowledgeInfo(acknowledgeInfo);
+    
+                String actorCache = "";
+                try {
+                    UUID uuid = UUID.fromString(punishment.getActor());
+                    NexusPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+                    if (actorCachePlayer == null) {
+                        try (Statement s = connection.createStatement()) {
+                            ResultSet rs = s.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
+                            if (rs.next()) {
+                                actorCache = rs.getString("lastKnownName");
+                            }
+                        }
+                    } else {
+                        actorCache = actorCachePlayer.getName();
+                    }
+                } catch (Exception e) {
+                    actorCache = actor;
+                }
+                punishment.setActorNameCache(actorCache);
+                
+                String targetCache = "";
+                UUID uuid = UUID.fromString(punishment.getTarget());
+                NexusPlayer targetCachePlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+                if (targetCachePlayer == null) {
+                    try (Statement s = connection.createStatement()) {
+                        ResultSet rs = s.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
+                        if (rs.next()) {
+                            targetCache = rs.getString("lastKnownName");
+                        }
+                    }
+                } else {
+                    targetCache = targetCachePlayer.getName();
+                }
+                punishment.setTargetNameCache(targetCache);
+                return punishment;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public Set<UUID> getPlayersByIp(String ip) {
+        Set<UUID> players = new HashSet<>();
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select * from iphistory where ip='" + ip + "';");
+            while (resultSet.next()) {
+                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                players.add(uuid);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return players;
+    }
+    
+    public void addIpHistory(UUID uuid, String ip) {
+        try (Connection connection = NexusAPI.getApi().getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery("select * from iphistory where uuid='" + uuid.toString() + "';");
+                while (resultSet.next()) {
+                    String existingIp = resultSet.getString("ip");
+                    if (existingIp.equals(ip)) {
+                        return;
+                    }
+                }
+            }
+            
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("insert into iphistory(ip, uuid) values (" + ip + ", " + uuid + ");");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
