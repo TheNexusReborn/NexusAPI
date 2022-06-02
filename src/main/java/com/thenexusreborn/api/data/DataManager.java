@@ -721,31 +721,24 @@ public class DataManager {
     
                 try {
                     if (punishment.getPardonInfo() != null) {
-                        System.out.println("Cachine the name of the removal actor");
                         String removalActorName = "";
                         try {
                             UUID uuid = UUID.fromString(punishment.getPardonInfo().getActor());
-                            System.out.println("Determined UUID to be " + uuid);
                             NexusPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
                             if (actorCachePlayer == null) {
-                                System.out.println("Actor is not online on the server, getting from MySQL");
                                 try (Statement s = connection.createStatement()) {
                                     ResultSet rs = s.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
                                     if (rs.next()) {
                                         removalActorName = rs.getString("lastKnownName");
-                                        System.out.println("Determined name from SQL is " + removalActorName);
                                     }
                                 }
                             } else {
                                 removalActorName = actorCachePlayer.getName();
-                                System.out.println("Determined name from online player " + removalActorName);
                             }
                         } catch (Exception e) {
                             removalActorName = punishment.getPardonInfo().getActor();
-                            System.out.println("Actor was not a player, using direct name");
                         }
                         punishment.getPardonInfo().setActorNameCache(removalActorName);
-                        System.out.println("Set the removal actor name to " + punishment.getPardonInfo().getActorNameCache());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -788,7 +781,7 @@ public class DataManager {
             }
             
             try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("insert into iphistory(ip, uuid) values (" + ip + ", " + uuid + ");");
+                statement.executeUpdate("insert into iphistory(ip, uuid) values ('" + ip + "', '" + uuid + "');");
             }
         } catch (SQLException e) {
             e.printStackTrace();
