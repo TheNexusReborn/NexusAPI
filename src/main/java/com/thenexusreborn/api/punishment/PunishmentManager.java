@@ -25,6 +25,14 @@ public class PunishmentManager {
     }
     
     public List<Punishment> getPunishmentsByTarget(UUID target) {
-        return new ArrayList<>(); //TODO
+        List<Punishment> punishments = new ArrayList<>();
+        
+        for (Punishment punishment : this.punishments.values()) {
+            if (punishment.getTarget().equalsIgnoreCase(target.toString())) {
+                punishments.add(punishment);
+            }
+        }
+        
+        return punishments;
     }
 }

@@ -74,24 +74,37 @@ public final class StaffChat {
                     punishment = NexusAPI.getApi().getDataManager().getPunishment(id);
                 }
                 
+                if (event.startsWith("remove")) {
+                    if (punishment.getPardonInfo() == null) {
+                        punishment = NexusAPI.getApi().getDataManager().getPunishment(id);
+                        NexusAPI.getApi().getPunishmentManager().addPunishment(punishment);
+                    }
+                }
+                
                 if (punishment == null) {
                     NexusAPI.getApi().getLogger().severe("Received staff chat incoming message for punishment " + id + " but none could be found.");
                     return;
                 }
                 
-                format = format.replace("{type}", punishment.getType().getColor() + punishment.getType().getVerb());
-                format = format.replace("{target}", punishment.getTargetNameCache());
-                format = format.replace("{actor}", punishment.getActorNameCache());
-                format = format.replace("{reason}", punishment.getReason());
-                
-                String length = "";
-                if (punishment.getLength() == -1) {
-                    length = " &c(Permanent)";
-                } else if (punishment.getLength() >= 1) {
-                    length = " &c(" + TimeHelper.formatTime(punishment.getLength()) + ")";
+                if (event.startsWith("remove")) {
+                    format = format.replace("{type}", punishment.getType().getColor() + "un" + punishment.getType().getVerb());
+                    format = format.replace("{length}", "");
+                    format = format.replace("{reason}", punishment.getPardonInfo().getReason());
+                    format = format.replace("{actor}", punishment.getPardonInfo().getActorNameCache());
+                } else {
+                    format = format.replace("{type}", punishment.getType().getColor() + punishment.getType().getVerb());
+                    String length = "";
+                    if (punishment.getLength() == -1) {
+                        length = " &c(Permanent)";
+                    } else if (punishment.getLength() >= 1) {
+                        length = " &c(" + TimeHelper.formatTime(punishment.getLength()) + ")";
+                    }
+    
+                    format = format.replace("{length}", length);
+                    format = format.replace("{reason}", punishment.getReason());
+                    format = format.replace("{actor}", punishment.getActorNameCache());
                 }
-                
-                format = format.replace("{length}", length);
+                format = format.replace("{target}", punishment.getTargetNameCache());
             }
         }
         

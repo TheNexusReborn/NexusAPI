@@ -92,6 +92,14 @@ public abstract class NexusAPI {
         networkManager.init("localhost", 3408);
         
         networkManager.addCommand(new NetworkCommand("punishment"));
+        networkManager.addCommand(new NetworkCommand("removepunishment", (cmd, origin, args) -> {
+            int id = Integer.parseInt(args[0]);
+            Punishment punishment = NexusAPI.getApi().getPunishmentManager().getPunishment(id);
+            if (punishment != null) {
+                punishment = NexusAPI.getApi().getDataManager().getPunishment(id);
+                NexusAPI.getApi().getPunishmentManager().addPunishment(punishment);
+            }
+        }));
         
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select id,type from punishments;");
