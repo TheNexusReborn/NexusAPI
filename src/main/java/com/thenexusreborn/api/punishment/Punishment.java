@@ -1,6 +1,14 @@
 package com.thenexusreborn.api.punishment;
 
+import com.thenexusreborn.api.helper.*;
+
 public class Punishment {
+    public static final String KICK_FORMAT = "&d&lThe Nexus Reborn &7- {type}\n \n" +
+            "&fStaff: &a{actor}\n" +
+            "&fReason: &b{reason}\n" +
+            "&fExpires: &c{expire}\n" +
+            "&fPunishment ID: &e{id}";
+    
     private int id = -1;
     private final long date, length;
     private final String actor, target, server, reason;
@@ -87,13 +95,13 @@ public class Punishment {
         if (this.pardonInfo != null) {
             return false;
         }
-        
-        if (this.length <= -1) {
-            return true;
+    
+        if (this.type == PunishmentType.WARN) {
+            return !(this.acknowledgeInfo.getTime() > 0);
         }
         
-        if (this.type == PunishmentType.WARN) {
-            return this.acknowledgeInfo.getTime() > 0;
+        if (getTimeRemaining() > 0) {
+            return true;
         }
         
         return System.currentTimeMillis() <= (this.date + this.length);
@@ -113,6 +121,38 @@ public class Punishment {
     
     public void setTargetNameCache(String targetNameCache) {
         this.targetNameCache = targetNameCache;
+    }
+    
+    public long getTimeRemaining() {
+        if (getLength() == -1) {
+            return -1;
+        }
+        
+        long timeRemaining = (this.date + this.length) - System.currentTimeMillis();
+        return timeRemaining > 0 ? timeRemaining : -2;
+    }
+    
+    public String formatTimeLeft() {
+        String expires = "";
+        long timeRemaining = getTimeRemaining();
+        if (timeRemaining == -1) {
+            expires = "Permanent";
+        } else if (timeRemaining == -2) {
+            expires = "Expired";
+        } else if (getTimeRemaining() >= 1) {
+            expires = TimeHelper.formatTime(timeRemaining);
+        }
+        return expires;
+    }
+    
+    public String formatKick() {
+        String message = Punishment.KICK_FORMAT;
+        message = message.replace("{type}", getType().getColor() + StringHelper.capitalizeEveryWord(getType().getVerb()));
+        message = message.replace("{actor}", getActorNameCache());
+        message = message.replace("{reason}", getReason());
+        message = message.replace("{expire}", formatTimeLeft());
+        message = message.replace("{id}", getId() + "");
+        return message;
     }
     
     @Override

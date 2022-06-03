@@ -118,6 +118,8 @@ public abstract class NexusAPI {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        playerManager.getIpHistory().putAll(getDataManager().getIpHistory());
     }
     
     public abstract Connection getConnection() throws SQLException;

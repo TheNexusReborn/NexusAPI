@@ -1,10 +1,9 @@
 package com.thenexusreborn.api;
 
-import com.thenexusreborn.api.helper.TimeHelper;
 import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.Punishment;
+import com.thenexusreborn.api.punishment.*;
 
 import java.util.UUID;
 
@@ -93,14 +92,11 @@ public final class StaffChat {
                     format = format.replace("{actor}", punishment.getPardonInfo().getActorNameCache());
                 } else {
                     format = format.replace("{type}", punishment.getType().getColor() + punishment.getType().getVerb());
-                    String length = "";
-                    if (punishment.getLength() == -1) {
-                        length = " &c(Permanent)";
-                    } else if (punishment.getLength() >= 1) {
-                        length = " &c(" + TimeHelper.formatTime(punishment.getLength()) + ")";
+                    if (punishment.getType() != PunishmentType.WARN) {
+                        format = format.replace("{length}", " &c(" + punishment.formatTimeLeft() + ")");
+                    } else {
+                        format = format.replace("{length}", "");
                     }
-    
-                    format = format.replace("{length}", length);
                     format = format.replace("{reason}", punishment.getReason());
                     format = format.replace("{actor}", punishment.getActorNameCache());
                 }
