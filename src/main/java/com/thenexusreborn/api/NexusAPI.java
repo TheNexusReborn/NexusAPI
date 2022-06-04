@@ -10,7 +10,7 @@ import com.thenexusreborn.api.stats.StatRegistry;
 import com.thenexusreborn.api.thread.ThreadFactory;
 
 import java.sql.*;
-import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class NexusAPI {
@@ -101,22 +101,9 @@ public abstract class NexusAPI {
             }
         }));
         
-        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery("select id,type from punishments;");
-            Set<Integer> punishments = new HashSet<>();
-            while (resultSet.next()) {
-                PunishmentType type = PunishmentType.valueOf(resultSet.getString("type"));
-                if (type == PunishmentType.MUTE || type == PunishmentType.WARN || type == PunishmentType.BAN || type == PunishmentType.BLACKLIST) {
-                    punishments.add(resultSet.getInt("id"));
-                }
-            }
-            
-            for (Integer pId : punishments) {
-                Punishment punishment = NexusAPI.getApi().getDataManager().getPunishment(pId);
-                NexusAPI.getApi().getPunishmentManager().addPunishment(punishment);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<Punishment> punishments = dataManager.getPunishments();
+        for (Punishment punishment : punishments) {
+            punishmentManager.addPunishment(punishment);
         }
         
         playerManager.getIpHistory().putAll(getDataManager().getIpHistory());

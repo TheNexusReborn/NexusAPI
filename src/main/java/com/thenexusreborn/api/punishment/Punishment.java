@@ -2,7 +2,7 @@ package com.thenexusreborn.api.punishment;
 
 import com.thenexusreborn.api.helper.*;
 
-public class Punishment {
+public class Punishment implements Comparable<Punishment> {
     public static final String KICK_FORMAT = "&d&lThe Nexus Reborn &7- {type}\n \n" +
             "&fStaff: &a{actor}\n" +
             "&fReason: &b{reason}\n" +
@@ -135,6 +135,9 @@ public class Punishment {
     public String formatTimeLeft() {
         String expires = "";
         long timeRemaining = getTimeRemaining();
+        if (type == PunishmentType.KICK || type == PunishmentType.WARN) {
+            return expires;
+        }
         if (timeRemaining == -1) {
             expires = "Permanent";
         } else if (timeRemaining == -2) {
@@ -171,5 +174,10 @@ public class Punishment {
                 ", acknowledgeInfo=" + acknowledgeInfo +
                 ", active=" + isActive() +
                 '}';
+    }
+    
+    @Override
+    public int compareTo(Punishment o) {
+        return Integer.compare(this.id, o.id);
     }
 }

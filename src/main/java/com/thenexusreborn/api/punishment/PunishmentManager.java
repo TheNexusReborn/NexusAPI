@@ -68,4 +68,8 @@ public class PunishmentManager {
         }
         return ips;
     }
+    
+    public List<Punishment> getPunishments() {
+        return new ArrayList<>(this.punishments.values());
+    }
 }

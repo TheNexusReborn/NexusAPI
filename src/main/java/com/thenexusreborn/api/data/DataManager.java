@@ -807,4 +807,20 @@ public class DataManager {
         
         return ipHistory;
     }
+    
+    public List<Punishment> getPunishments() {
+        List<Punishment> punishments = new ArrayList<>();
+        
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select id from punishments;");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                punishments.add(getPunishment(id));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return punishments;
+    }
 }
