@@ -45,6 +45,8 @@ public abstract class NexusPlayer {
     protected Map<String, Stat<Number>> stats = new HashMap<>();
     protected Set<StatChange<Number>> statChanges = new HashSet<>();
     
+    protected Map<String, Preference> preferences = new HashMap<>();
+    
     protected Set<Tag> unlockedTags = new HashSet<>();
     
     protected NexusScoreboard scoreboard;
@@ -451,5 +453,15 @@ public abstract class NexusPlayer {
         }
     }
     
+    public Map<String, Preference> getPreferences() {
+        return preferences;
+    }
+    
     public abstract boolean isOnline();
+    
+    public void setPreferences(List<Preference> preferences) {
+        for (Preference preference : preferences) {
+            this.preferences.put(preference.getInfo().getName(), preference);
+        }
+    }
 }

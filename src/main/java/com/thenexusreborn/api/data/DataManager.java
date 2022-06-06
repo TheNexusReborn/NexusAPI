@@ -4,6 +4,7 @@ import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.helper.MojangHelper;
 import com.thenexusreborn.api.player.*;
+import com.thenexusreborn.api.player.Preference.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.server.ServerInfo;
 import com.thenexusreborn.api.stats.*;
@@ -16,6 +17,9 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("DuplicatedCode")
 public class DataManager {
+    
+    private Map<String, Preference.Info> preferenceInfo = new HashMap<>();
+    
     public void setupMysql() throws SQLException {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), prealpha varchar(5), alpha varchar(5), beta varchar(5));");
@@ -26,52 +30,77 @@ public class DataManager {
             statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
             statement.execute("create table if not exists punishments(id int primary key not null auto_increment, date varchar(100), length varchar(100), actor varchar(100), target varchar(100), server varchar(100), reason varchar(200), type varchar(30), visibility varchar(30), pardonInfo varchar(500), acknowledgeInfo varchar(500));");
             statement.execute("create table if not exists iphistory(ip varchar(100), uuid varchar(36))");
+            statement.execute("create table if not exists preferenceinfo(name varchar(100), displayName varchar(200), description varchar(1000), defaultValue varchar(5));");
+            statement.execute("create table if not exists playerpreferences(id int auto_increment primary key, uuid varchar(36), name varchar(100), value varchar(5));");
             
-            int version = 0;
-            boolean convert = false;
-            ResultSet versionSet = statement.executeQuery("select version from players;");
-            while (versionSet.next()) {
-                int v = Integer.parseInt(versionSet.getString("version"));
-                if (v < NexusPlayer.version) {
-                    version = v;
-                    convert = true;
-                    break;
+            ResultSet prefResultSet = statement.executeQuery("select * from preferenceinfo;");
+            while (prefResultSet.next()) {
+                String name = prefResultSet.getString("name");
+                String displayName = prefResultSet.getString("displayName");
+                String description = prefResultSet.getString("description");
+                boolean defaultValue = Boolean.parseBoolean("defaultValue");
+                Preference.Info preference = new Preference.Info(name, displayName, description, defaultValue);
+                this.preferenceInfo.put(preference.getName(), preference);
+            }
+        }
+    }
+    
+    public void registerPreference(Preference.Info info) {
+        if (this.preferenceInfo.containsKey(info.getName())) {
+            this.preferenceInfo.put(info.getName(), info);
+            try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement statement = connection.prepareStatement("update preferenceinfo set displayName=?, description=?, defaultValue=? where name=?")) {
+                statement.setString(1, info.getDisplayName());
+                statement.setString(2, info.getDescription());
+                statement.setString(3, info.getDefaultValue() + "");
+                statement.setString(4, info.getName());
+                statement.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            this.preferenceInfo.put(info.getName(), info);
+            try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement statement = connection.prepareStatement("insert into preferenceinfo(name, displayName, description, defaultValue) values(?, ?, ?, ?);")) {
+                statement.setString(1, info.getName());
+                statement.setString(2, info.getDisplayName());
+                statement.setString(3, info.getDescription());
+                statement.setString(4, info.getDefaultValue() + "");
+                statement.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public Map<String, Preference.Info> getPreferenceInfo() {
+        return preferenceInfo;
+    }
+    
+    public List<Preference> loadPlayerPreferences(UUID player) {
+        List<Preference> playerPreferences = new ArrayList<>();
+        
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select * from playerpreferences where uuid='" + player.toString() + "';");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                boolean value = Boolean.parseBoolean("value");
+                
+                Preference.Info info = this.preferenceInfo.get(name);
+                if (info != null) {
+                    Preference preference = new Preference(info, id, value);
+                    playerPreferences.add(preference);
                 }
             }
-            
-            if (convert) {
-                NexusAPI.getApi().getLogger().info("Converting existing player data due to a new model version.");
-                Map<UUID, NexusPlayer> players = new HashMap<>();
-                ResultSet resultSet = statement.executeQuery("select uuid from players;");
-                while (resultSet.next()) {
-                    String rawuuid = resultSet.getString("uuid");
-                    UUID uuid = UUID.fromString(rawuuid);
-                    NexusPlayer nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uuid);
-                    players.put(nexusPlayer.getUniqueId(), nexusPlayer);
-                }
-                
-                if (version == 2) {
-                    statement.execute("alter table players add column tag VARCHAR(30) after lastKnownName;");
-                    statement.execute("alter table players add column lastLogout varchar(100) after lastLogin");
-                }
-                
-                if (version == 3) {
-                    statement.execute("alter table players add column unlockedTags varchar(1000) after ranks;");
-                }
-                
-                if (version == 4) {
-                    statement.execute("alter table players add column prealpha varchar(5) after unlockedTags;");
-                    statement.execute("alter table players add column alpha varchar(5) after prealpha;");
-                    statement.execute("alter table players add column beta varchar(5) after alpha;");
-                }
-                
-                for (NexusPlayer player : players.values()) {
-                    NexusAPI.getApi().getDataManager().pushPlayer(player);
-                }
-                
-                players.clear();
-                NexusAPI.getApi().getLogger().info("Conversion complete");
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return playerPreferences;
+    }
+    
+    public void setPreferenceHandler(String name, Handler handler) {
+        Info info = this.preferenceInfo.get(name);
+        if (info != null) {
+            info.setHandler(handler);
         }
     }
     
@@ -81,12 +110,12 @@ public class DataManager {
             if (nameSet.next()) {
                 return loadPlayer(UUID.fromString(nameSet.getString("uuid")));
             }
-        
+            
             UUID uuid = MojangHelper.getUUIDFromName(name);
             if (uuid == null) {
                 return null;
             }
-        
+            
             ResultSet uuidSet = statement.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
             if (uuidSet.next()) {
                 return loadPlayer(uuid);
@@ -415,6 +444,26 @@ public class DataManager {
                         }
                     }
                 }
+    
+                for (Preference preference : player.getPreferences().values()) {
+                    PreparedStatement statement;
+                    if (preference.getId() == 0) {
+                        statement = connection.prepareStatement("insert into playerpreferences(uuid, name, value) values(?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
+                        statement.setString(1, player.getUniqueId().toString());
+                        statement.setString(2, preference.getInfo().getName());
+                        statement.setString(3, preference.getValue() + "");
+                    } else {
+                        statement = connection.prepareStatement("update playerpreferences set value=? where uuid=? and name=?;");
+                        statement.setString(1, preference.getValue() + "");
+                        statement.setString(2, player.getUniqueId().toString());
+                        statement.setString(3, preference.getInfo().getName());
+                    }
+                    statement.executeUpdate();
+                    ResultSet generatedKeys = statement.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        preference.setId(generatedKeys.getInt(1));
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -539,8 +588,11 @@ public class DataManager {
                     alpha = Boolean.parseBoolean(playerResultSet.getString("alpha"));
                     beta = Boolean.parseBoolean(playerResultSet.getString("beta"));
                 }
-                
+    
+                List<Preference> preferences = loadPlayerPreferences(uuid);
+    
                 NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag, unlockedTags, prealpha, alpha, beta);
+                nexusPlayer.setPreferences(preferences);
                 refreshPlayerStats(nexusPlayer);
                 return nexusPlayer;
             }
@@ -680,7 +732,7 @@ public class DataManager {
                 punishment.setId(id);
                 punishment.setPardonInfo(pardonInfo);
                 punishment.setAcknowledgeInfo(acknowledgeInfo);
-    
+                
                 String actorCache = "";
                 try {
                     UUID uuid = UUID.fromString(punishment.getActor());
@@ -718,7 +770,7 @@ public class DataManager {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-    
+                
                 try {
                     if (punishment.getPardonInfo() != null) {
                         String removalActorName = "";
