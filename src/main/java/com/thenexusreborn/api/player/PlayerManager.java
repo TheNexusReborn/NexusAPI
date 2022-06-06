@@ -13,6 +13,7 @@ public abstract class PlayerManager {
             UUID.fromString("fc6a3e38-c1c0-40a6-b7b9-152ffdadc053"), UUID.fromString("84c55f0c-2f09-4cf6-9924-57f536eb2228"))));
     
     protected Map<UUID, NexusPlayer> players = new HashMap<>();
+    protected Map<String, Set<UUID>> ipHistory = new HashMap<>();
     
     public PlayerManager() {
         
@@ -140,5 +141,9 @@ public abstract class PlayerManager {
         }
         
         return null;
+    }
+    
+    public Map<String, Set<UUID>> getIpHistory() {
+        return ipHistory;
     }
 }

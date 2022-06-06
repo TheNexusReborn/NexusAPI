@@ -56,10 +56,6 @@ public abstract class NexusScoreboard {
         if (view != null) {
             view.update();
         }
-        
-        if (tablistHandler != null) {
-            tablistHandler.update();
-        }
     }
     
     public abstract void init();

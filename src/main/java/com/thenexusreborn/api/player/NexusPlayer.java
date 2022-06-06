@@ -45,6 +45,8 @@ public abstract class NexusPlayer {
     protected Map<String, Stat<Number>> stats = new HashMap<>();
     protected Set<StatChange<Number>> statChanges = new HashSet<>();
     
+    protected Map<String, Preference> preferences = new HashMap<>();
+    
     protected Set<Tag> unlockedTags = new HashSet<>();
     
     protected NexusScoreboard scoreboard;
@@ -437,5 +439,29 @@ public abstract class NexusPlayer {
         this.unlockedTags.remove(tag);
     }
     
+    public String serializeRanks() {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Rank, Long> entry : getRanks().entrySet()) {
+            sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
+        }
+    
+        String ranks;
+        if (sb.length() > 0) {
+            return sb.substring(0, sb.toString().length() - 1);
+        } else {
+            return "";
+        }
+    }
+    
+    public Map<String, Preference> getPreferences() {
+        return preferences;
+    }
+    
     public abstract boolean isOnline();
+    
+    public void setPreferences(List<Preference> preferences) {
+        for (Preference preference : preferences) {
+            this.preferences.put(preference.getInfo().getName(), preference);
+        }
+    }
 }

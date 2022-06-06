@@ -2,12 +2,15 @@ package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.DataManager;
 import com.thenexusreborn.api.network.*;
+import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
+import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.server.ServerManager;
 import com.thenexusreborn.api.stats.StatRegistry;
 import com.thenexusreborn.api.thread.ThreadFactory;
 
 import java.sql.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class NexusAPI {
@@ -30,6 +33,7 @@ public abstract class NexusAPI {
     protected ServerManager serverManager;
     protected final Environment environment;
     private NetworkManager networkManager;
+    private PunishmentManager punishmentManager;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
@@ -40,6 +44,7 @@ public abstract class NexusAPI {
         this.threadFactory = threadFactory;
         this.playerFactory = playerFactory;
         this.serverManager = serverManager;
+        this.punishmentManager = new PunishmentManager();
     }
     
     public Environment getEnvironment() {
@@ -55,7 +60,7 @@ public abstract class NexusAPI {
             e.printStackTrace();
             return;
         }
-    
+        
         StatRegistry.registerDoubleStat("nexites", 0); //done
         StatRegistry.registerDoubleStat("credits", 0); //done
         StatRegistry.registerDoubleStat("xp", 0); //done
@@ -85,6 +90,23 @@ public abstract class NexusAPI {
         dataManager.setupMysql();
         serverManager.setupCurrentServer();
         networkManager.init("localhost", 3408);
+        
+        networkManager.addCommand(new NetworkCommand("punishment"));
+        networkManager.addCommand(new NetworkCommand("removepunishment", (cmd, origin, args) -> {
+            int id = Integer.parseInt(args[0]);
+            Punishment punishment = NexusAPI.getApi().getPunishmentManager().getPunishment(id);
+            if (punishment != null) {
+                punishment = NexusAPI.getApi().getDataManager().getPunishment(id);
+                NexusAPI.getApi().getPunishmentManager().addPunishment(punishment);
+            }
+        }));
+        
+        List<Punishment> punishments = dataManager.getPunishments();
+        for (Punishment punishment : punishments) {
+            punishmentManager.addPunishment(punishment);
+        }
+        
+        playerManager.getIpHistory().putAll(getDataManager().getIpHistory());
     }
     
     public abstract Connection getConnection() throws SQLException;
@@ -115,5 +137,9 @@ public abstract class NexusAPI {
     
     public NetworkManager getNetworkManager() {
         return this.networkManager;
+    }
+    
+    public PunishmentManager getPunishmentManager() {
+        return punishmentManager;
     }
 }
