@@ -1,19 +1,26 @@
 package com.thenexusreborn.api.player;
 
+import com.thenexusreborn.api.NexusAPI;
+
+import java.util.UUID;
+
 public class Preference {
     private final Info info; //In theory, this should go based off of one instance so if that changes, then they all should change if they have the same
+    private final UUID uuid;
     private int id; //Database ID
     private boolean value;
     
-    public Preference(Info info, boolean value) {
+    public Preference(Info info, UUID uuid, boolean value) {
         this.info = info;
         this.value = value;
+        this.uuid = uuid;
     }
     
-    public Preference(Info info, int id, boolean value) {
+    public Preference(Info info, UUID uuid, int id, boolean value) {
         this.info = info;
         this.id = id;
         this.value = value;
+        this.uuid = uuid;
     }
     
     public boolean getValue() {
@@ -24,8 +31,12 @@ public class Preference {
         boolean oldValue = this.value;
         this.value = value;
         if (info.handler != null) {
-            info.handler.handleChange(this, oldValue, value);
+            info.handler.handleChange(this, getPlayer(), oldValue, value);
         }
+    }
+    
+    public NexusPlayer getPlayer() {
+        return NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
     }
     
     public int getId() {
@@ -78,6 +89,6 @@ public class Preference {
     }
     
     public interface Handler {
-        void handleChange(Preference preference, boolean oldValue, boolean newValue);
+        void handleChange(Preference preference, NexusPlayer player, boolean oldValue, boolean newValue);
     }
 }
