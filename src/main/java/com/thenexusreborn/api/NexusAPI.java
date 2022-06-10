@@ -6,11 +6,12 @@ import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.server.ServerManager;
-import com.thenexusreborn.api.stats.StatRegistry;
+import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.thread.ThreadFactory;
+import com.thenexusreborn.api.tournament.*;
 
 import java.sql.*;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class NexusAPI {
@@ -32,8 +33,9 @@ public abstract class NexusAPI {
     protected PlayerFactory playerFactory;
     protected ServerManager serverManager;
     protected final Environment environment;
-    private NetworkManager networkManager;
-    private PunishmentManager punishmentManager;
+    protected NetworkManager networkManager;
+    protected PunishmentManager punishmentManager;
+    protected Tournament tournament;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
@@ -91,6 +93,20 @@ public abstract class NexusAPI {
         serverManager.setupCurrentServer();
         networkManager.init("localhost", 3408);
         
+        networkManager.addCommand(new NetworkCommand("tournament", ((cmd, origin, args) -> {
+            if (args[0].equalsIgnoreCase("delete")) {
+                setTournament(null);
+    
+                for (NexusPlayer player : NexusAPI.getApi().getPlayerManager().getPlayers().values()) {
+                    player.getStats().values().removeIf(stat -> stat.getName().contains("tournament"));
+                    player.getStatChanges().removeIf(statChange -> statChange.getStatName().contains("tournament"));
+                }
+            } else {
+                int id = Integer.parseInt(args[0]);
+                setTournament(NexusAPI.getApi().getDataManager().getTournament(id));
+            }
+        })));
+        
         networkManager.addCommand(new NetworkCommand("punishment"));
         networkManager.addCommand(new NetworkCommand("removepunishment", (cmd, origin, args) -> {
             int id = Integer.parseInt(args[0]);
@@ -107,6 +123,10 @@ public abstract class NexusAPI {
         }
         
         playerManager.getIpHistory().putAll(getDataManager().getIpHistory());
+    }
+    
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
     }
     
     public abstract Connection getConnection() throws SQLException;
@@ -141,5 +161,9 @@ public abstract class NexusAPI {
     
     public PunishmentManager getPunishmentManager() {
         return punishmentManager;
+    }
+    
+    public Tournament getTournament() {
+        return tournament;
     }
 }

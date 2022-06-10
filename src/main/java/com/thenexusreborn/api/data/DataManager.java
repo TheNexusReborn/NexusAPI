@@ -9,6 +9,7 @@ import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.server.ServerInfo;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
+import com.thenexusreborn.api.tournament.Tournament;
 import com.thenexusreborn.api.util.Operator;
 
 import java.sql.*;
@@ -32,6 +33,7 @@ public class DataManager {
             statement.execute("create table if not exists iphistory(ip varchar(100), uuid varchar(36))");
             statement.execute("create table if not exists preferenceinfo(name varchar(100), displayName varchar(200), description varchar(1000), defaultValue varchar(5));");
             statement.execute("create table if not exists playerpreferences(id int auto_increment primary key, uuid varchar(36), name varchar(100), value varchar(5));");
+            statement.execute("create table if not exists tournaments(id int auto_increment primary key , host varchar(36), name varchar(100), active varchar(5), pointsperkill int, pointsperwin int, pointspersurvival int, servers varchar(1000));");
             
             ResultSet prefResultSet = statement.executeQuery("select * from preferenceinfo;");
             while (prefResultSet.next()) {
@@ -71,6 +73,49 @@ public class DataManager {
         }
     }
     
+    public Tournament getTournament(int id) {
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select * from tournaments where id='" + id + "';");
+            if (resultSet.next()) {
+                UUID host = UUID.fromString(resultSet.getString("host"));
+                String name = resultSet.getString("name");
+                boolean active = Boolean.parseBoolean(resultSet.getString("active"));
+                int pointsPerKill = resultSet.getInt("pointsperkill");
+                int pointsPerWin = resultSet.getInt("pointsperwin");
+                int pointsPerSurvival = resultSet.getInt("pointspersurvival");
+                String servers = resultSet.getString("servers");
+                Tournament tournament = new Tournament(host, name);
+                tournament.setId(id);
+                tournament.setActive(active);
+                tournament.setPointsPerKill(pointsPerKill);
+                tournament.setPointsPerWin(pointsPerWin);
+                tournament.setPointsPerSurvival(pointsPerSurvival);
+                tournament.setServers(servers);
+                return tournament;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public List<Tournament> getTournaments() {
+        List<Tournament> tournaments = new ArrayList<>();
+        
+        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select id from tournaments;");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                tournaments.add(getTournament(id));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return tournaments;
+    }
+    
     public Map<String, Preference.Info> getPreferenceInfo() {
         return preferenceInfo;
     }
@@ -94,7 +139,7 @@ public class DataManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    
+        
         infoLoop:
         for (Info info : this.preferenceInfo.values()) {
             for (Preference playerPreference : playerPreferences) {
@@ -102,7 +147,7 @@ public class DataManager {
                     continue infoLoop;
                 }
             }
-    
+            
             playerPreferences.add(new Preference(info, player, info.getDefaultValue()));
         }
         
@@ -894,5 +939,40 @@ public class DataManager {
         }
         
         return punishments;
+    }
+    
+    public void pushTournament(Tournament tournament) {
+        try (Connection connection = NexusAPI.getApi().getConnection()) {
+            String sql;
+            if (tournament.getId() == 0) {
+                sql = "insert into tournaments(host, name, active, pointsperkill, pointsperwin, pointspersurvival, servers) values ('{host}', '{name}', '{active}', '{pointsperkill}' ,'{pointsperwin}' ,'{pointspersurvival}', '{servers}');";
+            } else {
+                sql = "update tournaments set host='{host}', name='{name}', active='{active}', pointsperkill='{pointsperkill}', pointsperwin='{pointsperwin}', pointspersurvival='{pointspersurvival}', servers='{servers}' where id = '{id}';";
+            }
+            
+            sql = sql.replace("{id}", tournament.getId() + "");
+            sql = sql.replace("{host}", tournament.getHost().toString());
+            sql = sql.replace("{name}", tournament.getName());
+            sql = sql.replace("{active}", tournament.isActive() + "");
+            sql = sql.replace("{pointsperkill}", tournament.getPointsPerKill() + "");
+            sql = sql.replace("{pointsperwin}", tournament.getPointsPerWin() + "");
+            sql = sql.replace("{pointspersurvival}", tournament.getPointsPerSurvival() + "");
+            
+            if (tournament.getId() == 0) {
+                try (Statement statement = connection.createStatement()){
+                    statement.execute(sql, Statement.RETURN_GENERATED_KEYS);
+                    ResultSet generatedKeys = statement.getGeneratedKeys();
+                    generatedKeys.next();
+                    tournament.setId(generatedKeys.getInt(1));
+                }
+            } else {
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute(sql);
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
