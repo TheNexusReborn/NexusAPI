@@ -8,7 +8,7 @@ public class Tournament {
     private String name;
     private boolean active;
     private int pointsPerKill, pointsPerWin, pointsPerSurvival;
-    private String servers;
+    private String[] servers;
     
     private Map<UUID, ScoreInfo> scoreCache = new HashMap<>();
     
@@ -73,11 +73,11 @@ public class Tournament {
         this.id = id;
     }
     
-    public String getServers() {
+    public String[] getServers() {
         return servers;
     }
     
-    public void setServers(String servers) {
+    public void setServers(String[] servers) {
         this.servers = servers;
     }
     

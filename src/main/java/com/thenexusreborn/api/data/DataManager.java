@@ -2,7 +2,7 @@ package com.thenexusreborn.api.data;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.gamearchive.*;
-import com.thenexusreborn.api.helper.MojangHelper;
+import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.Preference.*;
 import com.thenexusreborn.api.punishment.*;
@@ -83,13 +83,14 @@ public class DataManager {
                 int pointsPerKill = resultSet.getInt("pointsperkill");
                 int pointsPerWin = resultSet.getInt("pointsperwin");
                 int pointsPerSurvival = resultSet.getInt("pointspersurvival");
-                String servers = resultSet.getString("servers");
+                String rawServers = resultSet.getString("servers");
                 Tournament tournament = new Tournament(host, name);
                 tournament.setId(id);
                 tournament.setActive(active);
                 tournament.setPointsPerKill(pointsPerKill);
                 tournament.setPointsPerWin(pointsPerWin);
                 tournament.setPointsPerSurvival(pointsPerSurvival);
+                String[] servers = rawServers.split(",");
                 tournament.setServers(servers);
                 return tournament;
             }
@@ -954,6 +955,7 @@ public class DataManager {
             sql = sql.replace("{host}", tournament.getHost().toString());
             sql = sql.replace("{name}", tournament.getName());
             sql = sql.replace("{active}", tournament.isActive() + "");
+            sql = sql.replace("{servers}", StringHelper.join(tournament.getServers(), ","));
             sql = sql.replace("{pointsperkill}", tournament.getPointsPerKill() + "");
             sql = sql.replace("{pointsperwin}", tournament.getPointsPerWin() + "");
             sql = sql.replace("{pointspersurvival}", tournament.getPointsPerSurvival() + "");
