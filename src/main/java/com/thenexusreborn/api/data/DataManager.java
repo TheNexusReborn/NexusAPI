@@ -79,21 +79,33 @@ public class DataManager {
         List<Preference> playerPreferences = new ArrayList<>();
         
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery("select * from playerpreferences where uuid='" + player.toString() + "';");
+            ResultSet resultSet = statement.executeQuery("select * from playerpreferences where uuid='" + player + "';");
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String name = resultSet.getString("name");
-                boolean value = Boolean.parseBoolean("value");
+                boolean value = Boolean.parseBoolean(resultSet.getString("value"));
                 
                 Preference.Info info = this.preferenceInfo.get(name);
                 if (info != null) {
-                    Preference preference = new Preference(info, id, value);
+                    Preference preference = new Preference(info, player, id, value);
                     playerPreferences.add(preference);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    
+        infoLoop:
+        for (Info info : this.preferenceInfo.values()) {
+            for (Preference playerPreference : playerPreferences) {
+                if (info.getName().equals(playerPreference.getInfo().getName())) {
+                    continue infoLoop;
+                }
+            }
+    
+            playerPreferences.add(new Preference(info, player, info.getDefaultValue()));
+        }
+        
         return playerPreferences;
     }
     
@@ -444,28 +456,36 @@ public class DataManager {
                         }
                     }
                 }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
-                for (Preference preference : player.getPreferences().values()) {
-                    PreparedStatement statement;
-                    if (preference.getId() == 0) {
-                        statement = connection.prepareStatement("insert into playerpreferences(uuid, name, value) values(?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
-                        statement.setString(1, player.getUniqueId().toString());
-                        statement.setString(2, preference.getInfo().getName());
-                        statement.setString(3, preference.getValue() + "");
-                    } else {
-                        statement = connection.prepareStatement("update playerpreferences set value=? where uuid=? and name=?;");
-                        statement.setString(1, preference.getValue() + "");
-                        statement.setString(2, player.getUniqueId().toString());
-                        statement.setString(3, preference.getInfo().getName());
-                    }
-                    statement.executeUpdate();
+    public void pushPlayerPreferences(NexusPlayer player) {
+        try (Connection connection = NexusAPI.getApi().getConnection()) {
+            for (Preference preference : player.getPreferences().values()) {
+                PreparedStatement statement;
+                if (preference.getId() == 0) {
+                    statement = connection.prepareStatement("insert into playerpreferences(uuid, name, value) values(?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
+                    statement.setString(1, player.getUniqueId().toString());
+                    statement.setString(2, preference.getInfo().getName());
+                    statement.setString(3, preference.getValue() + "");
+                } else {
+                    statement = connection.prepareStatement("update playerpreferences set value=? where uuid=? and name=?;");
+                    statement.setString(1, preference.getValue() + "");
+                    statement.setString(2, player.getUniqueId().toString());
+                    statement.setString(3, preference.getInfo().getName());
+                }
+                statement.executeUpdate();
+                if (preference.getId() == 0) {
                     ResultSet generatedKeys = statement.getGeneratedKeys();
                     if (generatedKeys.next()) {
                         preference.setId(generatedKeys.getInt(1));
                     }
                 }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -588,9 +608,9 @@ public class DataManager {
                     alpha = Boolean.parseBoolean(playerResultSet.getString("alpha"));
                     beta = Boolean.parseBoolean(playerResultSet.getString("beta"));
                 }
-    
+                
                 List<Preference> preferences = loadPlayerPreferences(uuid);
-    
+                
                 NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerFactory().createPlayer(uuid, ranks, firstJoined, lastLogin, lastLogout, playtime, lastKnownName, tag, unlockedTags, prealpha, alpha, beta);
                 nexusPlayer.setPreferences(preferences);
                 refreshPlayerStats(nexusPlayer);
