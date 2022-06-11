@@ -56,7 +56,6 @@ public class NettyServer extends NettyApp {
     
     @Override
     public void send(NexusPacket packet) {
-        ChannelGroupFuture future = channels.writeAndFlush(packet);
-        future.addListener((ChannelGroupFutureListener) f -> NexusAPI.getApi().getLogger().info("Send packet to all servers: " + packet));
+        channels.writeAndFlush(packet);
     }
 }

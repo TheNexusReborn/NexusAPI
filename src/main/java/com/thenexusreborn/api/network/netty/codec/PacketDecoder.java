@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.network.netty.codec;
 
-import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.network.netty.model.NexusPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,6 +23,5 @@ public class PacketDecoder extends ReplayingDecoder<NexusPacket> {
         
         NexusPacket nexusPacket = new NexusPacket(origin, action, data);
         out.add(nexusPacket);
-        NexusAPI.getApi().getLogger().info("Received packet: " + nexusPacket);
     }
 }

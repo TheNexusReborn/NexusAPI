@@ -56,11 +56,6 @@ public class NettyClient extends NettyApp {
     
     @Override
     public void send(NexusPacket packet) {
-        ChannelFuture future = channel.writeAndFlush(packet);
-        future.addListener((ChannelFutureListener) f -> {
-            if (f == future) {
-                NexusAPI.getApi().getLogger().info("Sent packet: " + packet.toString());
-            }
-        });
+        channel.writeAndFlush(packet);
     }
 }
