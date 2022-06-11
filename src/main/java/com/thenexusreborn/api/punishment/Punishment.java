@@ -1,6 +1,11 @@
 package com.thenexusreborn.api.punishment;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.helper.*;
+import com.thenexusreborn.api.player.NexusPlayer;
+
+import java.sql.*;
+import java.util.UUID;
 
 public class Punishment implements Comparable<Punishment> {
     public static final String KICK_FORMAT = "&d&lThe Nexus Reborn &7- {type}\n \n" +
@@ -29,6 +34,23 @@ public class Punishment implements Comparable<Punishment> {
         this.reason = reason;
         this.type = type;
         this.visibility = visibility;
+        
+        try {
+            UUID uuid = UUID.fromString(getActor());
+            NexusPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+            if (actorCachePlayer == null) {
+                try (Connection connection = NexusAPI.getApi().getConnection(); Statement s = connection.createStatement()) {
+                    ResultSet rs = s.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
+                    if (rs.next()) {
+                        actorNameCache = rs.getString("lastKnownName");
+                    }
+                }
+            } else {
+                actorNameCache = actorCachePlayer.getName();
+            }
+        } catch (Exception e) {
+            this.actorNameCache = actor;
+        }
     }
     
     public Punishment(long date, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
