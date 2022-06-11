@@ -90,8 +90,12 @@ public class DataManager {
                 tournament.setPointsPerKill(pointsPerKill);
                 tournament.setPointsPerWin(pointsPerWin);
                 tournament.setPointsPerSurvival(pointsPerSurvival);
-                String[] servers = rawServers.split(",");
-                tournament.setServers(servers);
+                if (rawServers != null && !rawServers.equals("")) {
+                    String[] servers = rawServers.split(",");
+                    tournament.setServers(servers);
+                } else {
+                    tournament.setServers(new String[0]);
+                }
                 return tournament;
             }
         } catch (SQLException e) {
@@ -955,7 +959,11 @@ public class DataManager {
             sql = sql.replace("{host}", tournament.getHost().toString());
             sql = sql.replace("{name}", tournament.getName());
             sql = sql.replace("{active}", tournament.isActive() + "");
-            sql = sql.replace("{servers}", StringHelper.join(tournament.getServers(), ","));
+            if (tournament.getServers() != null && tournament.getServers().length > 0) {
+                sql = sql.replace("{servers}", StringHelper.join(tournament.getServers(), ","));
+            } else {
+                sql = sql.replace("{servers}", "");
+            }
             sql = sql.replace("{pointsperkill}", tournament.getPointsPerKill() + "");
             sql = sql.replace("{pointsperwin}", tournament.getPointsPerWin() + "");
             sql = sql.replace("{pointspersurvival}", tournament.getPointsPerSurvival() + "");

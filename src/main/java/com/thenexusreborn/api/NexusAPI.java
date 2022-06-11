@@ -102,8 +102,12 @@ public abstract class NexusAPI {
                     player.getStatChanges().removeIf(statChange -> statChange.getStatName().contains("tournament"));
                 }
             } else {
+                System.out.println("Received request to update in memory tournament info");
                 int id = Integer.parseInt(args[0]);
-                setTournament(NexusAPI.getApi().getDataManager().getTournament(id));
+                System.out.println("Tournament id is " + id);
+                Tournament tournament = NexusAPI.getApi().getDataManager().getTournament(id);
+                System.out.println("Tournament Info: " + tournament);
+                setTournament(tournament);
             }
         })));
         
@@ -120,6 +124,13 @@ public abstract class NexusAPI {
         List<Punishment> punishments = dataManager.getPunishments();
         for (Punishment punishment : punishments) {
             punishmentManager.addPunishment(punishment);
+        }
+        
+        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("select id from tournaments;");
+            if (resultSet.next()) {
+                this.tournament = NexusAPI.getApi().getDataManager().getTournament(resultSet.getInt("id"));
+            }
         }
         
         playerManager.getIpHistory().putAll(getDataManager().getIpHistory());

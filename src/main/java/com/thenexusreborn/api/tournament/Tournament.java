@@ -146,4 +146,18 @@ public class Tournament {
             return -1;
         }
     }
+    
+    @Override
+    public String toString() {
+        return "Tournament{" +
+                "id=" + id +
+                ", host=" + host +
+                ", name='" + name + '\'' +
+                ", active=" + active +
+                ", pointsPerKill=" + pointsPerKill +
+                ", pointsPerWin=" + pointsPerWin +
+                ", pointsPerSurvival=" + pointsPerSurvival +
+                ", servers=" + Arrays.toString(servers) +
+                '}';
+    }
 }
