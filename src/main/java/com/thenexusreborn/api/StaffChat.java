@@ -5,7 +5,7 @@ import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 
-import java.util.UUID;
+import java.util.*;
 
 public final class StaffChat {
     /*
@@ -106,7 +106,7 @@ public final class StaffChat {
         
         format = format.replace("{prefix}", prefix).replace("{displayName}", displayName).replace("{origin}", origin);
     
-        for (NexusPlayer player : NexusAPI.getApi().getPlayerManager().getPlayers().values()) {
+        for (NexusPlayer player : new ArrayList<>(NexusAPI.getApi().getPlayerManager().getPlayers().values())) {
             if (player.isOnline()) {
                 if (player.getRank().ordinal() <= Rank.HELPER.ordinal()) {
                     player.sendMessage(format);
