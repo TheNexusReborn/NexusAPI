@@ -5,9 +5,9 @@ import com.thenexusreborn.api.NexusAPI;
 import java.util.UUID;
 
 public class Preference {
-    private final Info info; //In theory, this should go based off of one instance so if that changes, then they all should change if they have the same
+    private final Info info;
     private final UUID uuid;
-    private int id; //Database ID
+    private int id;
     private boolean value;
     
     public Preference(Info info, UUID uuid, boolean value) {

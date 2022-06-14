@@ -580,15 +580,15 @@ public class DataManager {
                 long modified = Long.parseLong(statsResultSet.getString("modified"));
                 UUID uuid = UUID.fromString(statsResultSet.getString("uuid"));
                 
-                if (!StatRegistry.isValidStat(name)) {
+                if (!StatHelper.isValidStat(name)) {
                     continue;
                 }
                 
                 Stat<? extends Number> stat;
-                if (StatRegistry.isIntegerStat(name)) {
-                    stat = StatRegistry.instantiateIntegerStat(id, name, nexusPlayer.getUniqueId(), Integer.parseInt(rawValue), created, modified);
-                } else if (StatRegistry.isDoubleStat(name)) {
-                    stat = StatRegistry.instantiateDoubleStat(id, name, nexusPlayer.getUniqueId(), Double.parseDouble(rawValue), created, modified);
+                if (StatHelper.isIntegerStat(name)) {
+                    stat = StatHelper.instantiateIntegerStat(id, name, nexusPlayer.getUniqueId(), Integer.parseInt(rawValue), created, modified);
+                } else if (StatHelper.isDoubleStat(name)) {
+                    stat = StatHelper.instantiateDoubleStat(id, name, nexusPlayer.getUniqueId(), Double.parseDouble(rawValue), created, modified);
                 } else {
                     continue;
                 }
@@ -605,9 +605,9 @@ public class DataManager {
                 long timestamp = Long.parseLong(statChangesResultSet.getString("timestamp"));
                 UUID uuid = UUID.fromString(statChangesResultSet.getString("uuid"));
                 Number value;
-                if (StatRegistry.isIntegerStat(name)) {
+                if (StatHelper.isIntegerStat(name)) {
                     value = Integer.parseInt(rawValue);
-                } else if (StatRegistry.isDoubleStat(name)) {
+                } else if (StatHelper.isDoubleStat(name)) {
                     value = Double.parseDouble(rawValue);
                 } else {
                     continue;

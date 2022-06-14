@@ -2,25 +2,23 @@ package com.thenexusreborn.api.stats;
 
 import java.util.UUID;
 
-public class Stat<T> {
-    public static final int version = 1;
-    
+public class Stat {
     private int id;
     private final UUID uuid;
     private final String name;
-    private T value;
+    private Object value;
     private final long created;
     private long modified;
     
-    public Stat(UUID uuid, String name, T value, long created) {
+    public Stat(UUID uuid, String name, Object value, long created) {
         this(uuid, name, value, created, created);
     }
     
-    public Stat(UUID uuid, String name, T value, long created, long modified) {
+    public Stat(UUID uuid, String name, Object value, long created, long modified) {
         this(-1, uuid, name, value, created, modified);
     }
     
-    public Stat(int id, UUID uuid, String name, T value, long created, long modified) {
+    public Stat(int id, UUID uuid, String name, Object value, long created, long modified) {
         this.id = id;
         this.uuid = uuid;
         this.name = name;
@@ -37,11 +35,11 @@ public class Stat<T> {
         return name;
     }
     
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
     
-    public void setValue(T value) {
+    public void setValue(Object value) {
         this.value = value;
         this.modified = System.currentTimeMillis();
     }
