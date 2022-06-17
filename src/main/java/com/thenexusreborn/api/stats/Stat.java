@@ -6,25 +6,27 @@ public class Stat {
     private int id;
     private final UUID uuid;
     private final String name;
+    private StatType type;
     private Object value;
     private final long created;
     private long modified;
     
-    public Stat(UUID uuid, String name, Object value, long created) {
-        this(uuid, name, value, created, created);
+    public Stat(UUID uuid, String name, StatType type, Object value, long created) {
+        this(uuid, name, type, value, created, created);
     }
     
-    public Stat(UUID uuid, String name, Object value, long created, long modified) {
-        this(-1, uuid, name, value, created, modified);
+    public Stat(UUID uuid, String name, StatType type, Object value, long created, long modified) {
+        this(-1, uuid, name, type, value, created, modified);
     }
     
-    public Stat(int id, UUID uuid, String name, Object value, long created, long modified) {
+    public Stat(int id, UUID uuid, String name, StatType type, Object value, long created, long modified) {
         this.id = id;
         this.uuid = uuid;
         this.name = name;
         this.value = value;
         this.created = created;
         this.modified = modified;
+        this.type = type;
     }
     
     public UUID getUuid() {
@@ -37,6 +39,10 @@ public class Stat {
     
     public Object getValue() {
         return value;
+    }
+    
+    public StatType getType() {
+        return type;
     }
     
     public void setValue(Object value) {

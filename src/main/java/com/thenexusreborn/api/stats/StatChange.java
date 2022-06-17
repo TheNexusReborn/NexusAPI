@@ -1,30 +1,30 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.util.Operator;
-
 import java.util.*;
 
-public class StatChange<T> implements Comparable<StatChange<?>> {
+public class StatChange implements Comparable<StatChange> {
     public static final int version = 1;
     
     private int id;
     private final UUID uuid;
     private final String statName;
-    private final T value;
-    private final Operator operator;
+    private final StatType type;
+    private final Object value;
+    private final StatOperator operator;
     private final long timestamp;
     
-    public StatChange(UUID uuid, String statName, T value, Operator operator, long timestamp) {
-        this(-1, uuid, statName, value, operator, timestamp);
+    public StatChange(UUID uuid, String statName, StatType type, Object value, StatOperator operator, long timestamp) {
+        this(-1, uuid, statName, type, value, operator, timestamp);
     }
     
-    public StatChange(int id, UUID uuid, String statName, T value, Operator operator, long timestamp) {
+    public StatChange(int id, UUID uuid, String statName, StatType type, Object value, StatOperator operator, long timestamp) {
         this.id = id;
         this.uuid = uuid;
         this.statName = statName;
         this.value = value;
         this.operator = operator;
         this.timestamp = timestamp;
+        this.type = type;
     }
     
     public UUID getUuid() {
@@ -35,7 +35,7 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
         return statName;
     }
     
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
     
@@ -43,7 +43,7 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
         return timestamp;
     }
     
-    public Operator getOperator() {
+    public StatOperator getOperator() {
         return operator;
     }
     
@@ -55,8 +55,12 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
         this.id = id;
     }
     
+    public StatType getType() {
+        return type;
+    }
+    
     @Override
-    public int compareTo(StatChange<?> o) {
+    public int compareTo(StatChange o) {
         if (timestamp <= o.timestamp) {
             return 1;
         }
@@ -71,12 +75,12 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        StatChange<?> that = (StatChange<?>) o;
-        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(statName, that.statName) && Objects.equals(value, that.value) && operator == that.operator;
+        StatChange that = (StatChange) o;
+        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(statName, that.statName) && Objects.equals(type, that.type) && Objects.equals(value, that.value) && operator == that.operator;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, uuid, statName, value, operator, timestamp);
+        return Objects.hash(id, uuid, statName, type, value, operator, timestamp);
     }
 }
