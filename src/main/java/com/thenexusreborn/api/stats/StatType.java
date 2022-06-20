@@ -3,16 +3,22 @@ package com.thenexusreborn.api.stats;
 import static com.thenexusreborn.api.stats.StatOperator.*;
 
 public enum StatType {
-    INTEGER(ADD, SUBTRACT, MUTLIPLY, DIVIDE, REPLACE, RESET, SET), 
-    DOUBLE(ADD, SUBTRACT, MUTLIPLY, DIVIDE, REPLACE, RESET, SET),
-    STRING(REPLACE, RESET, SET), 
-    BOOLEAN(REPLACE, RESET, INVERT, SET), 
-    LONG(ADD, SUBTRACT, MUTLIPLY, DIVIDE, REPLACE, RESET, SET);
+    INTEGER(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET), 
+    DOUBLE(0.0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET),
+    STRING("", RESET, SET), 
+    BOOLEAN(false, RESET, INVERT, SET), 
+    LONG(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET);
     
+    private final Object defaultValue;
     private final StatOperator[] allowedOperators;
     
-    StatType(StatOperator... allowedOperators) {
+    StatType(Object defaultValue, StatOperator... allowedOperators) {
+        this.defaultValue = defaultValue;
         this.allowedOperators = allowedOperators;
+    }
+    
+    public Object getDefaultValue() {
+        return defaultValue;
     }
     
     public StatOperator[] getAllowedOperators() {

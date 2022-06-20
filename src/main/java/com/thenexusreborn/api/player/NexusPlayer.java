@@ -5,7 +5,6 @@ import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
-import com.thenexusreborn.api.util.Operator;
 
 import java.util.*;
 
@@ -15,8 +14,8 @@ public abstract class NexusPlayer extends CachedPlayer {
     protected long firstJoined, lastLogin, lastLogout;
     protected Tag tag;
     
-    protected Map<String, Stat<Number>> stats = new HashMap<>();
-    protected Set<StatChange<Number>> statChanges = new HashSet<>();
+    protected Map<String, Stat> stats = new HashMap<>();
+    protected Set<StatChange> statChanges = new TreeSet<>();
     
     protected NexusScoreboard scoreboard;
     
@@ -102,91 +101,36 @@ public abstract class NexusPlayer extends CachedPlayer {
         this.lastLogout = lastLogout;
     }
     
-    public <T extends Number> void changeStat(String statName, T statValue, Operator operator) {
-        StatChange<T> statChange = new StatChange<>(this.uniqueId, statName, statValue, operator, System.currentTimeMillis());
-        NexusAPI.getApi().getDataManager().pushStatChangeAsync(statChange);
-        this.statChanges.add((StatChange<Number>) statChange);
-    }
-    
-    public void consolodateStats() {
-        Set<StatChange<Number>> statChanges = new TreeSet<>(this.statChanges);
-        
-        for (StatChange<Number> statChange : statChanges) {
-            Stat<Number> stat = this.stats.get(statChange.getStatName());
-            if (stat != null) {
-                if (statChange.getValue().getClass().equals(stat.getValue().getClass())) {
-                    if (statChange.getValue() instanceof Number) {
-                        stat.setValue(statChange.getOperator().calculate(stat.getValue(), statChange.getValue()));
-                    }
-                }
-            } else {
-                stat = new Stat<>(statChange.getUuid(), statChange.getStatName(), statChange.getValue(), statChange.getTimestamp());
-                this.stats.put(stat.getName(), stat);
-            }
-        }
-        
-        for (Stat<?> stat : this.stats.values()) {
-            NexusAPI.getApi().getDataManager().pushStatAsync(stat);
-        }
-        
-        for (StatChange<?> statChange : statChanges) {
-            this.statChanges.remove(statChange);
-            NexusAPI.getApi().getDataManager().removeStatChangeAsync(statChange);
-        }
+    public void changeStat(String statName, Object statValue, StatOperator operator) {
+        //TODO
     }
     
     public boolean hasStat(String statName) {
         return this.stats.containsKey(statName);
     }
     
-    public void addStat(Stat<Number> stat) {
+    public void addStat(Stat stat) {
         this.stats.put(stat.getName(), stat);
     }
     
-    public void addStatChange(StatChange<Number> statChange) {
+    public void addStatChange(StatChange statChange) {
         this.statChanges.add(statChange);
     }
     
-    public Set<StatChange<Number>> getStatChanges() {
+    public Set<StatChange> getStatChanges() {
         return statChanges;
     }
     
-    public Map<String, Stat<Number>> getStats() {
+    public Map<String, Stat> getStats() {
         return stats;
     }
     
     public double getStatValue(String statName) {
-        Number value = 0;
-        Stat<Number> stat = this.stats.get(statName);
-        if (stat != null) {
-            value = stat.getValue();
-        }
-
-        for (StatChange<Number> statChange : this.statChanges) {
-            if (statChange.getStatName().equalsIgnoreCase(statName)) {
-                value = statChange.getOperator().calculate(value, statChange.getValue());
-            }
-        }
-
-//        if (statName.equalsIgnoreCase("xp")) {
-//            long playtimeMinutes = (this.playTime / 20) / 60;
-//            long playtimeIntervals = playtimeMinutes / 10;
-//
-//            value = Operator.ADD.calculate(value, getPlayTimeXp());
-//        }
-
-        return value.doubleValue();
+        //TODO
+        return 0;
     }
-//    
-//    public double getPlayTimeXp() {
-//        long playtimeMinutes = (this.playTime / 20) / 60;
-//        long playtimeIntervals = playtimeMinutes / 10;
-//    
-//        return playtimeIntervals * (2 * getRank().getMultiplier());
-//    }
     
     public int getLevel() {
-//        double xp = getStatValue("xp");
         double xp = 0;
         int playerLevel = 0;
         for (int i = 1; i < LevelManager.levels.size(); i++) {
