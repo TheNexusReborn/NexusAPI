@@ -23,6 +23,69 @@ public final class StatHelper {
     }
     
     @SuppressWarnings("DuplicatedCode")
+    public static void changeStat(Stat stat, StatOperator operator, Object value) {
+        Object newValue = null;
+        if (operator == StatOperator.SET) {
+            newValue = value;
+        } else if (operator == StatOperator.RESET) {
+            newValue = StatHelper.getDefaultValue(stat.getName());
+        } else {
+            Object oldValue = stat.getValue();
+            if (stat.getType() == StatType.BOOLEAN) {
+                newValue = !((boolean) oldValue);
+            } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
+                Number number = (Number) stat.getValue();
+                if (number instanceof Integer) {
+                    Integer integerValue = (Integer) number;
+                    Integer changedValue = (Integer) value;
+                    if (operator == StatOperator.INVERT) {
+                        newValue = integerValue * -1;
+                    } else if (operator == StatOperator.ADD) {
+                        newValue = integerValue + changedValue;
+                    } else if (operator == StatOperator.SUBTRACT) {
+                        newValue = integerValue - changedValue;
+                    } else if (operator == StatOperator.MULTIPLY) {
+                        newValue = integerValue * changedValue;
+                    } else if (operator == StatOperator.DIVIDE) {
+                        newValue = integerValue / changedValue;
+                    }
+                } else if (number instanceof Double) {
+                    Double doubleValue = (Double) number;
+                    Double changedValue = (Double) value;
+                    if (operator == StatOperator.INVERT) {
+                        newValue = doubleValue * -1;
+                    } else if (operator == StatOperator.ADD) {
+                        newValue = doubleValue + changedValue;
+                    } else if (operator == StatOperator.SUBTRACT) {
+                        newValue = doubleValue - changedValue;
+                    } else if (operator == StatOperator.MULTIPLY) {
+                        newValue = doubleValue * changedValue;
+                    } else if (operator == StatOperator.DIVIDE) {
+                        newValue = doubleValue / changedValue;
+                    }
+                } else if (number instanceof Long) {
+                    Long longValue = (Long) number;
+                    Long changedValue = (Long) value;
+                    if (operator == StatOperator.INVERT) {
+                        newValue = longValue * -1;
+                    } else if (operator == StatOperator.ADD) {
+                        newValue = longValue + changedValue;
+                    } else if (operator == StatOperator.SUBTRACT) {
+                        newValue = longValue - changedValue;
+                    } else if (operator == StatOperator.MULTIPLY) {
+                        newValue = longValue * changedValue;
+                    } else if (operator == StatOperator.DIVIDE) {
+                        newValue = longValue / changedValue;
+                    }
+                } else {
+                    NexusAPI.getApi().getLogger().warning("Unhandled number type for stat " + stat.getName());
+                    return;
+                }
+            }
+        }
+        stat.setValue(newValue);
+    }
+    
     public static void consolidateStats(NexusPlayer player) {
         for (StatChange statChange : new TreeSet<>(player.getStatChanges())) {
             Stat stat = player.getStats().get(statChange.getStatName());
@@ -41,67 +104,7 @@ public final class StatHelper {
                 stat.setValue(stat.getType().getDefaultValue());
             }
             
-            StatOperator operator = statChange.getOperator();
-            Object newValue = null;
-            if (operator == StatOperator.SET) {
-                newValue = statChange.getValue();
-            } else if (operator == StatOperator.RESET) {
-                newValue = StatHelper.getDefaultValue(stat.getName());
-            } else {
-                Object oldValue = stat.getValue();
-                if (stat.getType() == StatType.BOOLEAN) {
-                    newValue = !((boolean) oldValue);
-                } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
-                    Number number = (Number) stat.getValue();
-                    if (number instanceof Integer) {
-                        Integer integerValue = (Integer) number;
-                        Integer changedValue = (Integer) statChange.getValue();
-                        if (operator == StatOperator.INVERT) {
-                            newValue = integerValue * -1;
-                        } else if (operator == StatOperator.ADD) {
-                            newValue = integerValue + changedValue;
-                        } else if (operator == StatOperator.SUBTRACT) {
-                            newValue = integerValue - changedValue;
-                        } else if (operator == StatOperator.MULTIPLY) {
-                            newValue = integerValue * changedValue;
-                        } else if (operator == StatOperator.DIVIDE) {
-                            newValue = integerValue / changedValue;
-                        }
-                    } else if (number instanceof Double) {
-                        Double doubleValue = (Double) number;
-                        Double changedValue = (Double) statChange.getValue();
-                        if (operator == StatOperator.INVERT) {
-                            newValue = doubleValue * -1;
-                        } else if (operator == StatOperator.ADD) {
-                            newValue = doubleValue + changedValue;
-                        } else if (operator == StatOperator.SUBTRACT) {
-                            newValue = doubleValue - changedValue;
-                        } else if (operator == StatOperator.MULTIPLY) {
-                            newValue = doubleValue * changedValue;
-                        } else if (operator == StatOperator.DIVIDE) {
-                            newValue = doubleValue / changedValue;
-                        }
-                    } else if (number instanceof Long) {
-                        Long longValue = (Long) number;
-                        Long changedValue = (Long) statChange.getValue();
-                        if (operator == StatOperator.INVERT) {
-                            newValue = longValue * -1;
-                        } else if (operator == StatOperator.ADD) {
-                            newValue = longValue + changedValue;
-                        } else if (operator == StatOperator.SUBTRACT) {
-                            newValue = longValue - changedValue;
-                        } else if (operator == StatOperator.MULTIPLY) {
-                            newValue = longValue * changedValue;
-                        } else if (operator == StatOperator.DIVIDE) {
-                            newValue = longValue / changedValue;
-                        }
-                    } else {
-                        NexusAPI.getApi().getLogger().warning("Unhandled number type for stat " + stat.getName());
-                        continue;
-                    }
-                }
-            }
-            stat.setValue(newValue);
+            changeStat(stat, statChange.getOperator(), statChange.getValue());
         }
     }
 }
