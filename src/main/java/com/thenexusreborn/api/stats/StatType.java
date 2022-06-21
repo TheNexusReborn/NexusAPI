@@ -5,9 +5,9 @@ import static com.thenexusreborn.api.stats.StatOperator.*;
 public enum StatType {
     INTEGER(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET), 
     DOUBLE(0.0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET),
+    LONG(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET), 
     STRING("", RESET, SET), 
-    BOOLEAN(false, RESET, INVERT, SET), 
-    LONG(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET);
+    BOOLEAN(false, RESET, INVERT, SET);
     
     private final Object defaultValue;
     private final StatOperator[] allowedOperators;
