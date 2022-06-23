@@ -22,7 +22,26 @@ public final class StatHelper {
         return name.toLowerCase().replace(" ", "_");
     }
     
-    @SuppressWarnings("DuplicatedCode")
+    public static double calculate(StatOperator operator, Number number1, Number number2) {
+        double value1 = number1.doubleValue();
+        double value2 = number2.doubleValue();
+        if (operator == StatOperator.INVERT) {
+            return value1 * -1;
+        } else if (operator == StatOperator.ADD) {
+            return value1 + value2;
+        } else if (operator == StatOperator.SUBTRACT) {
+            return value1 - value2;
+        } else if (operator == StatOperator.MULTIPLY) {
+            return value1 * value2;
+        } else if (operator == StatOperator.DIVIDE) {
+            if (value2 == 0) {
+                return 0;
+            }
+            return value1 / value2;
+        }
+        return 0;
+    }
+    
     public static void changeStat(Stat stat, StatOperator operator, Object value) {
         Object newValue = null;
         if (operator == StatOperator.SET) {
@@ -34,49 +53,13 @@ public final class StatHelper {
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
             } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
-                Number number = (Number) stat.getValue();
-                if (number instanceof Integer) {
-                    Integer integerValue = (Integer) number;
-                    Integer changedValue = (Integer) value;
-                    if (operator == StatOperator.INVERT) {
-                        newValue = integerValue * -1;
-                    } else if (operator == StatOperator.ADD) {
-                        newValue = integerValue + changedValue;
-                    } else if (operator == StatOperator.SUBTRACT) {
-                        newValue = integerValue - changedValue;
-                    } else if (operator == StatOperator.MULTIPLY) {
-                        newValue = integerValue * changedValue;
-                    } else if (operator == StatOperator.DIVIDE) {
-                        newValue = integerValue / changedValue;
-                    }
-                } else if (number instanceof Double) {
-                    Double doubleValue = (Double) number;
-                    Double changedValue = (Double) value;
-                    if (operator == StatOperator.INVERT) {
-                        newValue = doubleValue * -1;
-                    } else if (operator == StatOperator.ADD) {
-                        newValue = doubleValue + changedValue;
-                    } else if (operator == StatOperator.SUBTRACT) {
-                        newValue = doubleValue - changedValue;
-                    } else if (operator == StatOperator.MULTIPLY) {
-                        newValue = doubleValue * changedValue;
-                    } else if (operator == StatOperator.DIVIDE) {
-                        newValue = doubleValue / changedValue;
-                    }
-                } else if (number instanceof Long) {
-                    Long longValue = (Long) number;
-                    Long changedValue = (Long) value;
-                    if (operator == StatOperator.INVERT) {
-                        newValue = longValue * -1;
-                    } else if (operator == StatOperator.ADD) {
-                        newValue = longValue + changedValue;
-                    } else if (operator == StatOperator.SUBTRACT) {
-                        newValue = longValue - changedValue;
-                    } else if (operator == StatOperator.MULTIPLY) {
-                        newValue = longValue * changedValue;
-                    } else if (operator == StatOperator.DIVIDE) {
-                        newValue = longValue / changedValue;
-                    }
+                double calculated = calculate(operator, (Number) stat.getValue(), (Number) value);
+                if (stat.getType() == StatType.INTEGER) {
+                    newValue = (int) calculated;
+                } else if (stat.getType() == StatType.DOUBLE) {
+                    newValue = calculated;
+                } else if (stat.getType() == StatType.LONG) {
+                    newValue = (long) calculated;
                 } else {
                     NexusAPI.getApi().getLogger().warning("Unhandled number type for stat " + stat.getName());
                     return;
