@@ -33,6 +33,7 @@ public class DataManager {
             statement.execute("create table if not exists preferenceinfo(name varchar(100), displayName varchar(200), description varchar(1000), defaultValue varchar(5));");
             statement.execute("create table if not exists playerpreferences(id int auto_increment primary key, uuid varchar(36), name varchar(100), value varchar(5));");
             statement.execute("create table if not exists tournaments(id int auto_increment primary key , host varchar(36), name varchar(100), active varchar(5), pointsperkill int, pointsperwin int, pointspersurvival int, servers varchar(1000));");
+            statement.execute("create table if not exists statinfo(name varchar(100), type varchar(100), defaultValue varchar(1000));");
             
             ResultSet prefResultSet = statement.executeQuery("select * from preferenceinfo;");
             while (prefResultSet.next()) {
@@ -42,6 +43,15 @@ public class DataManager {
                 boolean defaultValue = Boolean.parseBoolean("defaultValue");
                 Preference.Info preference = new Preference.Info(name, displayName, description, defaultValue);
                 this.preferenceInfo.put(preference.getName(), preference);
+            }
+            
+            ResultSet statResultSet = statement.executeQuery("select * from statinfo;");
+            while (statResultSet.next()) {
+                String name = statResultSet.getString("name");
+                StatType type = StatType.valueOf(statResultSet.getString("type"));
+                Object defaultValue = StatHelper.parseValue(type, statResultSet.getString("defaultValue"));
+                Stat.Info statInfo = new Stat.Info(name, type, defaultValue);
+                StatHelper.addStatInfo(statInfo);
             }
         }
     }
