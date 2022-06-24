@@ -2,6 +2,7 @@ package com.thenexusreborn.api.stats;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.NexusPlayer;
+import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
 
@@ -9,14 +10,14 @@ public final class StatHelper {
     private StatHelper() {
     }
     
-    private static final Map<String, Object> defaultValues = new HashMap<>();
+    private static final Map<String, Stat.Info> statInfo = new HashMap<>();
     
-    public static void addDefaultValue(String statName, Object value) {
-        defaultValues.put(formatStatName(statName), value);
+    public static void addStatInfo(Stat.Info info) {
+        statInfo.put(info.getName(), info);
     }
     
-    public static Object getDefaultValue(String statName) {
-        return defaultValues.get(formatStatName(statName));
+    public static Stat.Info getInfo(String name) {
+        return statInfo.get(formatStatName(name));
     }
     
     public static String formatStatName(String name) {
@@ -48,7 +49,7 @@ public final class StatHelper {
         if (operator == StatOperator.SET) {
             newValue = value;
         } else if (operator == StatOperator.RESET) {
-            newValue = StatHelper.getDefaultValue(stat.getName());
+            newValue = getInfo(stat.getName()).getDefaultValue();
         } else {
             Object oldValue = stat.getValue();
             if (stat.getType() == StatType.BOOLEAN) {
@@ -74,7 +75,8 @@ public final class StatHelper {
         for (StatChange statChange : new TreeSet<>(player.getStatChanges())) {
             Stat stat = player.getStats().get(statChange.getStatName());
             if (stat == null) {
-                stat = new Stat(player.getUniqueId(), statChange.getStatName(), statChange.getType(), getDefaultValue(statChange.getStatName()), System.currentTimeMillis());
+                Info info = getInfo(statChange.getStatName());
+                stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
                 player.addStat(stat);
             }
             

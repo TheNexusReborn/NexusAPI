@@ -576,7 +576,7 @@ public class DataManager {
                 long modified = Long.parseLong(statsResultSet.getString("modified"));
                 UUID uuid = UUID.fromString(statsResultSet.getString("uuid"));
                 
-                Stat stat = new Stat(id, nexusPlayer.getUniqueId(), name, type, value, created, modified);
+                Stat stat = new Stat(StatHelper.getInfo(name), id, nexusPlayer.getUniqueId(), value, created, modified);
                 nexusPlayer.addStat(stat);
             }
             
@@ -590,7 +590,7 @@ public class DataManager {
                 StatType type = StatType.valueOf(statChangesResultSet.getString("type"));
                 Object value = StatHelper.parseValue(type, statChangesResultSet.getString("value"));
                 
-                StatChange statChange = new StatChange(id, nexusPlayer.getUniqueId(), name, type, value, operator, timestamp);
+                StatChange statChange = new StatChange(StatHelper.getInfo(name), id, nexusPlayer.getUniqueId(), value, operator, timestamp);
                 nexusPlayer.addStatChange(statChange);
             }
         } catch (SQLException e) {

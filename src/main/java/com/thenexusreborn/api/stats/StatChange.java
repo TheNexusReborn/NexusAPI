@@ -1,30 +1,33 @@
 package com.thenexusreborn.api.stats;
 
+import com.thenexusreborn.api.stats.Stat.Info;
+
 import java.util.*;
 
 public class StatChange implements Comparable<StatChange> {
-    public static final int version = 1;
+    private Info info;
     
     private int id;
     private final UUID uuid;
-    private final String statName;
-    private final StatType type;
     private final Object value;
     private final StatOperator operator;
     private final long timestamp;
     
-    public StatChange(UUID uuid, String statName, StatType type, Object value, StatOperator operator, long timestamp) {
-        this(-1, uuid, statName, type, value, operator, timestamp);
-    }
-    
-    public StatChange(int id, UUID uuid, String statName, StatType type, Object value, StatOperator operator, long timestamp) {
-        this.id = id;
+    public StatChange(Info info, UUID uuid, Object value, StatOperator operator, long timestamp) {
+        this.info = info;
         this.uuid = uuid;
-        this.statName = statName;
         this.value = value;
         this.operator = operator;
         this.timestamp = timestamp;
-        this.type = type;
+    }
+    
+    public StatChange(Info info, int id, UUID uuid, Object value, StatOperator operator, long timestamp) {
+        this.info = info;
+        this.id = id;
+        this.uuid = uuid;
+        this.value = value;
+        this.operator = operator;
+        this.timestamp = timestamp;
     }
     
     public UUID getUuid() {
@@ -32,7 +35,7 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public String getStatName() {
-        return statName;
+        return info.getName();
     }
     
     public Object getValue() {
@@ -56,7 +59,7 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public StatType getType() {
-        return type;
+        return info.getType();
     }
     
     @Override
@@ -76,11 +79,11 @@ public class StatChange implements Comparable<StatChange> {
             return false;
         }
         StatChange that = (StatChange) o;
-        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(statName, that.statName) && Objects.equals(type, that.type) && Objects.equals(value, that.value) && operator == that.operator;
+        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(info.getName(), that.info.getName()) && Objects.equals(info.getType(), that.info.getType()) && Objects.equals(value, that.value) && operator == that.operator;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, uuid, statName, type, value, operator, timestamp);
+        return Objects.hash(id, uuid, info.getName(), info.getType(), value, operator, timestamp);
     }
 }

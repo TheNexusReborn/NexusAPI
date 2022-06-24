@@ -3,30 +3,29 @@ package com.thenexusreborn.api.stats;
 import java.util.UUID;
 
 public class Stat {
+    private Info info;
+    
     private int id;
     private final UUID uuid;
-    private final String name;
-    private StatType type;
     private Object value;
     private final long created;
     private long modified;
     
-    public Stat(UUID uuid, String name, StatType type, Object value, long created) {
-        this(uuid, name, type, value, created, created);
+    public Stat(Info info, UUID uuid, Object value, long created) {
+        this(info, uuid, value, created, created);
     }
     
-    public Stat(UUID uuid, String name, StatType type, Object value, long created, long modified) {
-        this(-1, uuid, name, type, value, created, modified);
+    public Stat(Info info, UUID uuid, Object value, long created, long modified) {
+        this(info, -1, uuid, value, created, modified);
     }
     
-    public Stat(int id, UUID uuid, String name, StatType type, Object value, long created, long modified) {
+    public Stat(Info info, int id, UUID uuid, Object value, long created, long modified) {
+        this.info = info;
         this.id = id;
         this.uuid = uuid;
-        this.name = name;
         this.value = value;
         this.created = created;
         this.modified = modified;
-        this.type = type;
     }
     
     public UUID getUuid() {
@@ -34,7 +33,7 @@ public class Stat {
     }
     
     public String getName() {
-        return name;
+        return info.getName();
     }
     
     public Object getValue() {
@@ -42,7 +41,7 @@ public class Stat {
     }
     
     public StatType getType() {
-        return type;
+        return info.getType();
     }
     
     public void setValue(Object value) {
@@ -70,15 +69,43 @@ public class Stat {
         this.id = id;
     }
     
-    @Override
-    public String toString() {
-        return "Stat{" +
-                "id=" + id +
-                ", uuid=" + uuid +
-                ", name='" + name + '\'' +
-                ", value=" + value +
-                ", created=" + created +
-                ", modified=" + modified +
-                '}';
+    public Object getDefaultValue() {
+        return info.getDefaultValue();
+    }
+    
+    public static class Info {
+        private String name;
+        private StatType type;
+        private Object defaultValue;
+    
+        public Info(String name, StatType type, Object defaultValue) {
+            this.name = StatHelper.formatStatName(name);
+            this.type = type;
+            this.defaultValue = defaultValue;
+        }
+    
+        public String getName() {
+            return name;
+        }
+    
+        public void setName(String name) {
+            this.name = name;
+        }
+    
+        public StatType getType() {
+            return type;
+        }
+    
+        public void setType(StatType type) {
+            this.type = type;
+        }
+    
+        public Object getDefaultValue() {
+            return defaultValue;
+        }
+    
+        public void setDefaultValue(Object defaultValue) {
+            this.defaultValue = defaultValue;
+        }
     }
 }
