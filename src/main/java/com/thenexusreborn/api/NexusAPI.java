@@ -6,12 +6,11 @@ import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.server.ServerManager;
-import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.thread.ThreadFactory;
-import com.thenexusreborn.api.tournament.*;
+import com.thenexusreborn.api.tournament.Tournament;
 
 import java.sql.*;
-import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class NexusAPI {
@@ -63,31 +62,31 @@ public abstract class NexusAPI {
             return;
         }
         
-        StatHelper.registerDoubleStat("nexites", 0); //done
-        StatHelper.registerDoubleStat("credits", 0); //done
-        StatHelper.registerDoubleStat("xp", 0); //done
-        StatHelper.registerIntegerStat("sg_score", 100); //done
-        StatHelper.registerIntegerStat("sg_kills", 0); //done
-        StatHelper.registerIntegerStat("sg_highest_kill_streak", 0); //done
-        StatHelper.registerIntegerStat("sg_games", 0); //done
-        StatHelper.registerIntegerStat("sg_win_streak", 0); //done
-        StatHelper.registerIntegerStat("sg_wins", 0); //done
-        StatHelper.registerIntegerStat("sg_deaths", 0); //done
-        StatHelper.registerIntegerStat("sg_deathmatches_reached", 0); //done
-        StatHelper.registerIntegerStat("sg_chests_looted", 0); //done
-        StatHelper.registerIntegerStat("sg_assists", 0);
-        StatHelper.registerIntegerStat("sg_times_mutated", 0);
-        StatHelper.registerIntegerStat("sg_mutation_kills", 0);
-        StatHelper.registerIntegerStat("sg_mutation_deaths", 0);
-        StatHelper.registerIntegerStat("sg_mutation_passes", 0);
-        StatHelper.registerIntegerStat("sg_sponsored_others", 0);
-        StatHelper.registerIntegerStat("sg_sponsor_received", 0);
-        StatHelper.registerIntegerStat("sg_tournament_kills", 0);
-        StatHelper.registerIntegerStat("sg_tournament_wins", 0);
-        StatHelper.registerIntegerStat("sg_tournament_survives", 0);
-        StatHelper.registerIntegerStat("sg_tournament_chests_looted", 0);
-        StatHelper.registerIntegerStat("sg_tournament_points", 0);
-        StatHelper.registerIntegerStat("sg_tournament_assists", 0);
+//        StatHelper.registerDoubleStat("nexites", 0); //done
+//        StatHelper.registerDoubleStat("credits", 0); //done
+//        StatHelper.registerDoubleStat("xp", 0); //done
+//        StatHelper.registerIntegerStat("sg_score", 100); //done
+//        StatHelper.registerIntegerStat("sg_kills", 0); //done
+//        StatHelper.registerIntegerStat("sg_highest_kill_streak", 0); //done
+//        StatHelper.registerIntegerStat("sg_games", 0); //done
+//        StatHelper.registerIntegerStat("sg_win_streak", 0); //done
+//        StatHelper.registerIntegerStat("sg_wins", 0); //done
+//        StatHelper.registerIntegerStat("sg_deaths", 0); //done
+//        StatHelper.registerIntegerStat("sg_deathmatches_reached", 0); //done
+//        StatHelper.registerIntegerStat("sg_chests_looted", 0); //done
+//        StatHelper.registerIntegerStat("sg_assists", 0);
+//        StatHelper.registerIntegerStat("sg_times_mutated", 0);
+//        StatHelper.registerIntegerStat("sg_mutation_kills", 0);
+//        StatHelper.registerIntegerStat("sg_mutation_deaths", 0);
+//        StatHelper.registerIntegerStat("sg_mutation_passes", 0);
+//        StatHelper.registerIntegerStat("sg_sponsored_others", 0);
+//        StatHelper.registerIntegerStat("sg_sponsor_received", 0);
+//        StatHelper.registerIntegerStat("sg_tournament_kills", 0);
+//        StatHelper.registerIntegerStat("sg_tournament_wins", 0);
+//        StatHelper.registerIntegerStat("sg_tournament_survives", 0);
+//        StatHelper.registerIntegerStat("sg_tournament_chests_looted", 0);
+//        StatHelper.registerIntegerStat("sg_tournament_points", 0);
+//        StatHelper.registerIntegerStat("sg_tournament_assists", 0);
         
         dataManager.setupMysql();
         serverManager.setupCurrentServer();

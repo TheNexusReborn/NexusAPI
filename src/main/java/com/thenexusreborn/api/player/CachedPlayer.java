@@ -81,7 +81,7 @@ public class CachedPlayer {
         for (Entry<Rank, Long> entry : getRanks().entrySet()) {
             sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
         }
-    
+        
         String ranks;
         if (sb.length() > 0) {
             return sb.substring(0, sb.toString().length() - 1);
@@ -99,7 +99,7 @@ public class CachedPlayer {
         if (rawRanks == null || rawRanks.length == 0) {
             return;
         }
-    
+        
         for (String rawRank : rawRanks) {
             String[] rankSplit = rawRank.split("=");
             if (rankSplit == null || rankSplit.length != 2) {
@@ -125,7 +125,7 @@ public class CachedPlayer {
         if (tagsSplit == null || tagsSplit.length == 0) {
             return;
         }
-    
+        
         this.unlockedTags.addAll(Arrays.asList(tagsSplit));
     }
     
@@ -182,6 +182,13 @@ public class CachedPlayer {
         }
     }
     
+    public void setPreferences(List<Preference> preferences) {
+        this.preferences.clear();
+        for (Preference preference : preferences) {
+            addPreference(preference);
+        }
+    }
+    
     public Rank getRank() {
         if (PlayerManager.NEXUS_TEAM.contains(this.uniqueId)) {
             return Rank.NEXUS;
@@ -227,6 +234,14 @@ public class CachedPlayer {
         
         this.ranks.clear();
         this.ranks.put(rank, expire);
+    }
+    
+    public void removeRank(Rank rank) throws Exception {
+        if (rank == Rank.NEXUS) {
+            throw new Exception("Cannot remove the Nexus Team rank.");
+        }
+        
+        this.ranks.remove(rank);
     }
     
     public void setName(String name) {

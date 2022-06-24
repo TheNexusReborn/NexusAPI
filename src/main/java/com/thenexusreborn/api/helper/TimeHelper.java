@@ -6,15 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 
-/**
- * This is some helper methods for time based things
- */
 public final class TimeHelper {
-    /**
-     * This method parses time in a format for a number followed by any of the values in the Unit class
-     * @param rawTime The raw time 
-     * @return The time represented in milliseconds
-     */
     public static long parseTime(String rawTime) {
         Map.Entry<Long, String> years = extractRawTime(rawTime, Unit.YEARS);
         Map.Entry<Long, String> months = extractRawTime(years.getValue(), Unit.MONTHS);
@@ -58,12 +50,6 @@ public final class TimeHelper {
         return new AbstractMap.SimpleEntry<>(0L, rawTime);
     }
     
-    /**
-     * This parses raw input into a calendar date. This uses the parseDate() method
-     * @param rawDate The raw date
-     * @return The calendar instances represented by the input
-     * @throws IllegalArgumentException If input is invalid
-     */
     public static Calendar parseCalendarDate(String rawDate) throws IllegalArgumentException {
         short[] dateValues = parseDate(rawDate);
         if (dateValues == null) return null; 
@@ -77,12 +63,6 @@ public final class TimeHelper {
         return calendar;
     }
     
-    /**
-     * This parses a date into an array of short values based on the different arguments
-     * @param rawDate The raw input
-     * @return The values of the date
-     * @throws IllegalArgumentException If the input is invalid
-     */
     public static short[] parseDate(String rawDate) throws IllegalArgumentException {
         String[] rawDateArray = rawDate.split("/");
         if (!(rawDateArray.length >= 3)) {
@@ -123,11 +103,6 @@ public final class TimeHelper {
         }
     }
     
-    /**
-     * This formats a date using the DATE_FORMAT string in the Constants class
-     * @param time The time to format
-     * @return The formatted time
-     */
     public static String formatDate(long time) {
         if (time == 0) {
             return "0";
@@ -135,11 +110,6 @@ public final class TimeHelper {
         return new SimpleDateFormat(Constants.DATE_FORMAT).format(new Date(time));
     }
     
-    /**
-     * Formats time into the same format used in the parseTime() method
-     * @param time The time to format
-     * @return The formatted time
-     */
     public static String formatTime(long time) {
         Duration remainingTime = Duration.ofMillis(time);
         long days = remainingTime.toDays();
@@ -174,11 +144,6 @@ public final class TimeHelper {
         return sb.toString();
     }
     
-    /**
-     * The niceTime methods are useful for countdown or counter based uses.
-     * @param seconds The seconds to format
-     * @return The formatted time
-     */
     public static String niceTime(int seconds) {
         int hours = seconds / 3600;
         seconds -= hours * 3600;
@@ -187,12 +152,6 @@ public final class TimeHelper {
         return niceTime(hours, minutes, seconds);
     }
     
-    /**
-     * The niceTime methods are useful for countdown or counter based uses.
-     * @param seconds The seconds to format
-     * @param showEmptyHours Shows the hours as 00 if there is none
-     * @return The formatted time
-     */
     public static String niceTime(int seconds, boolean showEmptyHours) {
         int hours = seconds / 3600;
         seconds -= hours * 3600;
@@ -201,25 +160,10 @@ public final class TimeHelper {
         return niceTime(hours, minutes, seconds, showEmptyHours);
     }
     
-    /**
-     * The niceTime methods are useful for countdown or counter based uses.
-     * @param hours The hours  
-     * @param minutes The minutes
-     * @param seconds The seconds
-     * @return The formatted time
-     */
     public static String niceTime(int hours, int minutes, int seconds) {
         return niceTime(hours, minutes, seconds, true);
     }
     
-    /**
-     * The niceTime methods are useful for countdown or counter based uses.
-     * @param hours The hours
-     * @param minutes The minutes
-     * @param seconds The seconds
-     * @param showEmptyHours If showing empty hours
-     * @return The formatted time
-     */
     public static String niceTime(int hours, int minutes, int seconds, boolean showEmptyHours) {
         StringBuilder builder = new StringBuilder();
 

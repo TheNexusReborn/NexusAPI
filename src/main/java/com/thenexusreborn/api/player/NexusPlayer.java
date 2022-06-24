@@ -26,6 +26,14 @@ public abstract class NexusPlayer extends CachedPlayer {
         super(cachedPlayer);
     }
     
+    public NexusPlayer(UUID uniqueId) {
+        super(uniqueId);
+    }
+    
+    public NexusPlayer(UUID uniqueId, String name) {
+        super(uniqueId, name);
+    }
+    
     public NexusScoreboard getScoreboard() {
         return scoreboard;
     }
@@ -185,4 +193,8 @@ public abstract class NexusPlayer extends CachedPlayer {
     
     //TODO When implementing this method, it should take into account the current server
     public abstract boolean isOnline();
+    
+    public Stat getStat(String name) {
+        return this.stats.get(StatHelper.formatStatName(name));
+    }
 }

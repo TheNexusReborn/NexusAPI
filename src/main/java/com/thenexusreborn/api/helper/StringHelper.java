@@ -2,16 +2,7 @@ package com.thenexusreborn.api.helper;
 
 import java.util.*;
 
-/**
- * A collection of helper methods for strings
- */
 public final class StringHelper {
-    /**
-     * This capitalizes every word in a string. The spaces should be underscores.
-     * This is mainly useful with Enums
-     * @param string The string to format
-     * @return The formatted string
-     */
     public static String capitalizeEveryWord(String string) {
         string = string.toLowerCase();
         String[] words = string.split("_");
@@ -39,12 +30,6 @@ public final class StringHelper {
         return join(Arrays.asList(objects), separator);
     }
     
-    /**
-     * Joins a collection with a separator. This is useful if Apache is not in the dependency list
-     * @param collection The collection to join
-     * @param separator The separator
-     * @return The joined collection
-     */
     public static String join(Collection<?> collection, String separator) {
         Iterator<?> iterator = collection.iterator();
         if (!iterator.hasNext()) {
@@ -75,11 +60,6 @@ public final class StringHelper {
         }
     }
     
-    /**
-     * Checks to see if the string is empty. This also takes care of the null check as well
-     * @param str The string to check
-     * @return If the string is empty
-     */
     public static boolean isEmpty(String str) {
         return str == null || str.length() == 0;
     }

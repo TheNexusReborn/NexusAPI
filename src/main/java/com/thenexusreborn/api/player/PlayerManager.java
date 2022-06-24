@@ -113,16 +113,6 @@ public abstract class PlayerManager {
         });
     }
     
-    public void updateNexusTeamRank(NexusPlayer nexusPlayer) {
-        if (NEXUS_TEAM.contains(nexusPlayer.getUniqueId()) && nexusPlayer.getRank() != Rank.NEXUS) {
-            nexusPlayer.setRank(Rank.NEXUS, -1);
-        }
-        
-        if (!NEXUS_TEAM.contains(nexusPlayer.getUniqueId()) && nexusPlayer.getRank() == Rank.NEXUS) {
-            nexusPlayer.setRank(Rank.MEMBER, -1);
-        }
-    }
-    
     public NexusPlayer getNexusPlayer(UUID uniqueId) {
         return this.players.get(uniqueId);
     }

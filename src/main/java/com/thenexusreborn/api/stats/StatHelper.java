@@ -6,7 +6,8 @@ import com.thenexusreborn.api.player.NexusPlayer;
 import java.util.*;
 
 public final class StatHelper {
-    private StatHelper() {}
+    private StatHelper() {
+    }
     
     private static final Map<String, Object> defaultValues = new HashMap<>();
     
@@ -89,5 +90,26 @@ public final class StatHelper {
             
             changeStat(stat, statChange.getOperator(), statChange.getValue());
         }
+    }
+    
+    public static Object parseValue(StatType type, String raw) {
+        if (raw == null || raw.equals("")) {
+            return null;
+        }
+        
+        try {
+            if (type == StatType.INTEGER) {
+                return Integer.parseInt(raw);
+            } else if (type == StatType.DOUBLE) {
+                return Double.parseDouble(raw);
+            } else if (type == StatType.LONG) {
+                return Long.parseLong(raw);
+            } else if (type == StatType.BOOLEAN) {
+                return Boolean.parseBoolean(raw);
+            } else if (type == StatType.STRING) {
+                return raw;
+            }
+        } catch (Exception e) {}
+        return null;
     }
 }
