@@ -11,7 +11,7 @@ import com.thenexusreborn.api.tournament.Tournament;
 
 import java.sql.*;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public abstract class NexusAPI {
     private static NexusAPI instance;
@@ -175,5 +175,17 @@ public abstract class NexusAPI {
     
     public Tournament getTournament() {
         return tournament;
+    }
+    
+    public static void logMessage(Level level, String mainMessage, String... debug) {
+        Logger logger = NexusAPI.getApi().getLogger();
+        logger.log(level, "----------- Nexus Log -----------");
+        logger.log(level, mainMessage);
+        if (debug != null && debug.length > 0) {
+            for (String s : debug) {
+                logger.log(level, s);
+            }
+        }
+        logger.log(level, "---------------------------------");
     }
 }
