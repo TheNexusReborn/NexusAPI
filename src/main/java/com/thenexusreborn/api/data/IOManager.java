@@ -12,11 +12,15 @@ import java.util.logging.Level;
 public class IOManager {
     private Set<Database> databases = new HashSet<>();
     
-    
-    
     public void execute(String database, String sql) throws SQLException {
         for (Database db : getDatabasesByName(database)) {
             db.execute(sql);
+        }
+    }
+    
+    public void executePrepared(String database, String sql, Object... args) throws SQLException {
+        for (Database db : getDatabasesByName(database)) {
+            db.executePrepared(sql, args);
         }
     }
     
@@ -30,11 +34,11 @@ public class IOManager {
         return rows;
     }
     
-    public List<Row> executePreparedQuery(String database, String sql) throws SQLException {
+    public List<Row> executePreparedQuery(String database, String sql, Object... args) throws SQLException {
         List<Row> rows = new ArrayList<>();
         for (Database db : this.databases) {
             if (db.getName().equalsIgnoreCase(database)) {
-                rows.addAll(db.executePreparedQuery(sql));
+                rows.addAll(db.executePreparedQuery(sql, args));
             }
         }
         return rows;
