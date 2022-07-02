@@ -5,6 +5,7 @@ import com.thenexusreborn.api.NexusAPI;
 import java.lang.reflect.*;
 import java.sql.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 public class Database {
@@ -55,6 +56,8 @@ public class Database {
         
         Map<String, SqlCodec<?>> codecInstances = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
+        long id = 0; //This will hold an int as well
+        Field primaryField = null;
         for (Column column : table.getColumns()) {
             Field field = null;
             try {
@@ -73,6 +76,12 @@ public class Database {
                         value = codec.encode(value);
                     }
                 }
+                
+                if (column.isPrimaryKey()) {
+                    id = (long) value;
+                    primaryField = field;
+                }
+                
                 data.put(column.getName(), value);
             } catch (NoSuchFieldException e) {
                 NexusAPI.logMessage(Level.WARNING, "Could not find a field for a column while saving to the database",
@@ -92,7 +101,50 @@ public class Database {
         }
         
         String sql;
+        Iterator<Entry<String, Object>> iterator = data.entrySet().iterator();
+        boolean getGeneratedKeys = false;
+        if (id == 0) {
+            StringBuilder cb = new StringBuilder(), vb = new StringBuilder();
+            while (iterator.hasNext()) {
+                Entry<String, Object> entry = iterator.next();
+                cb.append(entry.getKey());
+                vb.append("'").append(entry.getValue()).append("'");
+                if (iterator.hasNext()) {
+                    cb.append(", ");
+                    vb.append(", ");
+                }
+            }
+            
+            getGeneratedKeys = true;
+            sql = "insert into " + table.getName() + " (" + cb +  ") values (" + vb +  ");";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            while (iterator.hasNext()) {
+                Entry<String, Object> entry = iterator.next();
+                sb.append(entry.getKey()).append("='").append(entry.getValue()).append("'");
+                if (iterator.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sql = "update " + table.getName() + " set(" + sb + ") where " + primaryField.getName() + "='" + id + "';";
+        }
         
+        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+            if (getGeneratedKeys) {
+                statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                generatedKeys.next();
+                primaryField.set(object, generatedKeys.getObject(1));
+            } else {
+                statement.executeUpdate(sql);
+            }
+        } catch (SQLException e) {
+            NexusAPI.logMessage(Level.SEVERE, "Error while saving data to the database", "Exception: ");
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            NexusAPI.logMessage(Level.SEVERE, "Could not set the primary field for generated keys", "Exception: ");
+            e.printStackTrace();
+        }
     }
     
     public Table getTable(String name) {
@@ -113,7 +165,7 @@ public class Database {
         return null;
     }
     
-    private Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(String.format(URL, host, name, user, password));
     }
     
