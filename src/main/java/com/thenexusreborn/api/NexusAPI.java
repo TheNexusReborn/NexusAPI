@@ -1,11 +1,14 @@
 package com.thenexusreborn.api;
 
-import com.thenexusreborn.api.data.DataManager;
+import com.thenexusreborn.api.data.*;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
+import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.ServerManager;
+import com.thenexusreborn.api.stats.Stat.Info;
+import com.thenexusreborn.api.stats.StatHelper;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
@@ -27,6 +30,7 @@ public abstract class NexusAPI {
     
     protected Logger logger;
     protected DataManager dataManager;
+    protected IOManager ioManager;
     protected PlayerManager playerManager;
     protected ThreadFactory threadFactory;
     protected PlayerFactory playerFactory;
@@ -52,7 +56,7 @@ public abstract class NexusAPI {
         return environment;
     }
     
-    public void init() throws Exception {
+    public final void init() throws Exception {
         try {
             Driver mysqlDriver = new com.mysql.cj.jdbc.Driver();
             DriverManager.registerDriver(mysqlDriver);
@@ -62,6 +66,23 @@ public abstract class NexusAPI {
             return;
         }
         
+        DatabaseRegistry databaseRegistry = new DatabaseRegistry();
+        registerDatabases(databaseRegistry);
+        
+        this.ioManager = new IOManager(databaseRegistry);
+        this.ioManager.setup();
+        
+        StatRegistry statRegistry = new StatRegistry();
+        registerStats(statRegistry);
+        
+        for (Info statInfo : statRegistry.getObjects()) {
+            StatHelper.addStatInfo(statInfo);
+        }
+        
+        NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
+        registerNetworkCommands(networkCommandRegistry);
+        networkManager.init("localhost", 3408);
+
 //        StatHelper.registerDoubleStat("nexites", 0); //done
 //        StatHelper.registerDoubleStat("credits", 0); //done
 //        StatHelper.registerDoubleStat("xp", 0); //done
@@ -90,12 +111,11 @@ public abstract class NexusAPI {
         
         dataManager.setupMysql();
         serverManager.setupCurrentServer();
-        networkManager.init("localhost", 3408);
         
         networkManager.addCommand(new NetworkCommand("tournament", ((cmd, origin, args) -> {
             if (args[0].equalsIgnoreCase("delete")) {
                 setTournament(null);
-    
+                
                 for (NexusPlayer player : NexusAPI.getApi().getPlayerManager().getPlayers().values()) {
                     player.getStats().values().removeIf(stat -> stat.getName().contains("tournament"));
                     player.getStatChanges().removeIf(statChange -> statChange.getStatName().contains("tournament"));
@@ -134,6 +154,12 @@ public abstract class NexusAPI {
         
         playerManager.getIpHistory().putAll(getDataManager().getIpHistory());
     }
+    
+    public abstract void registerDatabases(DatabaseRegistry registry);
+    
+    public abstract void registerStats(StatRegistry registry);
+    
+    public abstract void registerNetworkCommands(NetworkCommandRegistry registry);
     
     public void setTournament(Tournament tournament) {
         this.tournament = tournament;
