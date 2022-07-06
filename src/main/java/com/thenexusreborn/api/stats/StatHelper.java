@@ -5,6 +5,7 @@ import com.thenexusreborn.api.player.NexusPlayer;
 import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public final class StatHelper {
     private StatHelper() {
@@ -46,7 +47,25 @@ public final class StatHelper {
     
     public static void changeStat(Stat stat, StatOperator operator, Object value) {
         Object newValue = null;
-        if (operator == StatOperator.SET) {
+    
+        if (stat.getType() == StatType.STRING_LIST) {
+            Set<String> oldValue = (Set<String>) stat.getValue();
+            if (oldValue == null) {
+                oldValue = (Set<String>) StatType.STRING_LIST.getDefaultValue();
+            }
+            if (operator == StatOperator.ADD) {
+                oldValue.add((String) value);
+            } else if (operator == StatOperator.SUBTRACT) {
+                oldValue.remove((String) value);
+            } else if (operator == StatOperator.RESET) {
+                oldValue = (Set<String>) StatType.STRING_LIST.getDefaultValue();
+            } else if (operator == StatOperator.SET) {
+                oldValue.clear();
+                oldValue.add((String) value);
+            }
+            
+            newValue = oldValue;
+        } else if (operator == StatOperator.SET) {
             newValue = value;
         } else if (operator == StatOperator.RESET) {
             newValue = getInfo(stat.getName()).getDefaultValue();
@@ -95,8 +114,13 @@ public final class StatHelper {
     }
     
     public static Object parseValue(StatType type, String raw) {
-        if (raw == null || raw.equals("")) {
+        if (type == null) {
+            NexusAPI.logMessage(Level.SEVERE, "Could not parse a value for a stat because the provided type is null");
             return null;
+        }
+        
+        if (raw == null || raw.equals("")) {
+            return type.getDefaultValue();
         }
         
         try {
@@ -110,8 +134,17 @@ public final class StatHelper {
                 return Boolean.parseBoolean(raw);
             } else if (type == StatType.STRING) {
                 return raw;
+            } else if (type == StatType.STRING_LIST) {
+                Set<String> value = (Set<String>) type.getDefaultValue();
+                String[] split = raw.split(",");
+                if (split != null) {
+                    value.addAll(Arrays.asList(split));
+                }
+                return value;
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }
