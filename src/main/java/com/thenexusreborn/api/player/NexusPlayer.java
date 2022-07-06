@@ -10,8 +10,6 @@ import com.thenexusreborn.api.tags.Tag;
 import java.util.*;
 
 public abstract class NexusPlayer extends CachedPlayer {
-    protected Tag tag;
-    
     protected Map<String, Stat> stats = new HashMap<>();
     protected Set<StatChange> statChanges = new TreeSet<>();
     
@@ -36,11 +34,11 @@ public abstract class NexusPlayer extends CachedPlayer {
     }
     
     public Tag getTag() {
-        return tag;
+        return new Tag((String) getStatValue("tag"));
     }
     
     public void setTag(Tag tag) {
-        this.tag = tag;
+        changeStat("tag", tag.getName(), StatOperator.SET);
     }
     
     public void setScoreboard(NexusScoreboard scoreboard) {
