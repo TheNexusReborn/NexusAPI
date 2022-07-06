@@ -613,37 +613,29 @@ public class DataManager {
             ResultSet playerResultSet = statement.executeQuery("SELECT * FROM players WHERE uuid='" + uuid.toString() + "';");
             if (playerResultSet.next()) {
                 int version = Integer.parseInt(playerResultSet.getString("version"));
-                long firstJoined = 0, lastLogin = 0, lastLogout = 0, playtime = 0;
-                String lastKnownName = "", rawRanks;
-                Map<Rank, Long> ranks = null;
+                long firstJoined, lastLogin, lastLogout, playtime = 0;
+                String lastKnownName, rawRanks;
+                Map<Rank, Long> ranks;
                 Tag tag = null;
-                Set<String> unlockedTags = new HashSet<>();
-                boolean prealpha = false, alpha = false, beta = false;
-                if (version >= 2) {
-                    firstJoined = Long.parseLong(playerResultSet.getString("firstJoined"));
-                    lastLogin = Long.parseLong(playerResultSet.getString("lastLogin"));
-                    lastKnownName = playerResultSet.getString("lastKnownName");
-                    rawRanks = playerResultSet.getString("ranks");
-                    ranks = parseRanks(rawRanks);
-                }
+                Set<String> unlockedTags;
+                boolean prealpha, alpha, beta;
+                firstJoined = Long.parseLong(playerResultSet.getString("firstJoined"));
+                lastLogin = Long.parseLong(playerResultSet.getString("lastLogin"));
+                lastKnownName = playerResultSet.getString("lastKnownName");
+                rawRanks = playerResultSet.getString("ranks");
+                ranks = parseRanks(rawRanks);
                 
-                if (version >= 3) {
-                    String rawTag = playerResultSet.getString("tag");
-                    if (rawTag != null && !rawTag.equalsIgnoreCase("null")) {
-                        tag = new Tag(rawTag);
-                    }
-                    lastLogout = Long.parseLong(playerResultSet.getString("lastLogout"));
+                String rawTag = playerResultSet.getString("tag");
+                if (rawTag != null && !rawTag.equalsIgnoreCase("null")) {
+                    tag = new Tag(rawTag);
                 }
+                lastLogout = Long.parseLong(playerResultSet.getString("lastLogout"));
                 
-                if (version >= 4) {
-                    unlockedTags = parseTags(playerResultSet.getString("unlockedTags"));
-                }
+                unlockedTags = parseTags(playerResultSet.getString("unlockedTags"));
                 
-                if (version >= 5) {
-                    prealpha = Boolean.parseBoolean(playerResultSet.getString("prealpha"));
-                    alpha = Boolean.parseBoolean(playerResultSet.getString("alpha"));
-                    beta = Boolean.parseBoolean(playerResultSet.getString("beta"));
-                }
+                prealpha = Boolean.parseBoolean(playerResultSet.getString("prealpha"));
+                alpha = Boolean.parseBoolean(playerResultSet.getString("alpha"));
+                beta = Boolean.parseBoolean(playerResultSet.getString("beta"));
                 
                 List<Preference> preferences = loadPlayerPreferences(uuid);
                 
@@ -955,7 +947,7 @@ public class DataManager {
             sql = sql.replace("{pointspersurvival}", tournament.getPointsPerSurvival() + "");
             
             if (tournament.getId() == 0) {
-                try (Statement statement = connection.createStatement()){
+                try (Statement statement = connection.createStatement()) {
                     statement.execute(sql, Statement.RETURN_GENERATED_KEYS);
                     ResultSet generatedKeys = statement.getGeneratedKeys();
                     generatedKeys.next();
