@@ -8,10 +8,7 @@ import com.thenexusreborn.api.tags.Tag;
 
 import java.util.*;
 
-//TODO Playtime will be stat based (This will allow messages every 10 minutes as people keep suggesting that
 public abstract class NexusPlayer extends CachedPlayer {
-    //TODO Move FirstJoined, LastLogin and LastLogout to the stats system
-    protected long firstJoined, lastLogin, lastLogout;
     protected Tag tag;
     
     protected Map<String, Stat> stats = new HashMap<>();
@@ -20,7 +17,6 @@ public abstract class NexusPlayer extends CachedPlayer {
     protected NexusScoreboard scoreboard;
     
     private UUID lastMessage;
-    protected boolean prealpha, alpha, beta;
     
     public NexusPlayer(CachedPlayer cachedPlayer) {
         super(cachedPlayer);
@@ -50,20 +46,24 @@ public abstract class NexusPlayer extends CachedPlayer {
         this.scoreboard = scoreboard;
     }
     
+    @Deprecated
     public long getFirstJoined() {
-        return firstJoined;
+        return (long) getStatValue("firstjoined");
     }
     
+    @Deprecated
     public void setFirstJoined(long firstJoined) {
-        this.firstJoined = firstJoined;
+        changeStat("firstjoined", firstJoined, StatOperator.SET);
     }
     
+    @Deprecated
     public long getLastLogin() {
-        return lastLogin;
+        return (long) getStatValue("lastlogin");
     }
     
+    @Deprecated
     public void setLastLogin(long lastLogin) {
-        this.lastLogin = lastLogin;
+        changeStat("lastlogin", lastLogin, StatOperator.SET);
     }
     
     public String getDisplayName() {
@@ -101,16 +101,19 @@ public abstract class NexusPlayer extends CachedPlayer {
         return Objects.hash(uniqueId);
     }
     
+    @Deprecated
     public long getLastLogout() {
-        return lastLogout;
+        return (long) getStatValue("lastlogout");
     }
     
+    @Deprecated
     public void setLastLogout(long lastLogout) {
-        this.lastLogout = lastLogout;
+        changeStat("lastlogout", lastLogout, StatOperator.SET);
     }
     
     public void changeStat(String statName, Object statValue, StatOperator operator) {
-        //TODO
+        Stat stat = getStat(statName);
+        StatHelper.changeStat(stat, operator, statValue);
     }
     
     public boolean hasStat(String statName) {
@@ -133,9 +136,12 @@ public abstract class NexusPlayer extends CachedPlayer {
         return stats;
     }
     
-    public double getStatValue(String statName) {
-        //TODO
-        return 0;
+    public Object getStatValue(String statName) {
+        Stat stat = getStat(statName);
+        if (stat != null) {
+            return stat.getValue();
+        }
+        return null;
     }
     
     public int getLevel() {
@@ -167,31 +173,36 @@ public abstract class NexusPlayer extends CachedPlayer {
         this.lastMessage = nexusPlayer.getUniqueId();
     }
     
+    @Deprecated
     public boolean isPrealpha() {
-        return prealpha;
+        return (boolean) getStatValue("prealpha");
     }
     
+    @Deprecated
     public void setPrealpha(boolean prealpha) {
-        this.prealpha = prealpha;
+        changeStat("prealpha", prealpha, StatOperator.SET);
     }
     
+    @Deprecated
     public boolean isAlpha() {
-        return alpha;
+        return (boolean) getStatValue("prealpha");
     }
     
+    @Deprecated
     public void setAlpha(boolean alpha) {
-        this.alpha = alpha;
+        changeStat("alpha", alpha, StatOperator.SET);
     }
     
+    @Deprecated
     public boolean isBeta() {
-        return beta;
+        return (boolean) getStatValue("prealpha");
     }
     
+    @Deprecated
     public void setBeta(boolean beta) {
-        this.beta = beta;
+        changeStat("beta", beta, StatOperator.SET);
     }
     
-    //TODO When implementing this method, it should take into account the current server
     public abstract boolean isOnline();
     
     public Stat getStat(String name) {
