@@ -4,6 +4,7 @@ import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.util.*;
@@ -113,6 +114,15 @@ public abstract class NexusPlayer extends CachedPlayer {
     
     public void changeStat(String statName, Object statValue, StatOperator operator) {
         Stat stat = getStat(statName);
+        if (stat == null) {
+            Info info = StatHelper.getInfo(statName);
+            if (info == null) {
+                NexusAPI.getApi().getLogger().warning("Could not find a stat with the name " + statName);
+                return;
+            }
+            stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
+            this.addStat(stat);
+        }
         StatHelper.changeStat(stat, operator, statValue);
     }
     
@@ -145,7 +155,7 @@ public abstract class NexusPlayer extends CachedPlayer {
     }
     
     public int getLevel() {
-        double xp = 0;
+        double xp = (double) getStatValue("xp");
         int playerLevel = 0;
         for (int i = 1; i < LevelManager.levels.size(); i++) {
             if (i == 1) {
