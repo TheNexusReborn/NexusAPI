@@ -168,6 +168,10 @@ public abstract class NexusAPI {
         return tournament;
     }
     
+    public IOManager getIOManager() {
+        return ioManager;
+    }
+    
     public static void logMessage(Level level, String mainMessage, String... debug) {
         Logger logger = NexusAPI.getApi().getLogger();
         logger.log(level, "----------- Nexus Log -----------");
