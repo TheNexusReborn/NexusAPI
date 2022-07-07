@@ -38,7 +38,9 @@ public abstract class NexusPlayer extends CachedPlayer {
     }
     
     public void setTag(Tag tag) {
-        changeStat("tag", tag.getName(), StatOperator.SET);
+        if (tag != null) {
+            changeStat("tag", tag.getName(), StatOperator.SET);
+        }
     }
     
     public void setScoreboard(NexusScoreboard scoreboard) {
