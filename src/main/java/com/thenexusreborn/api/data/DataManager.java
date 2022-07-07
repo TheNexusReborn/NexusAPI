@@ -14,6 +14,7 @@ import com.thenexusreborn.api.tournament.Tournament;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 @SuppressWarnings("DuplicatedCode")
 public class DataManager {
@@ -513,7 +514,7 @@ public class DataManager {
                         try (PreparedStatement statement = connection.prepareStatement("insert into stats(uuid, name, value, created, modified) values(?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
                             statement.setString(1, player.getUniqueId().toString());
                             statement.setString(2, stat.getName());
-                            statement.setString(3, stat.getValue().toString());
+                            statement.setString(3, StatHelper.serializeStatValue(stat.getType(), stat.getValue()));
                             statement.setString(4, stat.getCreated() + "");
                             statement.setString(5, stat.getModified() + "");
                             statement.executeUpdate();
@@ -586,20 +587,24 @@ public class DataManager {
             ResultSet statsResultSet = statement.executeQuery("select * from stats where uuid='" + nexusPlayer.getUniqueId() + "';");
             while (statsResultSet.next()) {
                 int id = statsResultSet.getInt("id");
-                String name = statsResultSet.getString("name");
+                String name = StatHelper.formatStatName(statsResultSet.getString("name"));
                 StatType type;
+                Stat.Info info = StatHelper.getInfo(name);
                 try {
-                    //TODO This is temporary for now
                     type = StatType.valueOf(statsResultSet.getString("type"));
                 } catch (Exception e) {
-                    type = StatHelper.getInfo(name).getType();
+                    if (info == null) {
+                        NexusAPI.logMessage(Level.SEVERE, "Could not find Stat Info in Registry", "Stat Name: " + name, "Refreshing Player Stats", "Backup Stat Type Detection");
+                        continue;
+                    }
+                    type = info.getType();
                 }
                 Object value = StatHelper.parseValue(type, statsResultSet.getString("value"));
                 long created = Long.parseLong(statsResultSet.getString("created"));
                 long modified = Long.parseLong(statsResultSet.getString("modified"));
                 UUID uuid = UUID.fromString(statsResultSet.getString("uuid"));
                 
-                Stat stat = new Stat(StatHelper.getInfo(name), id, nexusPlayer.getUniqueId(), value, created, modified);
+                Stat stat = new Stat(info, id, nexusPlayer.getUniqueId(), value, created, modified);
                 nexusPlayer.addStat(stat);
             }
             

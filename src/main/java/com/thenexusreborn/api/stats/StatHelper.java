@@ -128,6 +128,10 @@ public final class StatHelper {
             return "";
         }
         
+        if (value == null) {
+            return "";
+        }
+        
         if (type == StatType.STRING_LIST) {
             StringBuilder sb = new StringBuilder();
             Iterator<String> iterator = ((Set<String>) value).iterator();
