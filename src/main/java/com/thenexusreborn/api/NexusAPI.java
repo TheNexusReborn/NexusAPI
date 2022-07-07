@@ -3,15 +3,15 @@ package com.thenexusreborn.api;
 import com.thenexusreborn.api.data.*;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.PunishmentManager;
+import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.ServerManager;
-import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.stats.StatHelper;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
 import java.sql.*;
+import java.util.List;
 import java.util.logging.*;
 
 public abstract class NexusAPI {
@@ -70,12 +70,7 @@ public abstract class NexusAPI {
         this.ioManager = new IOManager(databaseRegistry);
         this.ioManager.setup();
         
-        StatRegistry statRegistry = new StatRegistry();
-        registerStats(statRegistry);
-        
-        for (Info statInfo : statRegistry.getObjects()) {
-            StatHelper.addStatInfo(statInfo);
-        }
+        registerStats(StatHelper.getRegistry());
         
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
@@ -84,10 +79,10 @@ public abstract class NexusAPI {
         dataManager.setupMysql();
         serverManager.setupCurrentServer();
         
-//        List<Punishment> punishments = dataManager.getPunishments();
-//        for (Punishment punishment : punishments) {
-//            punishmentManager.addPunishment(punishment);
-//        }
+        List<Punishment> punishments = dataManager.getPunishments();
+        for (Punishment punishment : punishments) {
+            punishmentManager.addPunishment(punishment);
+        }
         
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select id from tournaments;");

@@ -2,23 +2,33 @@ package com.thenexusreborn.api.stats;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.NexusPlayer;
+import com.thenexusreborn.api.registry.StatRegistry;
 import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
 import java.util.logging.Level;
 
 public final class StatHelper {
-    private StatHelper() {
+    private StatHelper() {}
+    
+    private static final StatRegistry registry = new StatRegistry();
+    
+    public static StatRegistry getRegistry() {
+        return registry;
     }
     
-    private static final Map<String, Stat.Info> statInfo = new HashMap<>();
-    
     public static void addStatInfo(Stat.Info info) {
-        statInfo.put(info.getName(), info);
+        registry.register(info);
     }
     
     public static Stat.Info getInfo(String name) {
-        return statInfo.get(formatStatName(name));
+        String statName = formatStatName(name);
+        for (Info info : registry.getObjects()) {
+            if (info.getName().equals(statName)) {
+                return info;
+            }
+        }
+        return null;
     }
     
     public static String formatStatName(String name) {
@@ -111,6 +121,29 @@ public final class StatHelper {
             
             changeStat(stat, statChange.getOperator(), statChange.getValue());
         }
+    }
+    
+    public static String serializeStatValue(Stat stat) {
+        if (stat == null) {
+            return "";
+        }
+        
+        Object value = stat.getValue();
+        if (stat.getType() == StatType.STRING_LIST) {
+            StringBuilder sb = new StringBuilder();
+            Iterator<String> iterator = ((Set<String>) value).iterator();
+            while (iterator.hasNext()) {
+                String e = iterator.next();
+                sb.append(e);
+                if (iterator.hasNext()) {
+                    sb.append(",");
+                }
+            }
+            
+            return sb.toString();
+        }
+        
+        return value.toString();
     }
     
     public static Object parseValue(StatType type, String raw) {
