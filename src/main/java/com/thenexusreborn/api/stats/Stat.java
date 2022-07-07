@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.stats;
 
-import java.util.UUID;
+import java.util.*;
 
 public class Stat {
     private Info info;
@@ -73,6 +73,23 @@ public class Stat {
         return info.getDefaultValue();
     }
     
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Stat stat = (Stat) o;
+        return id == stat.id && Objects.equals(info, stat.info);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(info, id);
+    }
+    
     public static class Info {
         private String name;
         private StatType type;
@@ -106,6 +123,23 @@ public class Stat {
     
         public void setDefaultValue(Object defaultValue) {
             this.defaultValue = defaultValue;
+        }
+    
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Info info = (Info) o;
+            return Objects.equals(name, info.name);
+        }
+    
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
         }
     }
 }

@@ -6,7 +6,8 @@ import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.ServerManager;
-import com.thenexusreborn.api.stats.StatHelper;
+import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
@@ -69,14 +70,39 @@ public abstract class NexusAPI {
         
         this.ioManager = new IOManager(databaseRegistry);
         this.ioManager.setup();
-        
-        registerStats(StatHelper.getRegistry());
+    
+        StatRegistry registry = StatHelper.getRegistry();
+        registry.register("xp", StatType.DOUBLE, 0.0);
+        //TODO registry.register("level", StatType.INTEGER, 0);
+        registry.register("nexites", StatType.DOUBLE, 0.0);
+        registry.register("credits", StatType.DOUBLE, 0.0);
+        registry.register("playtime", StatType.LONG, 0);
+        registry.register("firstjoined", StatType.LONG, 0);
+        registry.register("lastlogin", StatType.LONG, 0);
+        registry.register("lastlogout", StatType.LONG, 0);
+        registry.register("prealpha", StatType.BOOLEAN, false);
+        registry.register("alpha", StatType.BOOLEAN, false);
+        registry.register("beta", StatType.BOOLEAN, false);
+        registry.register("tag", StatType.STRING, "");
+        registerStats(registry);
         
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
         networkManager.init("localhost", 3408);
 
         dataManager.setupMysql();
+    
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("insert into statinfo (name, type, defaultValue) values (?, ?, ?);")) {
+            for (Info info : registry.getObjects()) {
+                if (!dataManager.getStatsInDatabase().contains(info.getName())) {
+                    statement.setString(1, info.getName());
+                    statement.setString(2, info.getType().name());
+                    statement.setString(3, StatHelper.serializeStatValue(info.getType(), info.getDefaultValue()));
+                    statement.executeUpdate();
+                }
+            }
+        }
+        
         serverManager.setupCurrentServer();
         
         List<Punishment> punishments = dataManager.getPunishments();

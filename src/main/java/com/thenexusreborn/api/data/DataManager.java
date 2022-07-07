@@ -20,6 +20,8 @@ public class DataManager {
     
     private Map<String, Preference.Info> preferenceInfo = new HashMap<>();
     
+    private Set<String> statsInDatabase = new HashSet<>();
+    
     public void setupMysql() throws SQLException {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), prealpha varchar(5), alpha varchar(5), beta varchar(5));");
@@ -47,13 +49,18 @@ public class DataManager {
             
             ResultSet statResultSet = statement.executeQuery("select * from statinfo;");
             while (statResultSet.next()) {
-                String name = statResultSet.getString("name");
+                String name = StatHelper.formatStatName(statResultSet.getString("name"));
                 StatType type = StatType.valueOf(statResultSet.getString("type"));
                 Object defaultValue = StatHelper.parseValue(type, statResultSet.getString("defaultValue"));
                 Stat.Info statInfo = new Stat.Info(name, type, defaultValue);
                 StatHelper.addStatInfo(statInfo);
+                statsInDatabase.add(name);
             }
         }
+    }
+    
+    public Set<String> getStatsInDatabase() {
+        return statsInDatabase;
     }
     
     public void registerPreference(Preference.Info info) {
@@ -580,7 +587,13 @@ public class DataManager {
             while (statsResultSet.next()) {
                 int id = statsResultSet.getInt("id");
                 String name = statsResultSet.getString("name");
-                StatType type = StatType.valueOf(statsResultSet.getString("type"));
+                StatType type;
+                try {
+                    //TODO This is temporary for now
+                    type = StatType.valueOf(statsResultSet.getString("type"));
+                } catch (Exception e) {
+                    type = StatHelper.getInfo(name).getType();
+                }
                 Object value = StatHelper.parseValue(type, statsResultSet.getString("value"));
                 long created = Long.parseLong(statsResultSet.getString("created"));
                 long modified = Long.parseLong(statsResultSet.getString("modified"));

@@ -123,13 +123,12 @@ public final class StatHelper {
         }
     }
     
-    public static String serializeStatValue(Stat stat) {
-        if (stat == null) {
+    public static String serializeStatValue(StatType type, Object value) {
+        if (type == null) {
             return "";
         }
         
-        Object value = stat.getValue();
-        if (stat.getType() == StatType.STRING_LIST) {
+        if (type == StatType.STRING_LIST) {
             StringBuilder sb = new StringBuilder();
             Iterator<String> iterator = ((Set<String>) value).iterator();
             while (iterator.hasNext()) {
