@@ -58,6 +58,7 @@ public class Database {
         Map<String, Object> data = new HashMap<>();
         long id = 0; //This will hold an int as well
         Field primaryField = null;
+        Column primaryColumn = null;
         for (Column column : table.getColumns()) {
             Field field = null;
             try {
@@ -80,6 +81,7 @@ public class Database {
                 if (column.isPrimaryKey()) {
                     id = (long) value;
                     primaryField = field;
+                    primaryColumn = column;
                 }
                 
                 data.put(column.getName(), value);
@@ -126,7 +128,7 @@ public class Database {
                     sb.append(", ");
                 }
             }
-            sql = "update " + table.getName() + " set(" + sb + ") where " + primaryField.getName() + "='" + id + "';";
+            sql = "update " + table.getName() + " set(" + sb + ") where " + primaryColumn.getName() + "='" + id + "';";
         }
         
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
