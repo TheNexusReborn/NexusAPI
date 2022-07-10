@@ -14,7 +14,6 @@ import com.thenexusreborn.api.tournament.Tournament;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 
 @SuppressWarnings("DuplicatedCode")
 public class DataManager {
@@ -593,8 +592,9 @@ public class DataManager {
                 try {
                     type = StatType.valueOf(statsResultSet.getString("type"));
                 } catch (Exception e) {
+                    //TODO Removed for testing
                     if (info == null) {
-                        NexusAPI.logMessage(Level.SEVERE, "Could not find Stat Info in Registry", "Stat Name: " + name, "Refreshing Player Stats", "Backup Stat Type Detection");
+//                        NexusAPI.logMessage(Level.SEVERE, "Could not find Stat Info in Registry", "Stat Name: " + name, "Refreshing Player Stats", "Backup Stat Type Detection");
                         continue;
                     }
                     type = info.getType();
@@ -606,6 +606,7 @@ public class DataManager {
                 
                 Stat stat = new Stat(info, id, nexusPlayer.getUniqueId(), value, created, modified);
                 nexusPlayer.addStat(stat);
+                NexusAPI.getApi().getLogger().info("Added stat " + stat.getName() + " to the player " + nexusPlayer.getName() + " with value " + value);
             }
             
             ResultSet statChangesResultSet = statement.executeQuery("select * from statchanges where uuid='" + nexusPlayer.getUniqueId() + "'");

@@ -75,6 +75,8 @@ public class Row {
             return Boolean.parseBoolean((String) value);
         } else if (value instanceof Integer) {
             return ((int) value) == 1;
+        } else if (value instanceof Long) {
+            return ((long) value) == 1;
         }
         return false;
     }

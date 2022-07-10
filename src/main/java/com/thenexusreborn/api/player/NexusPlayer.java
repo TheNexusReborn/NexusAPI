@@ -148,10 +148,12 @@ public abstract class NexusPlayer extends CachedPlayer {
     
     public Object getStatValue(String statName) {
         Stat stat = getStat(statName);
-        if (stat != null) {
-            return stat.getValue();
+        if (stat == null) {
+            Info info = StatHelper.getInfo(statName);
+            stat = new Stat(info, uniqueId, System.currentTimeMillis());
+            this.addStat(stat);
         }
-        return null;
+        return stat.getValue();
     }
     
     public int getLevel() {

@@ -44,6 +44,18 @@ public class Database {
         return tables;
     }
     
+    public <T> T get(Class<T> clazz) throws SQLException {
+        Table table = getTable(clazz);
+        if (table == null) {
+            return null;
+        }
+    
+        List<Row> rows = executeQuery("select * from " + table.getName());
+        //TODO
+    
+        return null;
+    }
+    
     public void push(Object object) {
         Class<?> clazz = object.getClass();
         Table table = getTable(clazz);
@@ -56,7 +68,7 @@ public class Database {
         
         Map<String, SqlCodec<?>> codecInstances = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
-        long id = 0; //This will hold an int as well
+        long id = 0;
         Field primaryField = null;
         Column primaryColumn = null;
         for (Column column : table.getColumns()) {
@@ -136,12 +148,12 @@ public class Database {
                 statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
                 ResultSet generatedKeys = statement.getGeneratedKeys();
                 generatedKeys.next();
-                primaryField.set(object, generatedKeys.getObject(1));
+                primaryField.set(object, generatedKeys.getLong(1));
             } else {
                 statement.executeUpdate(sql);
             }
         } catch (SQLException e) {
-            NexusAPI.logMessage(Level.SEVERE, "Error while saving data to the database", "Exception: ");
+            NexusAPI.logMessage(Level.SEVERE, "Error while saving data to the database", "SQL: " + sql ,"Exception: ");
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             NexusAPI.logMessage(Level.SEVERE, "Could not set the primary field for generated keys", "Exception: ");

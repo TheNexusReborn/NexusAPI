@@ -11,6 +11,18 @@ public class Stat {
     private final long created;
     private long modified;
     
+    public Stat(Info info, int id, UUID uuid, long created, long modified) {
+        this(info, id, uuid, info.getDefaultValue(), created, modified);
+    }
+    
+    public Stat(Info info, UUID uuid, long created, long modified) {
+        this(info, 0, uuid, created, modified);
+    }
+    
+    public Stat(Info info, UUID uuid, long created) {
+        this(info, uuid, created, created);
+    }
+    
     public Stat(Info info, UUID uuid, Object value, long created) {
         this(info, uuid, value, created, created);
     }
@@ -23,9 +35,19 @@ public class Stat {
         this.info = info;
         this.id = id;
         this.uuid = uuid;
-        this.value = value;
         this.created = created;
         this.modified = modified;
+    
+        if (info.getType() == StatType.DOUBLE || info.getType() == StatType.INTEGER || info.getType() == StatType.LONG) {
+            Number number = (Number) value;
+            if (info.getType() == StatType.DOUBLE) {
+                this.value = number.doubleValue();
+            } else if (info.getType() == StatType.INTEGER) {
+                this.value = number.intValue();
+            } else if (info.getType() == StatType.LONG) {
+                this.value = number.longValue();
+            }
+        }
     }
     
     public UUID getUuid() {
@@ -90,6 +112,18 @@ public class Stat {
         return Objects.hash(info, id);
     }
     
+    @Override
+    public String toString() {
+        return "Stat{" +
+                "info=" + info +
+                ", id=" + id +
+                ", uuid=" + uuid +
+                ", value=" + value +
+                ", created=" + created +
+                ", modified=" + modified +
+                '}';
+    }
+    
     public static class Info {
         private String name;
         private StatType type;
@@ -140,6 +174,15 @@ public class Stat {
         @Override
         public int hashCode() {
             return Objects.hash(name);
+        }
+    
+        @Override
+        public String toString() {
+            return "Info{" +
+                    "name='" + name + '\'' +
+                    ", type=" + type +
+                    ", defaultValue=" + defaultValue +
+                    '}';
         }
     }
 }

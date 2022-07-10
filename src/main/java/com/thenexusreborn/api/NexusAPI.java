@@ -76,10 +76,10 @@ public abstract class NexusAPI {
         //TODO registry.register("level", StatType.INTEGER, 0);
         registry.register("nexites", StatType.DOUBLE, 0.0);
         registry.register("credits", StatType.DOUBLE, 0.0);
-        registry.register("playtime", StatType.LONG, 0);
-        registry.register("firstjoined", StatType.LONG, 0);
-        registry.register("lastlogin", StatType.LONG, 0);
-        registry.register("lastlogout", StatType.LONG, 0);
+        registry.register("playtime", StatType.LONG, 0L);
+        registry.register("firstjoined", StatType.LONG, 0L);
+        registry.register("lastlogin", StatType.LONG, 0L);
+        registry.register("lastlogout", StatType.LONG, 0L);
         registry.register("prealpha", StatType.BOOLEAN, false);
         registry.register("alpha", StatType.BOOLEAN, false);
         registry.register("beta", StatType.BOOLEAN, false);

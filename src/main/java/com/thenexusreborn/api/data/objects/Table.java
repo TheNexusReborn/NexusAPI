@@ -45,10 +45,14 @@ public class Table implements Comparable<Table> {
             }
         
             if (primary != null) {
-                autoIncrement = true;
-                primaryKey = true;
+                if (field.getType().equals(long.class) || field.getType().equals(Long.class)) {
+                    autoIncrement = true;
+                    primaryKey = true;
+                } else {
+                    throw new IllegalArgumentException("Field " + field.getName() + " in class " + modelClass.getName() + " is marked as the primary field, but is not a long.");
+                }
             }
-        
+            
             if (columnName == null || columnName.equals("")) {
                 columnName = field.getName();
             }
@@ -58,9 +62,9 @@ public class Table implements Comparable<Table> {
                 if (int.class.equals(fieldType) || Integer.class.equals(fieldType)) {
                     type = "int";
                 } else if (String.class.equals(fieldType) || char.class.equals(fieldType) || Character.class.equals(fieldType)) {
-                    type = "varchar(1000);";
+                    type = "varchar(1000)";
                 } else if (boolean.class.equals(fieldType) || Boolean.class.equals(fieldType)) {
-                    type = "bit";
+                    type = "varchar(5)";
                 } else if (long.class.equals(fieldType) || Long.class.equals(fieldType)) {
                     type = "bigint";
                 } else if (double.class.equals(fieldType) || Double.class.equals(fieldType)) {
@@ -82,8 +86,8 @@ public class Table implements Comparable<Table> {
             this.columns.add(column);
         }
     
-        if (primaryColumn != null) {
-            NexusAPI.logMessage(Level.SEVERE, "Could not find a primary column. This column must be a long or integer, and must be set to auto-increment and as the primary key. Or use the @Primary annotation");
+        if (primaryColumn == null) {
+            NexusAPI.logMessage(Level.SEVERE, "Could not find a primary column. This column must be a long, and must be set to auto-increment and as the primary key. Or use the @Primary annotation");
         }
     }
     
@@ -105,7 +109,7 @@ public class Table implements Comparable<Table> {
     
     public String generateCreationStatement() {
         StringBuilder sb = new StringBuilder();
-        sb.append("create table if not exists");
+        sb.append("create table if not exists ");
         sb.append(getName()).append("(");
         getColumns().forEach(column -> {
             sb.append(column.getName()).append(" ").append(column.getType());

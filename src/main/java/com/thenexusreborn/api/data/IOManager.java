@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.data;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.registry.DatabaseRegistry;
 
@@ -80,7 +81,12 @@ public class IOManager {
         for (Database database : this.registry.getObjects()) {
             for (Table table : database.getTables()) {
                 String sql = table.generateCreationStatement();
-                database.execute(sql);
+                try {
+                    database.execute(sql);
+                } catch (SQLException e) {
+                    NexusAPI.getApi().getLogger().severe(sql);
+                    throw e;
+                }
             }
         }
     }
