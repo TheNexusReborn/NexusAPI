@@ -47,11 +47,23 @@ public class Database {
     public <T> T get(Class<T> clazz) throws SQLException {
         Table table = getTable(clazz);
         if (table == null) {
+            NexusAPI.logMessage(Level.WARNING, "Tried to get data from a table that does not exist.", "Database: " + this.host + "/" + this.name, "Class: " + clazz.getName());
             return null;
         }
     
         List<Row> rows = executeQuery("select * from " + table.getName());
-        //TODO
+        T object = null;
+        try {
+            object = clazz.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            NexusAPI.logMessage(Level.SEVERE, "Could not create an instance of the class " + clazz.getName(), "Exception Type: " + e.getClass().getName(), "Exception Message: " + e.getMessage());
+            return null;
+        }
+    
+        for (Row row : rows) {
+            //TODO
+        }
+        
     
         return null;
     }
@@ -72,9 +84,8 @@ public class Database {
         Field primaryField = null;
         Column primaryColumn = null;
         for (Column column : table.getColumns()) {
-            Field field = null;
+            Field field = column.getField();
             try {
-                field = clazz.getDeclaredField(column.getName());
                 field.setAccessible(true);
                 Object value = field.get(object);
                 if (column.getCodec() != null) {
@@ -97,11 +108,6 @@ public class Database {
                 }
                 
                 data.put(column.getName(), value);
-            } catch (NoSuchFieldException e) {
-                NexusAPI.logMessage(Level.WARNING, "Could not find a field for a column while saving to the database",
-                        "Class: " + clazz.getName(),
-                        "Column: " + column.getName());
-                return;
             } catch (IllegalAccessException e) {
                 NexusAPI.logMessage(Level.WARNING, "Could not access a field while saving to the database",
                         "Class: " + clazz.getName(),

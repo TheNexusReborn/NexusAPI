@@ -14,6 +14,13 @@ public class Table implements Comparable<Table> {
     
     public Table(Class<?> modelClass) {
         this.modelClass = modelClass;
+    
+        try {
+            Constructor<?> defaultConstructor = modelClass.getDeclaredConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("Could not find default constructor for class " + modelClass.getName());
+        }
+    
         TableInfo tableInfo = modelClass.getAnnotation(TableInfo.class);
         if (tableInfo != null) {
             name = tableInfo.value();
@@ -28,59 +35,15 @@ public class Table implements Comparable<Table> {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
+    
+            Column column = new Column(modelClass, field);
         
-            ColumnInfo columnInfo = field.getAnnotation(ColumnInfo.class);
-            Primary primary = field.getAnnotation(Primary.class);
-            String columnName = null;
-            String type = null;
-            boolean primaryKey = false, autoIncrement = false, notNull = false;
-            Class<? extends SqlCodec<?>> codec = null;
-            if (columnInfo != null) {
-                columnName = columnInfo.name();
-                type = columnInfo.type();
-                primaryKey = columnInfo.primaryKey();
-                autoIncrement = columnInfo.autoIncrement();
-                notNull = columnInfo.notNull();
-                codec = (Class<? extends SqlCodec<?>>) columnInfo.codec(); //TODO May not work 
-            }
-        
-            if (primary != null) {
-                if (field.getType().equals(long.class) || field.getType().equals(Long.class)) {
-                    autoIncrement = true;
-                    primaryKey = true;
-                } else {
-                    throw new IllegalArgumentException("Field " + field.getName() + " in class " + modelClass.getName() + " is marked as the primary field, but is not a long.");
-                }
-            }
-            
-            if (columnName == null || columnName.equals("")) {
-                columnName = field.getName();
-            }
-        
-            if (type == null || type.equals("")) {
-                Class<?> fieldType = field.getType();
-                if (int.class.equals(fieldType) || Integer.class.equals(fieldType)) {
-                    type = "int";
-                } else if (String.class.equals(fieldType) || char.class.equals(fieldType) || Character.class.equals(fieldType)) {
-                    type = "varchar(1000)";
-                } else if (boolean.class.equals(fieldType) || Boolean.class.equals(fieldType)) {
-                    type = "varchar(5)";
-                } else if (long.class.equals(fieldType) || Long.class.equals(fieldType)) {
-                    type = "bigint";
-                } else if (double.class.equals(fieldType) || Double.class.equals(fieldType)) {
-                    type = "double";
-                } else if (float.class.equals(fieldType) || Float.class.equals(fieldType)) {
-                    type = "float";
-                }
-            }
-        
-            if (type == null || type.equals("")) {
+            if (column.getType() == null || column.getType().equals("")) {
                 NexusAPI.getApi().getLogger().severe("There was a problem parsing the MySQL type for field " + field.getName() + " in class " + modelClass.getName());
                 continue;
             }
         
-            Column column = new Column(columnName, type, primaryKey, autoIncrement, notNull, codec);
-            if (autoIncrement && primaryKey) {
+            if (column.isAutoIncrement() && column.isPrimaryKey()) {
                 primaryColumn = column;
             }
             this.columns.add(column);
