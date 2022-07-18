@@ -118,14 +118,6 @@ public class Column implements Comparable<Column> {
             return -1;
         }
         
-        if (this.autoIncrement) {
-            return 1;
-        }
-        
-        if (other.autoIncrement) {
-            return -1;
-        }
-        
         return name.compareTo(other.name);
     }
 }

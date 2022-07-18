@@ -44,15 +44,8 @@ public class Database {
         return tables;
     }
     
-    public <T> T get(Class<T> clazz) throws SQLException {
-        Table table = getTable(clazz);
-        if (table == null) {
-            NexusAPI.logMessage(Level.WARNING, "Tried to get data from a table that does not exist.", "Database: " + this.host + "/" + this.name, "Class: " + clazz.getName());
-            return null;
-        }
-    
-        List<Row> rows = executeQuery("select * from " + table.getName());
-        T object = null;
+    private <T> T parseObjectFromRow(Class<T> clazz, Table table, Row row) {
+        T object;
         try {
             object = clazz.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -60,12 +53,59 @@ public class Database {
             return null;
         }
     
-        for (Row row : rows) {
-            //TODO
+        for (Entry<String, Object> entry : row.getData().entrySet()) {
+            String columnName = entry.getKey();
+            Column column = table.getColumn(columnName);
+            if (column == null) {
+                NexusAPI.logMessage(Level.SEVERE, "Could not find a column for a table based on a MySQL query", "Column Name: " + columnName, "Class Name: " + clazz.getName(), "Table Name: " + table.getName());
+                continue;
+            }
+        
+            try {
+                column.getField().set(object, entry.getValue());
+            } catch (Exception e) {
+                NexusAPI.logMessage(Level.SEVERE, "Could not set the value of a field for a column while loading from database.", "Class Name: " + clazz.getName(), "Field Name: " + column.getField().getName());
+            }
+        }
+        return object;
+    }
+    
+    public <T> List<T> get(Class<T> clazz, String columnName, Object value) throws SQLException {
+        Table table = getTable(clazz);
+        if (table == null) {
+            NexusAPI.logMessage(Level.WARNING, "Tried to get data from a table that does not exist.", "Database: " + this.host + "/" + this.name, "Class: " + clazz.getName());
+            return null;
         }
         
+        Column column = table.getColumn(columnName);
+        if (column != null) {
+            return null;
+        }
+        
+        List<T> objects = new ArrayList<>();
+        
+        List<Row> rows = executeQuery("select * from " + table.getName() + " where " + column.getName() + "='" + value + "';");
+        for (Row row : rows) {
+            objects.add(parseObjectFromRow(clazz, table, row));
+        }
+        return objects;
+    }
     
-        return null;
+    public <T> List<T> get(Class<T> clazz) throws SQLException {
+        Table table = getTable(clazz);
+        if (table == null) {
+            NexusAPI.logMessage(Level.WARNING, "Tried to get data from a table that does not exist.", "Database: " + this.host + "/" + this.name, "Class: " + clazz.getName());
+            return null;
+        }
+        
+        List<T> objects = new ArrayList<>();
+    
+        List<Row> rows = executeQuery("select * from " + table.getName());
+        for (Row row : rows) {
+            objects.add(parseObjectFromRow(clazz, table, row));
+        }
+    
+        return objects;
     }
     
     public void push(Object object) {

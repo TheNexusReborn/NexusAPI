@@ -2,6 +2,7 @@ package com.thenexusreborn.api.data.objects;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.helper.ReflectionHelper;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -30,9 +31,14 @@ public class Table implements Comparable<Table> {
     
         Column primaryColumn = null;
     
-        for (Field field : modelClass.getDeclaredFields()) {
+        for (Field field : ReflectionHelper.getClassFields(modelClass)) {
             field.setAccessible(true);
             if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            
+            if (Modifier.isFinal(field.getModifiers())) {
+                NexusAPI.logMessage(Level.WARNING, "Field in a table class is final. These will be ignored", "Class Name: " + modelClass.getName(), "Field Name: " + field.getName());
                 continue;
             }
     
@@ -116,5 +122,14 @@ public class Table implements Comparable<Table> {
     @Override
     public int compareTo(Table o) {
         return this.name.compareTo(o.name);
+    }
+    
+    public Column getColumn(String columnName) {
+        for (Column column : this.columns) {
+            if (column.getName().equalsIgnoreCase(columnName)) {
+                return column;
+            }
+        }
+        return null;
     }
 }
