@@ -1,17 +1,43 @@
 package com.thenexusreborn.api.data.objects;
 
+import com.thenexusreborn.api.NexusAPI;
+
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Level;
 
 public class Row {
     private Map<String, Object> data = new HashMap<>();
     
-    public Row(ResultSet rs) {
+    public Row(ResultSet rs, Database database) {
         try {
             ResultSetMetaData metaData = rs.getMetaData();
-            for (int i = 0; i < metaData.getColumnCount(); i++) {
+            
+            Table table = database.getTable(metaData.getTableName(1));
+            
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
                 String columnName = metaData.getColumnName(i);
-                Object object = rs.getObject(i);
+                Column column = table.getColumn(columnName);
+                if (column == null) {
+                    continue;
+                }
+                
+                Object object = null;
+                
+                if (column.getType().equalsIgnoreCase("int")) {
+                    object = rs.getInt(i);
+                } else if (column.getType().equalsIgnoreCase("bigint")) {
+                    object = rs.getLong(i);
+                } else if (column.getType().toLowerCase().startsWith("varchar")) {
+                    object = rs.getString(i);
+                } else if (column.getType().equalsIgnoreCase("double")) {
+                    object = rs.getDouble(i);
+                } else if (column.getType().equalsIgnoreCase("float")) {
+                    object = rs.getFloat(i);
+                } else {
+                    NexusAPI.logMessage(Level.WARNING, "Unhandled MySQL Type", "Type: " + column.getType());
+                }
+                
                 this.data.put(columnName, object);
             }
         } catch (SQLException e) {

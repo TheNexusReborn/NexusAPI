@@ -47,24 +47,49 @@ public class Database {
     private <T> T parseObjectFromRow(Class<T> clazz, Table table, Row row) {
         T object;
         try {
-            object = clazz.getDeclaredConstructor().newInstance();
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            object = constructor.newInstance();
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             NexusAPI.logMessage(Level.SEVERE, "Could not create an instance of the class " + clazz.getName(), "Exception Type: " + e.getClass().getName(), "Exception Message: " + e.getMessage());
             return null;
         }
     
-        for (Entry<String, Object> entry : row.getData().entrySet()) {
-            String columnName = entry.getKey();
-            Column column = table.getColumn(columnName);
+        for (String key : row.getData().keySet()) {
+            Column column = table.getColumn(key);
             if (column == null) {
-                NexusAPI.logMessage(Level.SEVERE, "Could not find a column for a table based on a MySQL query", "Column Name: " + columnName, "Class Name: " + clazz.getName(), "Table Name: " + table.getName());
+                NexusAPI.logMessage(Level.SEVERE, "Could not find a column for a table based on a MySQL query", "Column Name: " + key, "Class Name: " + clazz.getName(), "Table Name: " + table.getName());
                 continue;
             }
         
             try {
-                column.getField().set(object, entry.getValue());
+                Object data = null;
+    
+                Class<?> fieldType = column.getField().getType();
+                if (int.class.equals(fieldType) || Integer.class.equals(fieldType)) {
+                    data = row.getInt(key);
+                } else if (String.class.equals(fieldType) || char.class.equals(fieldType) || Character.class.equals(fieldType)) {
+                    data = row.getString(key);
+                } else if (boolean.class.equals(fieldType) || Boolean.class.equals(fieldType)) {
+                    data = row.getBoolean(key);
+                } else if (long.class.equals(fieldType) || Long.class.equals(fieldType)) {
+                    data = row.getLong(key);
+                } else if (double.class.equals(fieldType) || Double.class.equals(fieldType)) {
+                    data = row.getDouble(key);
+                } else if (float.class.equals(fieldType) || Float.class.equals(fieldType)) {
+                    data = row.getFloat(key);
+                } else {
+                    Class<? extends SqlCodec<?>> codec = column.getCodec();
+                    try {
+                        SqlCodec<?> codecInstance = codec.getDeclaredConstructor().newInstance();
+                        data = codecInstance.decode(row.getString(key));
+                    } catch (Exception e) {}
+                }
+    
+                column.getField().setAccessible(true);
+                column.getField().set(object, data);
             } catch (Exception e) {
-                NexusAPI.logMessage(Level.SEVERE, "Could not set the value of a field for a column while loading from database.", "Class Name: " + clazz.getName(), "Field Name: " + column.getField().getName());
+                NexusAPI.logMessage(Level.SEVERE, "Could not set the value of a field for a column while loading from database.", "Class Name: " + clazz.getName(), "Field Name: " + column.getField().getName(), "Exception Class: " + e.getClass().getName(), "Exception Message: " + e.getMessage());
             }
         }
         return object;
@@ -232,7 +257,7 @@ public class Database {
     public Row parseRow(String sql) throws SQLException {
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(sql);
-            return new Row(rs);
+            return new Row(rs, this);
         }
     }
     
@@ -264,7 +289,7 @@ public class Database {
             boolean value = parsePreparedParmeters(statement, args);
             if (value) {
                 ResultSet rs = statement.executeQuery();
-                return new Row(rs);
+                return new Row(rs, this);
             }
         }
         
@@ -291,7 +316,7 @@ public class Database {
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                rows.add(new Row(resultSet));
+                rows.add(new Row(resultSet, this));
             }
         }
         
@@ -305,7 +330,7 @@ public class Database {
             if (value) {
                 ResultSet resultSet = statement.executeQuery(sql);
                 while (resultSet.next()) {
-                    rows.add(new Row(resultSet));
+                    rows.add(new Row(resultSet, this));
                 }
             }
         }
