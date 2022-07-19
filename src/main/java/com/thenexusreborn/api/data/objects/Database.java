@@ -211,7 +211,7 @@ public class Database {
                     sb.append(", ");
                 }
             }
-            sql = "update " + table.getName() + " set(" + sb + ") where " + primaryColumn.getName() + "='" + id + "';";
+            sql = "update " + table.getName() + " set " + sb + " where " + primaryColumn.getName() + "='" + id + "';";
         }
         
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
