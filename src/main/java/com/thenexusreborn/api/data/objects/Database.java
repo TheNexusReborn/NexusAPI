@@ -64,7 +64,8 @@ public class Database {
         
             try {
                 Object data = null;
-    
+                
+                //TODO Have this detection using the codec system with default codecs
                 Class<?> fieldType = column.getField().getType();
                 if (int.class.equals(fieldType) || Integer.class.equals(fieldType)) {
                     data = row.getInt(key);
@@ -78,6 +79,8 @@ public class Database {
                     data = row.getDouble(key);
                 } else if (float.class.equals(fieldType) || Float.class.equals(fieldType)) {
                     data = row.getFloat(key);
+                } else if (UUID.class.equals(fieldType)) {
+                    data = UUID.fromString(row.getString(key));
                 } else {
                     Class<? extends SqlCodec<?>> codec = column.getCodec();
                     try {

@@ -3,7 +3,7 @@ package com.thenexusreborn.api.data.objects;
 import com.thenexusreborn.api.data.annotations.*;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
+import java.util.*;
 
 public class Column implements Comparable<Column> {
     private Class<?> modelClass;
@@ -42,6 +42,7 @@ public class Column implements Comparable<Column> {
         }
     
         if (type == null || type.equals("")) {
+            //TODO Have this detection using the codec system with default codecs
             Class<?> fieldType = field.getType();
             if (int.class.equals(fieldType) || Integer.class.equals(fieldType)) {
                 type = "int";
@@ -55,6 +56,8 @@ public class Column implements Comparable<Column> {
                 type = "double";
             } else if (float.class.equals(fieldType) || Float.class.equals(fieldType)) {
                 type = "float";
+            } else if (UUID.class.equals(fieldType)) {
+                type = "varchar(36)";
             }
         }
     }

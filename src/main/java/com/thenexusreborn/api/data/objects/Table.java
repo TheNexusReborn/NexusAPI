@@ -41,6 +41,10 @@ public class Table implements Comparable<Table> {
                 NexusAPI.logMessage(Level.WARNING, "Field in a table class is final. These will be ignored", "Class Name: " + modelClass.getName(), "Field Name: " + field.getName());
                 continue;
             }
+            
+            if (field.isAnnotationPresent(ColumnIgnored.class)) {
+                continue;
+            }
     
             Column column = new Column(modelClass, field);
         
