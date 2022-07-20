@@ -58,17 +58,17 @@ public final class StatHelper {
     public static void changeStat(Stat stat, StatOperator operator, Object value) {
         Object newValue = null;
     
-        if (stat.getType() == StatType.STRING_LIST) {
+        if (stat.getType() == StatType.STRING_SET) {
             Set<String> oldValue = (Set<String>) stat.getValue();
             if (oldValue == null) {
-                oldValue = (Set<String>) StatType.STRING_LIST.getDefaultValue();
+                oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
             }
             if (operator == StatOperator.ADD) {
                 oldValue.add((String) value);
             } else if (operator == StatOperator.SUBTRACT) {
                 oldValue.remove((String) value);
             } else if (operator == StatOperator.RESET) {
-                oldValue = (Set<String>) StatType.STRING_LIST.getDefaultValue();
+                oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
             } else if (operator == StatOperator.SET) {
                 oldValue.clear();
                 oldValue.add((String) value);
@@ -132,7 +132,7 @@ public final class StatHelper {
             return "";
         }
         
-        if (type == StatType.STRING_LIST) {
+        if (type == StatType.STRING_SET) {
             StringBuilder sb = new StringBuilder();
             Iterator<String> iterator = ((Set<String>) value).iterator();
             while (iterator.hasNext()) {
@@ -170,7 +170,7 @@ public final class StatHelper {
                 return Boolean.parseBoolean(raw);
             } else if (type == StatType.STRING) {
                 return raw;
-            } else if (type == StatType.STRING_LIST) {
+            } else if (type == StatType.STRING_SET) {
                 Set<String> value = (Set<String>) type.getDefaultValue();
                 String[] split = raw.split(",");
                 if (split != null) {

@@ -12,7 +12,7 @@ import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
 import java.sql.*;
-import java.util.List;
+import java.util.*;
 import java.util.logging.*;
 
 public abstract class NexusAPI {
@@ -84,6 +84,9 @@ public abstract class NexusAPI {
         registry.register("alpha", StatType.BOOLEAN, false);
         registry.register("beta", StatType.BOOLEAN, false);
         registry.register("tag", StatType.STRING, "");
+        registry.register("online", StatType.BOOLEAN, false);
+        registry.register("server", StatType.STRING, "");
+        registry.register("unlockedtags", StatType.STRING_SET, new HashSet<>());
         registerStats(registry);
         
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();

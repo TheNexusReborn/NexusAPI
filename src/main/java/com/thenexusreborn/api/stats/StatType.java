@@ -10,7 +10,7 @@ public enum StatType {
     LONG(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET, INVERT), 
     STRING("", RESET, SET), 
     BOOLEAN(false, RESET, INVERT, SET), 
-    STRING_LIST(new HashSet<>(), ADD, SUBTRACT, RESET, SET);
+    STRING_SET(new HashSet<>(), ADD, SUBTRACT, RESET, SET);
     
     private final Object defaultValue;
     private final StatOperator[] allowedOperators;

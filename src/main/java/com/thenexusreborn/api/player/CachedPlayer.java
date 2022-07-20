@@ -1,26 +1,38 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.helper.StringHelper;
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.RanksCodec;
 import com.thenexusreborn.api.player.Preference.Info;
+import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.tags.Tag;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 //This is only information that needs to be accessed either right away when the player joins, or in a command if they are offline
 //Nexus Player will extend from this class
+@TableInfo("profiles")
 public class CachedPlayer {
-    protected int id; //This is the database id
+    @Primary 
+    protected int id;
+    
+    @ColumnInfo 
     protected UUID uniqueId;
+    
     protected String name;
     
+    @ColumnInfo(codec = RanksCodec.class) 
     protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
-    protected Map<String, Preference> preferences = new HashMap<>();
-    protected Set<String> unlockedTags = new HashSet<>();
     
-    //These will be udpated by the network for when a player switches servers or goes offline as these fields will be used for several features like friends, guilds and messaging
-    protected boolean online;
-    protected String server;
+    @ColumnIgnored 
+    protected Map<String, Preference> preferences = new HashMap<>();
+    
+    @ColumnIgnored
+    protected Map<String, Stat> stats = new HashMap<>();
+    
+    @ColumnIgnored
+    protected Set<StatChange> statChanges = new TreeSet<>();
     
     public CachedPlayer(UUID uniqueId) {
         this.uniqueId = uniqueId;
@@ -38,9 +50,8 @@ public class CachedPlayer {
         this.name = cachedPlayer.name;
         this.ranks = cachedPlayer.ranks;
         this.preferences = cachedPlayer.preferences;
-        this.unlockedTags = cachedPlayer.unlockedTags;
-        this.online = cachedPlayer.online;
-        this.server = cachedPlayer.server;
+        this.stats = cachedPlayer.stats;
+        this.statChanges = cachedPlayer.statChanges;
     }
     
     public int getId() {
@@ -49,84 +60,6 @@ public class CachedPlayer {
     
     public void setId(int id) {
         this.id = id;
-    }
-    
-    public boolean isOnline() {
-        return online;
-    }
-    
-    public String getServer() {
-        return server;
-    }
-    
-    public void setOnline(boolean online) {
-        this.online = online;
-    }
-    
-    public void setServer(String server) {
-        this.server = server;
-    }
-    
-    public String serializeRanks() {
-        StringBuilder sb = new StringBuilder();
-        
-        if (PlayerManager.NEXUS_TEAM.contains(this.uniqueId)) {
-            return Rank.NEXUS.name() + "=-1";
-        }
-        
-        if (getRanks().size() == 0) {
-            return Rank.MEMBER.name() + "=-1";
-        }
-        
-        for (Entry<Rank, Long> entry : getRanks().entrySet()) {
-            sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
-        }
-        
-        String ranks;
-        if (sb.length() > 0) {
-            return sb.substring(0, sb.toString().length() - 1);
-        } else {
-            return "";
-        }
-    }
-    
-    public void loadRanks(String serialized) {
-        if (serialized == null && serialized.equals("")) {
-            return;
-        }
-        
-        String[] rawRanks = serialized.split(",");
-        if (rawRanks == null || rawRanks.length == 0) {
-            return;
-        }
-        
-        for (String rawRank : rawRanks) {
-            String[] rankSplit = rawRank.split("=");
-            if (rankSplit == null || rankSplit.length != 2) {
-                continue;
-            }
-            
-            Rank rank = Rank.valueOf(rankSplit[0]);
-            long expire = Long.parseLong(rankSplit[1]);
-            this.ranks.put(rank, expire);
-        }
-    }
-    
-    public String serializeTags() {
-        return StringHelper.join(this.unlockedTags, ",");
-    }
-    
-    public void loadTags(String serialized) {
-        if (serialized == null && serialized.equals("")) {
-            return;
-        }
-        
-        String[] tagsSplit = serialized.split(",");
-        if (tagsSplit == null || tagsSplit.length == 0) {
-            return;
-        }
-        
-        this.unlockedTags.addAll(Arrays.asList(tagsSplit));
     }
     
     public Map<Rank, Long> getRanks() {
@@ -138,19 +71,19 @@ public class CachedPlayer {
     }
     
     public Set<String> getUnlockedTags() {
-        return new HashSet<>(unlockedTags);
+        return (Set<String>) getStatValue("unlockedtags");
     }
     
     public boolean isTagUnlocked(String tag) {
-        return this.unlockedTags.contains(tag.toLowerCase());
+        return getUnlockedTags().contains(tag.toLowerCase());
     }
     
     public void unlockTag(String tag) {
-        this.unlockedTags.add(tag.toLowerCase());
+        getUnlockedTags().add(tag.toLowerCase());
     }
     
     public void lockTag(String tag) {
-        this.unlockedTags.remove(tag.toLowerCase());
+        getUnlockedTags().remove(tag.toLowerCase());
     }
     
     public Preference getPreference(String name) {
@@ -254,5 +187,63 @@ public class CachedPlayer {
     
     public String getName() {
         return name;
+    }
+    
+    public boolean hasStat(String statName) {
+        return this.stats.containsKey(statName);
+    }
+    
+    public void addStat(Stat stat) {
+        this.stats.put(stat.getName(), stat);
+    }
+    
+    public void addStatChange(StatChange statChange) {
+        this.statChanges.add(statChange);
+    }
+    
+    public Set<StatChange> getStatChanges() {
+        return statChanges;
+    }
+    
+    public Map<String, Stat> getStats() {
+        return stats;
+    }
+    
+    public Object getStatValue(String statName) {
+        Stat stat = getStat(statName);
+        if (stat == null) {
+            Stat.Info info = StatHelper.getInfo(statName);
+            stat = new Stat(info, uniqueId, System.currentTimeMillis());
+            this.addStat(stat);
+        }
+        return stat.getValue();
+    }
+    
+    public Stat getStat(String name) {
+        return this.stats.get(StatHelper.formatStatName(name));
+    }
+    
+    public Tag getTag() {
+        return new Tag((String) getStatValue("tag"));
+    }
+    
+    public void setTag(Tag tag) {
+        if (tag != null) {
+            changeStat("tag", tag.getName(), StatOperator.SET);
+        }
+    }
+    
+    public void changeStat(String statName, Object statValue, StatOperator operator) {
+        Stat stat = getStat(statName);
+        if (stat == null) {
+            Stat.Info info = StatHelper.getInfo(statName);
+            if (info == null) {
+                NexusAPI.getApi().getLogger().warning("Could not find a stat with the name " + statName);
+                return;
+            }
+            stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
+            this.addStat(stat);
+        }
+        StatHelper.changeStat(stat, operator, statValue);
     }
 }

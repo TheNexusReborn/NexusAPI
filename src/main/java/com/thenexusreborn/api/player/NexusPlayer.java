@@ -1,24 +1,24 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.data.annotations.ColumnIgnored;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.stats.*;
-import com.thenexusreborn.api.stats.Stat.Info;
-import com.thenexusreborn.api.tags.Tag;
+import com.thenexusreborn.api.stats.StatOperator;
 
 import java.util.*;
 
 public abstract class NexusPlayer extends CachedPlayer {
-    protected Map<String, Stat> stats = new HashMap<>();
-    protected Set<StatChange> statChanges = new TreeSet<>();
-    
+    @ColumnIgnored 
     protected NexusScoreboard scoreboard;
     
-    private UUID lastMessage;
+    @ColumnIgnored
+    protected UUID lastMessage;
     
-    public NexusPlayer(CachedPlayer cachedPlayer) {
+    public NexusPlayer(NexusPlayer cachedPlayer) {
         super(cachedPlayer);
+        this.scoreboard = cachedPlayer.scoreboard;
+        this.lastMessage = cachedPlayer.lastMessage;
     }
     
     public NexusPlayer(UUID uniqueId) {
@@ -31,16 +31,6 @@ public abstract class NexusPlayer extends CachedPlayer {
     
     public NexusScoreboard getScoreboard() {
         return scoreboard;
-    }
-    
-    public Tag getTag() {
-        return new Tag((String) getStatValue("tag"));
-    }
-    
-    public void setTag(Tag tag) {
-        if (tag != null) {
-            changeStat("tag", tag.getName(), StatOperator.SET);
-        }
     }
     
     public void setScoreboard(NexusScoreboard scoreboard) {
@@ -112,50 +102,7 @@ public abstract class NexusPlayer extends CachedPlayer {
         changeStat("lastlogout", lastLogout, StatOperator.SET);
     }
     
-    public void changeStat(String statName, Object statValue, StatOperator operator) {
-        Stat stat = getStat(statName);
-        if (stat == null) {
-            Info info = StatHelper.getInfo(statName);
-            if (info == null) {
-                NexusAPI.getApi().getLogger().warning("Could not find a stat with the name " + statName);
-                return;
-            }
-            stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
-            this.addStat(stat);
-        }
-        StatHelper.changeStat(stat, operator, statValue);
-    }
-    
-    public boolean hasStat(String statName) {
-        return this.stats.containsKey(statName);
-    }
-    
-    public void addStat(Stat stat) {
-        this.stats.put(stat.getName(), stat);
-    }
-    
-    public void addStatChange(StatChange statChange) {
-        this.statChanges.add(statChange);
-    }
-    
-    public Set<StatChange> getStatChanges() {
-        return statChanges;
-    }
-    
-    public Map<String, Stat> getStats() {
-        return stats;
-    }
-    
-    public Object getStatValue(String statName) {
-        Stat stat = getStat(statName);
-        if (stat == null) {
-            Info info = StatHelper.getInfo(statName);
-            stat = new Stat(info, uniqueId, System.currentTimeMillis());
-            this.addStat(stat);
-        }
-        return stat.getValue();
-    }
-    
+    @Deprecated
     public int getLevel() {
         double xp = (double) getStatValue("xp");
         int playerLevel = 0;
@@ -168,7 +115,7 @@ public abstract class NexusPlayer extends CachedPlayer {
                     break;
                 }
             }
-    
+            
             if (xp >= LevelManager.levels.get(i - 1) && xp < LevelManager.levels.get(i)) {
                 playerLevel = i - 1;
             }
@@ -217,7 +164,4 @@ public abstract class NexusPlayer extends CachedPlayer {
     
     public abstract boolean isOnline();
     
-    public Stat getStat(String name) {
-        return this.stats.get(StatHelper.formatStatName(name));
-    }
 }
