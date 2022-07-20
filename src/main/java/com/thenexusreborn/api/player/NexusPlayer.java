@@ -57,6 +57,11 @@ public abstract class NexusPlayer extends CachedPlayer {
         changeStat("lastlogin", lastLogin, StatOperator.SET);
     }
     
+    @Deprecated
+    public void setUnlockedTags(Set<String> unlockedTags) {
+        changeStat("unlockedtags", unlockedTags, StatOperator.SET);
+    }
+    
     public String getDisplayName() {
         if (getRank() != Rank.MEMBER) {
             return getRank().getPrefix() + " &f" + getName();

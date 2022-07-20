@@ -246,4 +246,8 @@ public class CachedPlayer {
         }
         StatHelper.changeStat(stat, operator, statValue);
     }
+    
+    public String serializeRanks() {
+        return new RanksCodec().encode(this.ranks);
+    }
 }
