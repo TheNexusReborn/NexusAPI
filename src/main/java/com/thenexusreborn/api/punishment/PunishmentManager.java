@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 public class PunishmentManager {
     
-    private Map<Integer, Punishment> punishments = new HashMap<>();
+    private Map<Long, Punishment> punishments = new HashMap<>();
     
     public void addPunishment(Punishment punishment) {
         this.punishments.put(punishment.getId(), punishment);

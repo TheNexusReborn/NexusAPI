@@ -1,21 +1,28 @@
 package com.thenexusreborn.api.gamearchive;
 
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StringArrayCodec;
+import com.thenexusreborn.api.data.handler.GamesObjectHandler;
+
 import java.util.*;
 
+@TableInfo(value = "games", handler = GamesObjectHandler.class)
 public class GameInfo {
-    private int id;
+    private long id;
     private long gameStart, gameEnd;
     private String serverName;
+    @ColumnInfo(codec = StringArrayCodec.class) 
     private String[] players;
     private String winner, mapName, settings, firstBlood;
     private int playerCount;
     private long length;
+    @ColumnIgnored
     private List<GameAction> actions = new ArrayList<>();
     
     public GameInfo() {
     }
     
-    public GameInfo(int id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
+    public GameInfo(long id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
         this.id = id;
         this.gameStart = gameStart;
         this.gameEnd = gameEnd;
@@ -45,7 +52,7 @@ public class GameInfo {
         this.winner = winner;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     

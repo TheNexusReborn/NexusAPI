@@ -9,10 +9,7 @@ import com.thenexusreborn.api.stats.StatOperator;
 import java.util.*;
 
 public abstract class NexusPlayer extends CachedPlayer {
-    @ColumnIgnored 
     protected NexusScoreboard scoreboard;
-    
-    @ColumnIgnored
     protected UUID lastMessage;
     
     public NexusPlayer(NexusPlayer cachedPlayer) {

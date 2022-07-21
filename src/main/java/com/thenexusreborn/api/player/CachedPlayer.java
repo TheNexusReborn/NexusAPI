@@ -3,6 +3,7 @@ package com.thenexusreborn.api.player;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.annotations.*;
 import com.thenexusreborn.api.data.codec.RanksCodec;
+import com.thenexusreborn.api.data.handler.PlayerObjectHandler;
 import com.thenexusreborn.api.player.Preference.Info;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
@@ -12,7 +13,7 @@ import java.util.Map.Entry;
 
 //This is only information that needs to be accessed either right away when the player joins, or in a command if they are offline
 //Nexus Player will extend from this class
-@TableInfo("profiles")
+@TableInfo(value = "profiles", handler = PlayerObjectHandler.class)
 public class CachedPlayer {
     @Primary 
     protected int id;

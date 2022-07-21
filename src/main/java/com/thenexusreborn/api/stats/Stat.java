@@ -1,14 +1,21 @@
 package com.thenexusreborn.api.stats;
 
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StatInfoCodec;
+import com.thenexusreborn.api.data.handler.StatObjectHandler;
+
 import java.util.*;
 
+@TableInfo(value = "stats", handler = StatObjectHandler.class)
 public class Stat {
+    @ColumnInfo(name = "name", type = "varchar(100)", codec = StatInfoCodec.class) 
     private Info info;
     
+    @Primary 
     private int id;
-    private final UUID uuid;
+    private UUID uuid;
     private Object value;
-    private final long created;
+    private long created;
     private long modified;
     
     public Stat(Info info, int id, UUID uuid, long created, long modified) {
@@ -124,6 +131,7 @@ public class Stat {
                 '}';
     }
     
+    @TableInfo(value = "statinfo", handler = StatObjectHandler.class)
     public static class Info {
         private String name;
         private StatType type;

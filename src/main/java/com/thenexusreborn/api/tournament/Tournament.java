@@ -1,15 +1,21 @@
 package com.thenexusreborn.api.tournament;
 
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StringArrayCodec;
+
 import java.util.*;
 
+@TableInfo("tournaments")
 public class Tournament {
     private int id;
     private UUID host;
     private String name;
     private boolean active;
     private int pointsPerKill, pointsPerWin, pointsPerSurvival;
+    @ColumnInfo(codec = StringArrayCodec.class)
     private String[] servers;
     
+    @ColumnIgnored
     private Map<UUID, ScoreInfo> scoreCache = new HashMap<>();
     
     public Tournament(UUID host, String name) {

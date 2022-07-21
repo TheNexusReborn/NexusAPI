@@ -58,6 +58,8 @@ public class Column implements Comparable<Column> {
                 type = "float";
             } else if (UUID.class.equals(fieldType)) {
                 type = "varchar(36)";
+            } else if (Enum.class.isAssignableFrom(fieldType)) {
+                type = "varchar(100)";
             }
         }
     }

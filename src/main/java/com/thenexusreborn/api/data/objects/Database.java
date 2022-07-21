@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.data.objects;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.helper.ReflectionHelper;
 
 import java.lang.reflect.*;
 import java.sql.*;
@@ -81,6 +82,13 @@ public class Database {
                     data = row.getFloat(key);
                 } else if (UUID.class.equals(fieldType)) {
                     data = UUID.fromString(row.getString(key));
+                } else if (Enum.class.isAssignableFrom(fieldType)) {
+                    try {
+                        Method valueOfMethod = ReflectionHelper.getClassMethod(fieldType, "valueOf", String.class);
+                        data = valueOfMethod.invoke(null, row.getString(key));
+                    } catch (Exception e) {
+                        
+                    }
                 } else {
                     Class<? extends SqlCodec<?>> codec = column.getCodec();
                     try {
@@ -95,6 +103,18 @@ public class Database {
                 NexusAPI.logMessage(Level.SEVERE, "Could not set the value of a field for a column while loading from database.", "Class Name: " + clazz.getName(), "Field Name: " + column.getField().getName(), "Exception Class: " + e.getClass().getName(), "Exception Message: " + e.getMessage());
             }
         }
+    
+        Class<? extends ObjectHandler> handler = table.getHandler();
+        if (handler != null) {
+            try {
+                Constructor<?> constructor = handler.getDeclaredConstructor(Object.class, Database.class, Table.class);
+                ObjectHandler o = (ObjectHandler) constructor.newInstance(object, this, table);
+                o.afterLoad();
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+    
         return object;
     }
     
@@ -144,6 +164,18 @@ public class Database {
                     "Class Name: " + clazz.getName(),
                     "Database Name: " + this.host + "/" + this.name);
             return;
+        }
+    
+        Class<? extends ObjectHandler> handler = table.getHandler();
+        ObjectHandler objectHandler = null;
+        if (handler != null) {
+            try {
+                Constructor<?> constructor = handler.getDeclaredConstructor(Object.class, Database.class, Table.class);
+                objectHandler = (ObjectHandler) constructor.newInstance(object, this, table);
+                objectHandler.beforeSave();
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
         
         Map<String, SqlCodec<?>> codecInstances = new HashMap<>();
@@ -232,6 +264,10 @@ public class Database {
         } catch (IllegalAccessException e) {
             NexusAPI.logMessage(Level.SEVERE, "Could not set the primary field for generated keys", "Exception: ");
             e.printStackTrace();
+        }
+        
+        if (objectHandler != null) {
+            objectHandler.afterSave();
         }
     }
     

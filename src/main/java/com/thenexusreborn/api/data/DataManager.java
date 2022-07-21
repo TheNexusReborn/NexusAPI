@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.data;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.data.codec.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.*;
@@ -24,18 +25,18 @@ public class DataManager {
     
     public void setupMysql() throws SQLException {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), prealpha varchar(5), alpha varchar(5), beta varchar(5));");
-            statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), type varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
-            statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), type varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
-            statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
-            statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, serverName varchar(100), players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
-            statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
-            statement.execute("create table if not exists punishments(id int primary key not null auto_increment, date varchar(100), length varchar(100), actor varchar(100), target varchar(100), server varchar(100), reason varchar(200), type varchar(30), visibility varchar(30), pardonInfo varchar(500), acknowledgeInfo varchar(500));");
+            //statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), prealpha varchar(5), alpha varchar(5), beta varchar(5));");
+            //statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), type varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
+            //statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), type varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
+            //statement.execute("create table if not exists serverinfo(multicraftId int primary key not null, ip varchar(50), name varchar(100), port int, players int, maxPlayers int, hiddenPlayers int, type varchar(100), status varchar(100), state varchar(100));");
+            //statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, serverName varchar(100), players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
+            //statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
+            //statement.execute("create table if not exists punishments(id int primary key not null auto_increment, date varchar(100), length varchar(100), actor varchar(100), target varchar(100), server varchar(100), reason varchar(200), type varchar(30), visibility varchar(30), pardonInfo varchar(500), acknowledgeInfo varchar(500));");
             statement.execute("create table if not exists iphistory(ip varchar(100), uuid varchar(36))");
-            statement.execute("create table if not exists preferenceinfo(name varchar(100), displayName varchar(200), description varchar(1000), defaultValue varchar(5));");
-            statement.execute("create table if not exists playerpreferences(id int auto_increment primary key, uuid varchar(36), name varchar(100), value varchar(5));");
-            statement.execute("create table if not exists tournaments(id int auto_increment primary key , host varchar(36), name varchar(100), active varchar(5), pointsperkill int, pointsperwin int, pointspersurvival int, servers varchar(1000));");
-            statement.execute("create table if not exists statinfo(name varchar(100), type varchar(100), defaultValue varchar(1000));");
+            //statement.execute("create table if not exists preferenceinfo(name varchar(100), displayName varchar(200), description varchar(1000), defaultValue varchar(5));");
+            //statement.execute("create table if not exists playerpreferences(id int auto_increment primary key, uuid varchar(36), name varchar(100), value varchar(5));");
+            //statement.execute("create table if not exists tournaments(id int auto_increment primary key , host varchar(36), name varchar(100), active varchar(5), pointsperkill int, pointsperwin int, pointspersurvival int, servers varchar(1000));");
+            //statement.execute("create table if not exists statinfo(name varchar(100), type varchar(100), defaultValue varchar(1000));");
             
             ResultSet prefResultSet = statement.executeQuery("select * from preferenceinfo;");
             while (prefResultSet.next()) {
@@ -259,7 +260,7 @@ public class DataManager {
             
             PreparedStatement actionStatement = connection.prepareStatement("insert into gameactions(gameId, timestamp, type, value) values (?, ?, ?, ?);");
             for (GameAction action : gameInfo.getActions()) {
-                actionStatement.setInt(1, gameInfo.getId());
+                actionStatement.setInt(1, (int) gameInfo.getId());
                 actionStatement.setLong(2, action.getTimestamp());
                 actionStatement.setString(3, action.getType());
                 actionStatement.setString(4, action.getValue());
@@ -713,18 +714,8 @@ public class DataManager {
                 ps.setString(6, punishment.getReason());
                 ps.setString(7, punishment.getType().name());
                 ps.setString(8, punishment.getVisibility().name());
-                String piv = "";
-                PardonInfo pardonInfo = punishment.getPardonInfo();
-                if (pardonInfo != null) {
-                    piv = "date=" + pardonInfo.getDate() + ",actor=" + pardonInfo.getActor() + ",reason=" + pardonInfo.getReason();
-                }
-                ps.setString(9, piv);
-                String aiv = "";
-                AcknowledgeInfo acknowledgeInfo = punishment.getAcknowledgeInfo();
-                if (acknowledgeInfo != null) {
-                    aiv = "code=" + acknowledgeInfo.getCode() + ",time=" + acknowledgeInfo.getTime();
-                }
-                ps.setString(10, aiv);
+                ps.setString(9, new PardonInfoCodec().encode(punishment.getPardonInfo()));
+                ps.setString(10, new AcknowledgeInfoCodec().encode(punishment.getAcknowledgeInfo()));
                 ps.executeUpdate();
                 if (returnGeneratedKeys == Statement.RETURN_GENERATED_KEYS) {
                     ResultSet generatedKeys = ps.getGeneratedKeys();
@@ -750,51 +741,8 @@ public class DataManager {
                 String reason = resultSet.getString("reason");
                 PunishmentType type = PunishmentType.valueOf(resultSet.getString("type"));
                 Visibility visibility = Visibility.valueOf(resultSet.getString("visibility"));
-                String rawPardonInfo = resultSet.getString("pardonInfo");
-                PardonInfo pardonInfo = null;
-                if (rawPardonInfo != null && !rawPardonInfo.equals("")) {
-                    String[] piSplit = rawPardonInfo.split(",");
-                    long pardonDate = 0;
-                    String pardonActor = "";
-                    String pardonReason = "";
-                    if (piSplit != null && piSplit.length == 3) {
-                        for (String d : piSplit) {
-                            String[] dSplit = d.split("=");
-                            if (dSplit != null && dSplit.length == 2) {
-                                if (dSplit[0].equalsIgnoreCase("date")) {
-                                    pardonDate = Long.parseLong(dSplit[1]);
-                                } else if (dSplit[0].equalsIgnoreCase("actor")) {
-                                    pardonActor = dSplit[1];
-                                } else if (dSplit[0].equalsIgnoreCase("reason")) {
-                                    pardonReason = dSplit[1];
-                                }
-                            }
-                        }
-                    }
-                    pardonInfo = new PardonInfo(pardonDate, pardonActor, pardonReason);
-                }
-                
-                String rawAcknowledgeInfo = resultSet.getString("acknowledgeInfo");
-                AcknowledgeInfo acknowledgeInfo = null;
-                if (rawAcknowledgeInfo != null && !rawAcknowledgeInfo.equals("")) {
-                    String[] piSplit = rawAcknowledgeInfo.split(",");
-                    long ackTime = 0;
-                    String ackCode = "";
-                    if (piSplit != null && piSplit.length == 2) {
-                        for (String d : piSplit) {
-                            String[] dSplit = d.split("=");
-                            if (dSplit != null && dSplit.length == 2) {
-                                if (dSplit[0].equalsIgnoreCase("time")) {
-                                    ackTime = Long.parseLong(dSplit[1]);
-                                } else if (dSplit[0].equalsIgnoreCase("code")) {
-                                    ackCode = dSplit[1];
-                                }
-                            }
-                        }
-                    }
-                    acknowledgeInfo = new AcknowledgeInfo(ackCode, ackTime);
-                }
-                
+                PardonInfo pardonInfo = new PardonInfoCodec().decode(resultSet.getString("pardonInfo"));
+                AcknowledgeInfo acknowledgeInfo = new AcknowledgeInfoCodec().decode(resultSet.getString("acknowledgeInfo"));
                 Punishment punishment = new Punishment(date, length, actor, target, server, reason, type, visibility);
                 punishment.setId(id);
                 punishment.setPardonInfo(pardonInfo);

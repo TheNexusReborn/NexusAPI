@@ -1,9 +1,12 @@
 package com.thenexusreborn.api.stats;
 
+import com.thenexusreborn.api.data.annotations.TableInfo;
+import com.thenexusreborn.api.data.handler.StatObjectHandler;
 import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
 
+@TableInfo(value = "statchanges", handler = StatObjectHandler.class)
 public class StatChange implements Comparable<StatChange> {
     private Info info;
     

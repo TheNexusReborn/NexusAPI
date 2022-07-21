@@ -1,12 +1,15 @@
 package com.thenexusreborn.api.punishment;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.*;
 import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.NexusPlayer;
 
 import java.sql.*;
 import java.util.UUID;
 
+@TableInfo("punishments")
 public class Punishment implements Comparable<Punishment> {
     public static final String KICK_FORMAT = "&d&lThe Nexus Reborn &7- {type}\n \n" +
             "&fStaff: &a{actor}\n" +
@@ -14,15 +17,19 @@ public class Punishment implements Comparable<Punishment> {
             "&fExpires: &c{expire}\n" +
             "&fPunishment ID: &e{id}";
     
-    private int id = -1;
-    private final long date, length;
-    private final String actor, target, server, reason;
-    private final PunishmentType type;
-    private final Visibility visibility;
+    @Primary
+    private long id = -1;
+    private long date, length;
+    private String actor, target, server, reason;
+    private PunishmentType type;
+    private Visibility visibility;
+    @ColumnInfo(codec = PardonInfoCodec.class)
     private PardonInfo pardonInfo;
+    @ColumnInfo(codec = AcknowledgeInfoCodec.class)
     private AcknowledgeInfo acknowledgeInfo;
     
     //Cache variables
+    @ColumnIgnored
     private String actorNameCache, targetNameCache;
     
     public Punishment(long date, long length, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
@@ -57,11 +64,11 @@ public class Punishment implements Comparable<Punishment> {
         this(date, -1, actor, target, server, reason, type, visibility);
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
@@ -200,6 +207,6 @@ public class Punishment implements Comparable<Punishment> {
     
     @Override
     public int compareTo(Punishment o) {
-        return Integer.compare(this.id, o.id);
+        return Long.compare(this.id, o.id);
     }
 }

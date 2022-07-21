@@ -1,13 +1,16 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.data.annotations.*;
 
 import java.util.UUID;
 
+@TableInfo("preferences")
 public class Preference {
-    private final Info info;
-    private final UUID uuid;
-    private int id;
+    @Primary
+    private long id;
+    private Info info;
+    private UUID uuid;
     private boolean value;
     
     public Preference(Info info, UUID uuid, boolean value) {
@@ -39,11 +42,11 @@ public class Preference {
         return NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
     
@@ -51,38 +54,41 @@ public class Preference {
         return info;
     }
     
+    @TableInfo("preferenceinfo")
     public static class Info {
+        @Primary private long id;
         private final String name, displayName, description;
         private final boolean defaultValue;
+        @ColumnIgnored
         private Handler handler;
-    
+        
         public Info(String name, String displayName, String description, boolean defaultValue) {
             this.name = name;
             this.displayName = displayName;
             this.description = description;
             this.defaultValue = defaultValue;
         }
-    
+        
         public String getName() {
             return name;
         }
-    
+        
         public String getDisplayName() {
             return displayName;
         }
-    
+        
         public String getDescription() {
             return description;
         }
-    
+        
         public boolean getDefaultValue() {
             return defaultValue;
         }
-    
+        
         public Handler getHandler() {
             return handler;
         }
-    
+        
         public void setHandler(Handler handler) {
             this.handler = handler;
         }

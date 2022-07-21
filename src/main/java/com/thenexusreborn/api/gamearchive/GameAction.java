@@ -1,6 +1,11 @@
 package com.thenexusreborn.api.gamearchive;
 
+import com.thenexusreborn.api.data.annotations.*;
+
+@TableInfo("gameactions")
 public class GameAction {
+    @Primary
+    private long id;
     private int gameId;
     private long timestamp;
     private String type, value;
