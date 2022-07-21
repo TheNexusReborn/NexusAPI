@@ -6,11 +6,11 @@ import com.thenexusreborn.api.data.annotations.*;
 public class GameAction {
     @Primary
     private long id;
-    private int gameId;
+    private long gameId;
     private long timestamp;
     private String type, value;
     
-    public GameAction(int gameId, long timestamp, String type, String value) {
+    public GameAction(long gameId, long timestamp, String type, String value) {
         this.gameId = gameId;
         this.timestamp = timestamp;
         this.type = type;
@@ -23,7 +23,7 @@ public class GameAction {
         this.value = value;
     }
     
-    public int getGameId() {
+    public long getGameId() {
         return gameId;
     }
     
