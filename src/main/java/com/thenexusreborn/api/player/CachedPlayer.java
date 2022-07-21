@@ -35,6 +35,11 @@ public class CachedPlayer {
     @ColumnIgnored
     protected Set<StatChange> statChanges = new TreeSet<>();
     
+    @ColumnIgnored
+    protected Set<IPEntry> ipHistory = new HashSet<>();
+    
+    private CachedPlayer() {}
+    
     public CachedPlayer(UUID uniqueId) {
         this.uniqueId = uniqueId;
     }
@@ -53,6 +58,7 @@ public class CachedPlayer {
         this.preferences = cachedPlayer.preferences;
         this.stats = cachedPlayer.stats;
         this.statChanges = cachedPlayer.statChanges;
+        this.ipHistory = cachedPlayer.ipHistory;
     }
     
     public int getId() {
