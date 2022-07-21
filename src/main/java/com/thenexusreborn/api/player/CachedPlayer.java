@@ -257,4 +257,8 @@ public class CachedPlayer {
     public String serializeRanks() {
         return new RanksCodec().encode(this.ranks);
     }
+    
+    public Set<IPEntry> getIpHistory() {
+        return ipHistory;
+    }
 }

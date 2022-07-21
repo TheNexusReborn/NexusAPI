@@ -118,6 +118,53 @@ public class Database {
         return object;
     }
     
+    public <T> List<T> get(Class<T> clazz, String[] columns, Object[] values) throws SQLException {
+        if (columns == null || values == null) {
+            throw new IllegalArgumentException("Columns or Values are null");
+        }
+        
+        if (columns.length != values.length) {
+            throw new IllegalArgumentException("Columns has a size of " + columns.length + " and values has a size of " + values.length + ". They must be equal.");
+        }
+        
+        Table table = getTable(clazz);
+        if (table == null) {
+            NexusAPI.logMessage(Level.WARNING, "Tried to get data from a table that does not exist.", "Database: " + this.host + "/" + this.name, "Class: " + clazz.getName());
+            return null;
+        }
+        
+        Map<Column, Object> tableColumns = new HashMap<>();
+    
+        for (int i = 0; i < columns.length; i++) {
+            Column column = table.getColumn(columns[i]);
+            if (column != null) {
+                tableColumns.put(column, values[i]);
+            }
+        }
+        
+        List<String> whereConditions = new ArrayList<>();
+        tableColumns.forEach((column, value) -> whereConditions.add(column.getName() + "='" + value.toString() + "'"));
+        
+        StringBuilder sb = new StringBuilder("select * from " + table.getName() + " where ");
+        for (int i = 0; i < whereConditions.size(); i++) {
+            sb.append(whereConditions.get(i));
+            if (i < whereConditions.size() - 1) {
+                sb.append(" and ");
+            }
+        }
+        
+        sb.append(";");
+    
+        List<Row> rows = executeQuery(sb.toString());
+        
+        List<T> objects = new ArrayList<>();
+        for (Row row : rows) {
+            objects.add(parseObjectFromRow(clazz, table, row));
+        }
+    
+        return objects;
+    }
+    
     public <T> List<T> get(Class<T> clazz, String columnName, Object value) throws SQLException {
         Table table = getTable(clazz);
         if (table == null) {
@@ -130,9 +177,9 @@ public class Database {
             return null;
         }
         
-        List<T> objects = new ArrayList<>();
-        
         List<Row> rows = executeQuery("select * from " + table.getName() + " where " + column.getName() + "='" + value + "';");
+    
+        List<T> objects = new ArrayList<>();
         for (Row row : rows) {
             objects.add(parseObjectFromRow(clazz, table, row));
         }

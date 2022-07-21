@@ -5,7 +5,7 @@ import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.stats.*;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 public class PlayerObjectHandler extends ObjectHandler {
     public PlayerObjectHandler(Object object, Database database, Table table) {
@@ -24,7 +24,13 @@ public class PlayerObjectHandler extends ObjectHandler {
         }
     
         try {
-            List<Stat> stats = database.get(Stat.class, "uuid", cachedPlayer.getUniqueId());
+            List<Stat> stats = new ArrayList<>(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "online"}));
+            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "server"}));
+            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "online"}));
+            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "unlockedtags"}));
+            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "tag"}));
+            //TODO add more based on commands and stuff
+            
             for (Stat stat : stats) {
                 cachedPlayer.addStat(stat);
             }
@@ -37,6 +43,13 @@ public class PlayerObjectHandler extends ObjectHandler {
             for (StatChange statChange : statChanges) {
                 cachedPlayer.addStatChange(statChange);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            List<IPEntry> ipEntries = database.get(IPEntry.class, "uuid", cachedPlayer.getUniqueId());
+            cachedPlayer.getIpHistory().addAll(ipEntries);
         } catch (SQLException e) {
             e.printStackTrace();
         }
