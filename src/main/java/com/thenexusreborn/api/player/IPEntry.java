@@ -2,7 +2,7 @@ package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.data.annotations.TableInfo;
 
-import java.util.UUID;
+import java.util.*;
 
 @TableInfo("iphistory")
 public class IPEntry {
@@ -22,5 +22,22 @@ public class IPEntry {
     
     public UUID getUuid() {
         return uuid;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        IPEntry ipEntry = (IPEntry) o;
+        return Objects.equals(ip, ipEntry.ip) && Objects.equals(uuid, ipEntry.uuid);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(ip, uuid);
     }
 }

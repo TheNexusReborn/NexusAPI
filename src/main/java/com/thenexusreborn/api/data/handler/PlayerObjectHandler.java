@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.data.handler;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.stats.*;
@@ -46,12 +47,11 @@ public class PlayerObjectHandler extends ObjectHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        try {
-            List<IPEntry> ipEntries = database.get(IPEntry.class, "uuid", cachedPlayer.getUniqueId());
-            cachedPlayer.getIpHistory().addAll(ipEntries);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    
+        for (IPEntry ipEntry : NexusAPI.getApi().getPlayerManager().getIpHistory()) {
+            if (ipEntry.getUuid().equals(cachedPlayer.getUniqueId())) {
+                cachedPlayer.getIpHistory().add(ipEntry);
+            }
         }
     }
     

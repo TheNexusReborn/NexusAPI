@@ -855,24 +855,8 @@ public class DataManager {
         }
     }
     
-    public Map<String, Set<UUID>> getIpHistory() {
-        Map<String, Set<UUID>> ipHistory = new HashMap<>();
-        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery("select * from iphistory");
-            while (resultSet.next()) {
-                String ip = resultSet.getString("ip");
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                if (ipHistory.containsKey(ip)) {
-                    ipHistory.get(ip).add(uuid);
-                } else {
-                    ipHistory.put(ip, new HashSet<>(Collections.singleton(uuid)));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return ipHistory;
+    public Set<IPEntry> getIpHistory() {
+        return null; //TODO
     }
     
     public List<Punishment> getPunishments() {

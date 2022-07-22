@@ -120,7 +120,7 @@ public abstract class NexusAPI {
             }
         }
         
-        playerManager.getIpHistory().putAll(getDataManager().getIpHistory());
+        playerManager.getIpHistory().addAll(getDataManager().getIpHistory());
     }
     
     public abstract void registerDatabases(DatabaseRegistry registry);
