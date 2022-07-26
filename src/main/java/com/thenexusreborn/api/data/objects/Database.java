@@ -12,13 +12,15 @@ import java.util.logging.Level;
 public class Database {
     public static final String URL = "jdbc:mysql://%s/%s?user=%s&password=%s";
     private final String name, host, user, password;
+    private final boolean primary;
     private Set<Table> tables = new HashSet<>();
     
-    public Database(String name, String host, String user, String password) {
+    public Database(String name, String host, String user, String password, boolean primary) {
         this.name = name;
         this.host = host;
         this.user = user;
         this.password = password;
+        this.primary = primary;
     }
     
     public String getName() {
@@ -39,6 +41,10 @@ public class Database {
     
     public void addTable(Table table) {
         this.tables.add(table);
+    }
+    
+    public void registerClass(Class<?> clazz) {
+        addTable(new Table(clazz));
     }
     
     public Set<Table> getTables() {
@@ -422,6 +428,10 @@ public class Database {
         }
         
         return rows;
+    }
+    
+    public boolean isPrimary() {
+        return primary;
     }
     
     @Override

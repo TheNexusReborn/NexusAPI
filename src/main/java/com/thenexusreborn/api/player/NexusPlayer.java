@@ -210,7 +210,7 @@ public abstract class NexusPlayer {
         if (preference != null) {
             return preference.getValue();
         } else {
-            Info info = NexusAPI.getApi().getDataManager().getPreferenceInfo().get(name.toLowerCase());
+            Info info = NexusAPI.getApi().getPreferenceRegistry().get(name.toLowerCase());
             if (info != null) {
                 return info.getDefaultValue();
             } else {

@@ -16,4 +16,6 @@ public abstract class Registry<T> {
     public void remove(T object) {
         this.objects.remove(object);
     }
+    
+    public abstract T get(String str);
 }

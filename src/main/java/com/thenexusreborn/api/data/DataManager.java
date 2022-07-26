@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("DuplicatedCode")
 public class DataManager {
     
+    @Deprecated
     public void setupMysql() {
         //try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             //statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), prealpha varchar(5), alpha varchar(5), beta varchar(5));");
@@ -58,6 +59,7 @@ public class DataManager {
         //}
     }
     
+    @Deprecated
     public Tournament getTournament(int id) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from tournaments where id='" + id + "';");
@@ -90,6 +92,7 @@ public class DataManager {
         return null;
     }
     
+    @Deprecated
     public List<Tournament> getTournaments() {
         List<Tournament> tournaments = new ArrayList<>();
         
@@ -159,6 +162,7 @@ public class DataManager {
         return null;
     }
     
+    @Deprecated
     public GameInfo getGameInfo(int id) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from games where id='" + id + "';");
@@ -237,6 +241,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void getGameInfoAsync(int id, Consumer<GameInfo> action) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             GameInfo gameInfo = getGameInfo(id);
@@ -246,6 +251,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void updateAllServers(List<ServerInfo> servers) {
         if (servers == null || servers.isEmpty()) {
             return;
@@ -256,6 +262,7 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public void updateServerInfo(ServerInfo serverInfo) {
         ServerInfo infoFromDatabase = getServerInfo(serverInfo.getMulticraftId());
         serverInfo.setHiddenPlayers(infoFromDatabase.getHiddenPlayers());
@@ -266,6 +273,7 @@ public class DataManager {
         serverInfo.setType(infoFromDatabase.getType());
     }
     
+    @Deprecated
     public List<ServerInfo> getAllServers() {
         List<ServerInfo> servers = new ArrayList<>();
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
@@ -283,6 +291,7 @@ public class DataManager {
         return servers;
     }
     
+    @Deprecated
     public void getAllServersAsync(Consumer<List<ServerInfo>> action) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             List<ServerInfo> allServers = getAllServers();
@@ -292,6 +301,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public ServerInfo getServerInfo(int multicraftId) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from serverinfo where multicraftId='" + multicraftId + "';");
@@ -314,6 +324,7 @@ public class DataManager {
         return null;
     }
     
+    @Deprecated
     public void getServerInfoAsync(int multicraftId, Consumer<ServerInfo> action) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             ServerInfo serverInfo = getServerInfo(multicraftId);
@@ -413,6 +424,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void removeStatChangeAsync(StatChange statChange) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             if (statChange.getId() != 0) {
@@ -547,6 +559,7 @@ public class DataManager {
         return unlockedTags;
     }
     
+    @Deprecated
     public void refreshPlayerStats(NexusPlayer nexusPlayer) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet statsResultSet = statement.executeQuery("select * from stats where uuid='" + nexusPlayer.getUniqueId() + "';");
@@ -653,6 +666,7 @@ public class DataManager {
         return ranks;
     }
     
+    @Deprecated
     public void loadPlayerAsync(UUID uuid, Consumer<NexusPlayer> consumer) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             NexusPlayer nexusPlayer = loadPlayer(uuid);
@@ -698,6 +712,7 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public Punishment getPunishment(int id) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from punishments where id='" + id + "';");
@@ -789,6 +804,7 @@ public class DataManager {
         return null;
     }
     
+    @Deprecated
     public Set<UUID> getPlayersByIp(String ip) {
         Set<UUID> players = new HashSet<>();
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
@@ -804,6 +820,7 @@ public class DataManager {
         return players;
     }
     
+    @Deprecated
     public void addIpHistory(UUID uuid, String ip) {
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             try (Statement statement = connection.createStatement()) {
@@ -824,10 +841,12 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public Set<IPEntry> getIpHistory() {
         return new HashSet<>(); //TODO
     }
     
+    @Deprecated
     public List<Punishment> getPunishments() {
         List<Punishment> punishments = new ArrayList<>();
         

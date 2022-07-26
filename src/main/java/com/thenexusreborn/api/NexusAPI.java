@@ -1,12 +1,13 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.*;
-import com.thenexusreborn.api.data.objects.Database;
+import com.thenexusreborn.api.data.objects.*;
+import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.PunishmentManager;
+import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
-import com.thenexusreborn.api.server.ServerManager;
+import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
@@ -115,6 +116,23 @@ public abstract class NexusAPI {
     
         DatabaseRegistry databaseRegistry = new DatabaseRegistry();
         registerDatabases(databaseRegistry);
+    
+        for (Database database : databaseRegistry.getObjects()) {
+            if (database.isPrimary()) {
+                database.registerClass(NexusPlayer.class);
+                database.registerClass(Stat.class);
+                database.registerClass(Stat.Info.class);
+                database.registerClass(StatChange.class);
+                database.registerClass(ServerInfo.class);
+                database.registerClass(GameInfo.class);
+                database.registerClass(GameAction.class);
+                database.registerClass(Punishment.class);
+                database.registerClass(IPEntry.class);
+                database.registerClass(Preference.Info.class);
+                database.registerClass(Preference.class);
+                database.registerClass(Tournament.class);
+            }
+        }
         
         this.ioManager = new IOManager(databaseRegistry);
         this.ioManager.setup();
