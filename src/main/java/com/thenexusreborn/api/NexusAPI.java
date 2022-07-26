@@ -11,6 +11,8 @@ import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
+import java.io.*;
+import java.net.URL;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.*;
@@ -38,6 +40,7 @@ public abstract class NexusAPI {
     protected NetworkManager networkManager;
     protected PunishmentManager punishmentManager;
     protected Tournament tournament;
+    protected String version;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
@@ -49,6 +52,20 @@ public abstract class NexusAPI {
         this.playerFactory = playerFactory;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
+    
+        //TODO problem
+        URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
+        try (InputStream in = url.openStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String line = reader.readLine();
+            if (line == null || line.equals("")) {
+                logger.warning("Could not find the NexusAPI Version.");
+            } else {
+                this.version = line;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public Environment getEnvironment() {
@@ -56,6 +73,8 @@ public abstract class NexusAPI {
     }
     
     public final void init() throws Exception {
+        getLogger().info("Detected NexusAPI Version: " + version);
+        
         try {
             Driver mysqlDriver = new com.mysql.cj.jdbc.Driver();
             DriverManager.registerDriver(mysqlDriver);
@@ -64,7 +83,7 @@ public abstract class NexusAPI {
             e.printStackTrace();
             return;
         }
-        
+    
         DatabaseRegistry databaseRegistry = new DatabaseRegistry();
         registerDatabases(databaseRegistry);
         
@@ -131,6 +150,10 @@ public abstract class NexusAPI {
     
     public void setTournament(Tournament tournament) {
         this.tournament = tournament;
+    }
+    
+    public String getVersion() {
+        return version;
     }
     
     public abstract Connection getConnection() throws SQLException;

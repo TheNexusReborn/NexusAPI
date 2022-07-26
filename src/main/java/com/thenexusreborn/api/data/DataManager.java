@@ -856,7 +856,7 @@ public class DataManager {
     }
     
     public Set<IPEntry> getIpHistory() {
-        return null; //TODO
+        return new HashSet<>(); //TODO
     }
     
     public List<Punishment> getPunishments() {
