@@ -19,12 +19,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("DuplicatedCode")
 public class DataManager {
     
-    private Map<String, Preference.Info> preferenceInfo = new HashMap<>();
-    
-    private Set<String> statsInDatabase = new HashSet<>();
-    
-    public void setupMysql() throws SQLException {
-        try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
+    public void setupMysql() {
+        //try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             //statement.execute("CREATE TABLE IF NOT EXISTS players(version varchar(10), uuid varchar(36) NOT NULL, firstJoined varchar(100), lastLogin varchar(100), lastLogout varchar(100), playtime varchar(100), lastKnownName varchar(16), tag varchar(30), ranks varchar(1000), unlockedTags varchar(1000), prealpha varchar(5), alpha varchar(5), beta varchar(5));");
             //statement.execute("CREATE TABLE IF NOT EXISTS stats(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), name varchar(100), type varchar(100), value varchar(1000), created varchar(100), modified varchar(100));");
             //statement.execute("CREATE TABLE IF NOT EXISTS statchanges(id int PRIMARY KEY NOT NULL AUTO_INCREMENT, uuid varchar(36), statName varchar(100), type varchar(100), value varchar(100), operator varchar(50), timestamp varchar(100));");
@@ -38,56 +34,28 @@ public class DataManager {
             //statement.execute("create table if not exists tournaments(id int auto_increment primary key , host varchar(36), name varchar(100), active varchar(5), pointsperkill int, pointsperwin int, pointspersurvival int, servers varchar(1000));");
             //statement.execute("create table if not exists statinfo(name varchar(100), type varchar(100), defaultValue varchar(1000));");
             
-            ResultSet prefResultSet = statement.executeQuery("select * from preferenceinfo;");
-            while (prefResultSet.next()) {
-                String name = prefResultSet.getString("name");
-                String displayName = prefResultSet.getString("displayName");
-                String description = prefResultSet.getString("description");
-                boolean defaultValue = Boolean.parseBoolean("defaultValue");
-                Preference.Info preference = new Preference.Info(name, displayName, description, defaultValue);
-                this.preferenceInfo.put(preference.getName(), preference);
-            }
+            //TODO
+//            ResultSet prefResultSet = statement.executeQuery("select * from preferenceinfo;");
+//            while (prefResultSet.next()) {
+//                String name = prefResultSet.getString("name");
+//                String displayName = prefResultSet.getString("displayName");
+//                String description = prefResultSet.getString("description");
+//                boolean defaultValue = Boolean.parseBoolean("defaultValue");
+//                Preference.Info preference = new Preference.Info(name, displayName, description, defaultValue);
+//                this.preferenceInfo.put(preference.getName(), preference);
+//            }
             
-            ResultSet statResultSet = statement.executeQuery("select * from statinfo;");
-            while (statResultSet.next()) {
-                String name = StatHelper.formatStatName(statResultSet.getString("name"));
-                StatType type = StatType.valueOf(statResultSet.getString("type"));
-                Object defaultValue = StatHelper.parseValue(type, statResultSet.getString("defaultValue"));
-                Stat.Info statInfo = new Stat.Info(name, type, defaultValue);
-                StatHelper.addStatInfo(statInfo);
-                statsInDatabase.add(name);
-            }
-        }
-    }
-    
-    public Set<String> getStatsInDatabase() {
-        return statsInDatabase;
-    }
-    
-    public void registerPreference(Preference.Info info) {
-        if (this.preferenceInfo.containsKey(info.getName())) {
-            this.preferenceInfo.put(info.getName(), info);
-            try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement statement = connection.prepareStatement("update preferenceinfo set displayName=?, description=?, defaultValue=? where name=?")) {
-                statement.setString(1, info.getDisplayName());
-                statement.setString(2, info.getDescription());
-                statement.setString(3, info.getDefaultValue() + "");
-                statement.setString(4, info.getName());
-                statement.executeUpdate();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            this.preferenceInfo.put(info.getName(), info);
-            try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement statement = connection.prepareStatement("insert into preferenceinfo(name, displayName, description, defaultValue) values(?, ?, ?, ?);")) {
-                statement.setString(1, info.getName());
-                statement.setString(2, info.getDisplayName());
-                statement.setString(3, info.getDescription());
-                statement.setString(4, info.getDefaultValue() + "");
-                statement.executeUpdate();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+            //TODO
+//            ResultSet statResultSet = statement.executeQuery("select * from statinfo;");
+//            while (statResultSet.next()) {
+//                String name = StatHelper.formatStatName(statResultSet.getString("name"));
+//                StatType type = StatType.valueOf(statResultSet.getString("type"));
+//                Object defaultValue = StatHelper.parseValue(type, statResultSet.getString("defaultValue"));
+//                Stat.Info statInfo = new Stat.Info(name, type, defaultValue);
+//                StatHelper.addStatInfo(statInfo);
+//                statsInDatabase.add(name);
+//            }
+        //}
     }
     
     public Tournament getTournament(int id) {
@@ -138,10 +106,8 @@ public class DataManager {
         return tournaments;
     }
     
-    public Map<String, Preference.Info> getPreferenceInfo() {
-        return preferenceInfo;
-    }
     
+    @Deprecated
     public List<Preference> loadPlayerPreferences(UUID player) {
         List<Preference> playerPreferences = new ArrayList<>();
         
@@ -152,7 +118,12 @@ public class DataManager {
                 String name = resultSet.getString("name");
                 boolean value = Boolean.parseBoolean(resultSet.getString("value"));
                 
-                Preference.Info info = this.preferenceInfo.get(name);
+                Preference.Info info = null;
+                for (Info object : NexusAPI.getApi().getPreferenceRegistry().getObjects()) {
+                    if (object.getName().equalsIgnoreCase("name")) {
+                        info = object;
+                    }
+                }
                 if (info != null) {
                     Preference preference = new Preference(info, player, id, value);
                     playerPreferences.add(preference);
@@ -161,28 +132,11 @@ public class DataManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        infoLoop:
-        for (Info info : this.preferenceInfo.values()) {
-            for (Preference playerPreference : playerPreferences) {
-                if (info.getName().equals(playerPreference.getInfo().getName())) {
-                    continue infoLoop;
-                }
-            }
-            
-            playerPreferences.add(new Preference(info, player, info.getDefaultValue()));
-        }
-        
         return playerPreferences;
     }
     
-    public void setPreferenceHandler(String name, Handler handler) {
-        Info info = this.preferenceInfo.get(name);
-        if (info != null) {
-            info.setHandler(handler);
-        }
-    }
-    
+    //TODO Do this as cached player and not normal player. Cached Player has a loadFully method
+    @Deprecated
     public NexusPlayer loadPlayer(String name) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet nameSet = statement.executeQuery("select uuid from players where lastKnownName='" + name + "';");
@@ -237,6 +191,7 @@ public class DataManager {
         return null;
     }
     
+    @Deprecated
     public void pushGameInfo(GameInfo gameInfo) {
         try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement gameStatement = connection.prepareStatement("insert into games(start, end, serverName, players, winner, mapName, settings, firstBlood, playerCount, length) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
             gameStatement.setLong(1, gameInfo.getGameStart());
@@ -272,6 +227,7 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public void pushGameInfoAsync(GameInfo gameInfo, Consumer<GameInfo> action) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             pushGameInfo(gameInfo);
@@ -367,6 +323,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void pushServerInfo(ServerInfo serverInfo) {
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             try (Statement statement = connection.createStatement()) {
@@ -394,10 +351,12 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public void pushServerInfoAsync(ServerInfo serverInfo) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> pushServerInfo(serverInfo));
     }
     
+    @Deprecated
     public <T extends Number> void pushStatChangeAsync(StatChange statChange) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             try (Connection connection = NexusAPI.getApi().getConnection(); PreparedStatement statement = connection.prepareStatement("insert into statchanges(uuid, statName, value, operator, timestamp) values (?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
@@ -418,6 +377,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void pushStatAsync(Stat stat) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             try (Connection connection = NexusAPI.getApi().getConnection()) {
@@ -465,6 +425,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void pushPlayer(NexusPlayer player) {
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             boolean exists = false;
@@ -527,6 +488,7 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public void pushPlayerPreferences(NexusPlayer player) {
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             for (Preference preference : player.getPreferences().values()) {
@@ -555,10 +517,12 @@ public class DataManager {
         }
     }
     
+    @Deprecated
     public void pushPlayerAsync(NexusPlayer player) {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> pushPlayer(player));
     }
     
+    @Deprecated
     public String convertTags(NexusPlayer player) {
         StringBuilder sb = new StringBuilder();
         for (String tag : player.getUnlockedTags()) {
@@ -573,6 +537,7 @@ public class DataManager {
         return unlockedTags;
     }
     
+    @Deprecated
     public Set<String> parseTags(String rawUnlockedTags) {
         Set<String> unlockedTags = new HashSet<>();
         if (rawUnlockedTags != null && !rawUnlockedTags.equals("")) {
@@ -628,6 +593,8 @@ public class DataManager {
         }
     }
     
+    //TODO See other load player above
+    @Deprecated
     public NexusPlayer loadPlayer(UUID uuid) {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet playerResultSet = statement.executeQuery("SELECT * FROM players WHERE uuid='" + uuid.toString() + "';");
@@ -670,6 +637,7 @@ public class DataManager {
         return null;
     }
     
+    @Deprecated
     public Map<Rank, Long> parseRanks(String rawRanks) {
         Map<Rank, Long> ranks = new TreeMap<>();
         if (rawRanks.contains(",")) {
@@ -694,6 +662,7 @@ public class DataManager {
         });
     }
     
+    @Deprecated
     public void pushPunishment(Punishment punishment) {
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             String sql;
@@ -875,6 +844,7 @@ public class DataManager {
         return punishments;
     }
     
+    @Deprecated
     public void pushTournament(Tournament tournament) {
         try (Connection connection = NexusAPI.getApi().getConnection()) {
             String sql;

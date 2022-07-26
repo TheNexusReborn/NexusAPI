@@ -4,18 +4,17 @@ import com.thenexusreborn.api.data.*;
 import com.thenexusreborn.api.data.objects.Database;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.*;
+import com.thenexusreborn.api.punishment.PunishmentManager;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.ServerManager;
 import com.thenexusreborn.api.stats.*;
-import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
 import java.io.*;
 import java.net.URL;
 import java.sql.*;
-import java.util.*;
+import java.util.HashSet;
 import java.util.logging.*;
 
 public abstract class NexusAPI {
@@ -42,6 +41,9 @@ public abstract class NexusAPI {
     protected PunishmentManager punishmentManager;
     protected Tournament tournament;
     protected String version;
+    
+    protected StatRegistry statRegistry;
+    protected PreferenceRegistry preferenceRegistry;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
@@ -84,62 +86,70 @@ public abstract class NexusAPI {
             return;
         }
     
+        StatRegistry statRegistry = StatHelper.getRegistry();
+        statRegistry.register("xp", StatType.DOUBLE, 0.0);
+        statRegistry.register("level", StatType.INTEGER, 0);
+        statRegistry.register("nexites", StatType.DOUBLE, 0.0);
+        statRegistry.register("credits", StatType.DOUBLE, 0.0);
+        statRegistry.register("playtime", StatType.LONG, 0L);
+        statRegistry.register("firstjoined", StatType.LONG, 0L);
+        statRegistry.register("lastlogin", StatType.LONG, 0L);
+        statRegistry.register("lastlogout", StatType.LONG, 0L);
+        statRegistry.register("prealpha", StatType.BOOLEAN, false);
+        statRegistry.register("alpha", StatType.BOOLEAN, false);
+        statRegistry.register("beta", StatType.BOOLEAN, false);
+        statRegistry.register("tag", StatType.STRING, "");
+        statRegistry.register("online", StatType.BOOLEAN, false);
+        statRegistry.register("server", StatType.STRING, "");
+        statRegistry.register("unlockedtags", StatType.STRING_SET, new HashSet<>());
+        registerStats(statRegistry);
+        
+        PreferenceRegistry preferenceRegistry = new PreferenceRegistry();
+        preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
+        preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+        registerPreferences(preferenceRegistry);
+    
+        NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
+        registerNetworkCommands(networkCommandRegistry);
+        networkManager.init("localhost", 3408);
+    
         DatabaseRegistry databaseRegistry = new DatabaseRegistry();
         registerDatabases(databaseRegistry);
         
         this.ioManager = new IOManager(databaseRegistry);
         this.ioManager.setup();
-    
-        StatRegistry registry = StatHelper.getRegistry();
-        registry.register("xp", StatType.DOUBLE, 0.0);
-        registry.register("level", StatType.INTEGER, 0);
-        registry.register("nexites", StatType.DOUBLE, 0.0);
-        registry.register("credits", StatType.DOUBLE, 0.0);
-        registry.register("playtime", StatType.LONG, 0L);
-        registry.register("firstjoined", StatType.LONG, 0L);
-        registry.register("lastlogin", StatType.LONG, 0L);
-        registry.register("lastlogout", StatType.LONG, 0L);
-        registry.register("prealpha", StatType.BOOLEAN, false);
-        registry.register("alpha", StatType.BOOLEAN, false);
-        registry.register("beta", StatType.BOOLEAN, false);
-        registry.register("tag", StatType.STRING, "");
-        registry.register("online", StatType.BOOLEAN, false);
-        registry.register("server", StatType.STRING, "");
-        registry.register("unlockedtags", StatType.STRING_SET, new HashSet<>());
-        registerStats(registry);
         
-        NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
-        registerNetworkCommands(networkCommandRegistry);
-        networkManager.init("localhost", 3408);
-
-        dataManager.setupMysql();
-    
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("insert into statinfo (name, type, defaultValue) values (?, ?, ?);")) {
-            for (Info info : registry.getObjects()) {
-                if (!dataManager.getStatsInDatabase().contains(info.getName())) {
-                    statement.setString(1, info.getName());
-                    statement.setString(2, info.getType().name());
-                    statement.setString(3, StatHelper.serializeStatValue(info.getType(), info.getDefaultValue()));
-                    statement.executeUpdate();
-                }
-            }
-        }
+        //TODO
+//        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("insert into statinfo (name, type, defaultValue) values (?, ?, ?);")) {
+//            for (Info info : registry.getObjects()) {
+//                if (!dataManager.getStatsInDatabase().contains(info.getName())) {
+//                    statement.setString(1, info.getName());
+//                    statement.setString(2, info.getType().name());
+//                    statement.setString(3, StatHelper.serializeStatValue(info.getType(), info.getDefaultValue()));
+//                    statement.executeUpdate();
+//                }
+//            }
+//        }
         
-        serverManager.setupCurrentServer();
+        //TODO
+        //serverManager.setupCurrentServer();
         
-        List<Punishment> punishments = dataManager.getPunishments();
-        for (Punishment punishment : punishments) {
-            punishmentManager.addPunishment(punishment);
-        }
+        //TODO
+//        List<Punishment> punishments = dataManager.getPunishments();
+//        for (Punishment punishment : punishments) {
+//            punishmentManager.addPunishment(punishment);
+//        }
         
-        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery("select id from tournaments;");
-            if (resultSet.next()) {
-                this.tournament = NexusAPI.getApi().getDataManager().getTournament(resultSet.getInt("id"));
-            }
-        }
+        //TODO
+//        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+//            ResultSet resultSet = statement.executeQuery("select id from tournaments;");
+//            if (resultSet.next()) {
+//                this.tournament = NexusAPI.getApi().getDataManager().getTournament(resultSet.getInt("id"));
+//            }
+//        }
         
-        playerManager.getIpHistory().addAll(getDataManager().getIpHistory());
+        //TODO
+        //playerManager.getIpHistory().addAll(getDataManager().getIpHistory());
     }
     
     public abstract void registerDatabases(DatabaseRegistry registry);
@@ -147,6 +157,8 @@ public abstract class NexusAPI {
     public abstract void registerStats(StatRegistry registry);
     
     public abstract void registerNetworkCommands(NetworkCommandRegistry registry);
+    
+    public abstract void registerPreferences(PreferenceRegistry registry);
     
     public void setTournament(Tournament tournament) {
         this.tournament = tournament;
@@ -156,7 +168,10 @@ public abstract class NexusAPI {
         return version;
     }
     
+    @Deprecated
     public abstract Connection getConnection() throws SQLException;
+    
+    public abstract File getFolder();
     
     public DataManager getDataManager() {
         return dataManager;
@@ -212,5 +227,13 @@ public abstract class NexusAPI {
     
     public Database getPrimaryDatabase() {
         return null; //TODO
+    }
+    
+    public StatRegistry getStatRegistry() {
+        return statRegistry;
+    }
+    
+    public PreferenceRegistry getPreferenceRegistry() {
+        return preferenceRegistry;
     }
 }
