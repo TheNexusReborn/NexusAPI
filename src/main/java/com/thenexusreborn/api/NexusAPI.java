@@ -53,7 +53,6 @@ public abstract class NexusAPI {
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
     
-        //TODO problem
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
