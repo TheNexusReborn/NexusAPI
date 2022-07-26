@@ -91,7 +91,7 @@ public abstract class NexusAPI {
     
         StatRegistry registry = StatHelper.getRegistry();
         registry.register("xp", StatType.DOUBLE, 0.0);
-        //TODO registry.register("level", StatType.INTEGER, 0);
+        registry.register("level", StatType.INTEGER, 0);
         registry.register("nexites", StatType.DOUBLE, 0.0);
         registry.register("credits", StatType.DOUBLE, 0.0);
         registry.register("playtime", StatType.LONG, 0L);
