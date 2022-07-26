@@ -32,7 +32,7 @@ public class DataManager {
             //statement.execute("create table if not exists games(id int primary key not null auto_increment, start long, end long, serverName varchar(100), players varchar(500), winner varchar(20), mapName varchar(50), settings varchar(1000), firstBlood varchar(20), playerCount int, length long);");
             //statement.execute("create table if not exists gameactions(gameId int, timestamp long, type varchar(100), value varchar(1000));");
             //statement.execute("create table if not exists punishments(id int primary key not null auto_increment, date varchar(100), length varchar(100), actor varchar(100), target varchar(100), server varchar(100), reason varchar(200), type varchar(30), visibility varchar(30), pardonInfo varchar(500), acknowledgeInfo varchar(500));");
-            statement.execute("create table if not exists iphistory(ip varchar(100), uuid varchar(36))");
+            //statement.execute("create table if not exists iphistory(ip varchar(100), uuid varchar(36))");
             //statement.execute("create table if not exists preferenceinfo(name varchar(100), displayName varchar(200), description varchar(1000), defaultValue varchar(5));");
             //statement.execute("create table if not exists playerpreferences(id int auto_increment primary key, uuid varchar(36), name varchar(100), value varchar(5));");
             //statement.execute("create table if not exists tournaments(id int auto_increment primary key , host varchar(36), name varchar(100), active varchar(5), pointsperkill int, pointsperwin int, pointspersurvival int, servers varchar(1000));");

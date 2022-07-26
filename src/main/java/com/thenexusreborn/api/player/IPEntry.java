@@ -1,11 +1,14 @@
 package com.thenexusreborn.api.player;
 
-import com.thenexusreborn.api.data.annotations.TableInfo;
+import com.thenexusreborn.api.data.annotations.*;
 
 import java.util.*;
 
 @TableInfo("iphistory")
 public class IPEntry {
+    
+    @Primary
+    private long id;
     private String ip;
     private UUID uuid;
     

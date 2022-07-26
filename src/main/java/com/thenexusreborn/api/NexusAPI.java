@@ -1,6 +1,7 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.*;
+import com.thenexusreborn.api.data.objects.Database;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
@@ -207,5 +208,9 @@ public abstract class NexusAPI {
             }
         }
         logger.log(level, "---------------------------------");
+    }
+    
+    public Database getPrimaryDatabase() {
+        return null; //TODO
     }
 }

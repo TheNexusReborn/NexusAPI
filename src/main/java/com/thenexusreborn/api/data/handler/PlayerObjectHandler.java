@@ -15,60 +15,63 @@ public class PlayerObjectHandler extends ObjectHandler {
     
     @Override
     public void afterLoad() {
-        CachedPlayer cachedPlayer = (CachedPlayer) object;
+        NexusPlayer player = (NexusPlayer) object;
     
         try {
-            List<Preference> preferences = database.get(Preference.class, "uuid", cachedPlayer.getUniqueId());
-            cachedPlayer.setPreferences(preferences);
+            List<Preference> preferences = database.get(Preference.class, "uuid", player.getUniqueId());
+            player.setPreferences(preferences);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     
         try {
-            List<Stat> stats = new ArrayList<>(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "online"}));
-            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "server"}));
-            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "online"}));
-            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "unlockedtags"}));
-            stats.addAll(database.get(Stat.class, new String[]{"uuid", "name"}, new Object[]{cachedPlayer.getUniqueId(), "tag"}));
-            //TODO add more based on commands and stuff
+            List<Stat> stats = new ArrayList<>(database.get(Stat.class, "uuid", player.getUniqueId()));
             
             for (Stat stat : stats) {
-                cachedPlayer.addStat(stat);
+                player.addStat(stat);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     
         try {
-            List<StatChange> statChanges = database.get(StatChange.class, "uuid", cachedPlayer.getUniqueId());
+            List<StatChange> statChanges = database.get(StatChange.class, "uuid", player.getUniqueId());
             for (StatChange statChange : statChanges) {
-                cachedPlayer.addStatChange(statChange);
+                player.addStatChange(statChange);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     
-        for (IPEntry ipEntry : NexusAPI.getApi().getPlayerManager().getIpHistory()) {
-            if (ipEntry.getUuid().equals(cachedPlayer.getUniqueId())) {
-                cachedPlayer.getIpHistory().add(ipEntry);
+        try {
+            List<IPEntry> statChanges = database.get(IPEntry.class, "uuid", player.getUniqueId());
+            for (IPEntry ipEntry : statChanges) {
+                player.getIpHistory().add(ipEntry);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
     
     @Override
     public void afterSave() {
-        CachedPlayer cachedPlayer = (CachedPlayer) object;
+        NexusPlayer player = (NexusPlayer) object;
     
-        for (Preference preference : cachedPlayer.getPreferences().values()) {
+        for (Preference preference : player.getPreferences().values()) {
             database.push(preference);
         }
     
-        for (Stat stat : cachedPlayer.getStats().values()) {
+        for (Stat stat : player.getStats().values()) {
             database.push(stat);
         }
     
-        for (StatChange statChange : cachedPlayer.getStatChanges()) {
+        for (StatChange statChange : player.getStatChanges()) {
             database.push(statChange);
+        }
+    
+        for (IPEntry ipEntry : player.getIpHistory()) {
+            database.push(ipEntry);
+            NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);
         }
     }
 }
