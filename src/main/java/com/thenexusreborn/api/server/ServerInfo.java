@@ -12,6 +12,8 @@ public class ServerInfo {
     private int players, maxPlayers, hiddenPlayers;
     private String type, status, state;
     
+    private ServerInfo() {}
+    
     public ServerInfo(int multicraftId, String ip, String name, int port) {
         this(multicraftId, ip, name, port, 0, 0, 0, "", "offline", "none");
     }

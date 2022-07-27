@@ -10,6 +10,8 @@ public class GameAction {
     private long timestamp;
     private String type, value;
     
+    private GameAction() {}
+    
     public GameAction(long gameId, long timestamp, String type, String value) {
         this.gameId = gameId;
         this.timestamp = timestamp;

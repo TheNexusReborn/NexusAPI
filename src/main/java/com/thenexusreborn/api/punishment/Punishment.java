@@ -23,14 +23,16 @@ public class Punishment implements Comparable<Punishment> {
     private String actor, target, server, reason;
     private PunishmentType type;
     private Visibility visibility;
-    @ColumnInfo(codec = PardonInfoCodec.class)
+    @ColumnInfo(type = "varchar(1000)", codec = PardonInfoCodec.class)
     private PardonInfo pardonInfo;
-    @ColumnInfo(codec = AcknowledgeInfoCodec.class)
+    @ColumnInfo(type = "varchar(1000)", codec = AcknowledgeInfoCodec.class)
     private AcknowledgeInfo acknowledgeInfo;
     
     //Cache variables
     @ColumnIgnored
     private String actorNameCache, targetNameCache;
+    
+    private Punishment() {}
     
     public Punishment(long date, long length, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
         this.date = date;

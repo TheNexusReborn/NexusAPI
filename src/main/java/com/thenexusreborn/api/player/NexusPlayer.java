@@ -23,7 +23,7 @@ public abstract class NexusPlayer {
     @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     
-    @ColumnInfo(codec = RanksCodec.class)
+    @ColumnInfo(type = "varchar(1000)", codec = RanksCodec.class)
     protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
     
     @ColumnIgnored

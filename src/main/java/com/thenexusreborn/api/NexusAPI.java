@@ -46,6 +46,8 @@ public abstract class NexusAPI {
     protected StatRegistry statRegistry;
     protected PreferenceRegistry preferenceRegistry;
     
+    protected Database primaryDatabase;
+    
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
         this.logger = logger;
@@ -131,6 +133,7 @@ public abstract class NexusAPI {
                 database.registerClass(Preference.Info.class);
                 database.registerClass(Preference.class);
                 database.registerClass(Tournament.class);
+                this.primaryDatabase = database;
             }
         }
         
@@ -149,8 +152,7 @@ public abstract class NexusAPI {
 //            }
 //        }
         
-        //TODO
-        //serverManager.setupCurrentServer();
+        serverManager.setupCurrentServer();
         
         //TODO
 //        List<Punishment> punishments = dataManager.getPunishments();
@@ -244,7 +246,7 @@ public abstract class NexusAPI {
     }
     
     public Database getPrimaryDatabase() {
-        return null; //TODO
+        return this.primaryDatabase;
     }
     
     public StatRegistry getStatRegistry() {

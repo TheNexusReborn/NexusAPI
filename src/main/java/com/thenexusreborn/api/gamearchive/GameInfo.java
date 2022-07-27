@@ -8,10 +8,11 @@ import java.util.*;
 
 @TableInfo(value = "games", handler = GamesObjectHandler.class)
 public class GameInfo {
+    @Primary
     private long id;
     private long gameStart, gameEnd;
     private String serverName;
-    @ColumnInfo(codec = StringArrayCodec.class) 
+    @ColumnInfo(type = "varchar(1000)", codec = StringArrayCodec.class) 
     private String[] players;
     private String winner, mapName, settings, firstBlood;
     private int playerCount;

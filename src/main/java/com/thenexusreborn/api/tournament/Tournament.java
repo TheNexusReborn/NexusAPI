@@ -7,16 +7,19 @@ import java.util.*;
 
 @TableInfo("tournaments")
 public class Tournament {
-    private int id;
+    @Primary
+    private long id;
     private UUID host;
     private String name;
     private boolean active;
     private int pointsPerKill, pointsPerWin, pointsPerSurvival;
-    @ColumnInfo(codec = StringArrayCodec.class)
+    @ColumnInfo(type = "varchar(1000)", codec = StringArrayCodec.class)
     private String[] servers;
     
     @ColumnIgnored
     private Map<UUID, ScoreInfo> scoreCache = new HashMap<>();
+    
+    private Tournament() {}
     
     public Tournament(UUID host, String name) {
         this.host = host;
@@ -71,11 +74,11 @@ public class Tournament {
         this.pointsPerSurvival = pointsPerSurvival;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
     

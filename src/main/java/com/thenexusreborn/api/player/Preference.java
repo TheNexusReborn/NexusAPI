@@ -2,6 +2,7 @@ package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.PreferenceInfoCodec;
 
 import java.util.UUID;
 
@@ -9,9 +10,12 @@ import java.util.UUID;
 public class Preference {
     @Primary
     private long id;
+    @ColumnInfo(type = "varchar(100)", codec = PreferenceInfoCodec.class)
     private Info info;
     private UUID uuid;
     private boolean value;
+    
+    private Preference() {}
     
     public Preference(Info info, UUID uuid, boolean value) {
         this.info = info;
@@ -57,10 +61,12 @@ public class Preference {
     @TableInfo("preferenceinfo")
     public static class Info {
         @Primary private long id;
-        private final String name, displayName, description;
-        private final boolean defaultValue;
+        private String name, displayName, description;
+        private boolean defaultValue;
         @ColumnIgnored
         private Handler handler;
+        
+        private Info() {}
         
         public Info(String name, String displayName, String description, boolean defaultValue) {
             this.name = name;

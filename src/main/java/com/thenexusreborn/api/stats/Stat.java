@@ -12,11 +12,14 @@ public class Stat {
     private Info info;
     
     @Primary 
-    private int id;
+    private long id;
     private UUID uuid;
+    @ColumnInfo(type = "varchar(1000)")
     private Object value;
     private long created;
     private long modified;
+    
+    private Stat() {}
     
     public Stat(Info info, int id, UUID uuid, long created, long modified) {
         this(info, id, uuid, info.getDefaultValue(), created, modified);
@@ -90,11 +93,11 @@ public class Stat {
         this.modified = modified;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
     
@@ -133,9 +136,14 @@ public class Stat {
     
     @TableInfo(value = "statinfo", handler = StatObjectHandler.class)
     public static class Info {
+        @Primary 
+        private long id;
         private String name;
         private StatType type;
+        @ColumnInfo(type = "varchar(1000)")
         private Object defaultValue;
+        
+        private Info() {}
     
         public Info(String name, StatType type, Object defaultValue) {
             this.name = StatHelper.formatStatName(name);

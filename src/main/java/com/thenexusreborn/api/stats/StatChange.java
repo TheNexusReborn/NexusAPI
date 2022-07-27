@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.data.annotations.TableInfo;
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StatInfoCodec;
 import com.thenexusreborn.api.data.handler.StatObjectHandler;
 import com.thenexusreborn.api.stats.Stat.Info;
 
@@ -8,13 +9,18 @@ import java.util.*;
 
 @TableInfo(value = "statchanges", handler = StatObjectHandler.class)
 public class StatChange implements Comparable<StatChange> {
+    @ColumnInfo(type = "varchar(100)", codec = StatInfoCodec.class)
     private Info info;
     
-    private int id;
-    private final UUID uuid;
-    private final Object value;
-    private final StatOperator operator;
-    private final long timestamp;
+    @Primary
+    private long id;
+    private UUID uuid;
+    @ColumnInfo(type = "varchar(1000)")
+    private Object value;
+    private StatOperator operator;
+    private long timestamp;
+    
+    private StatChange() {}
     
     public StatChange(Info info, UUID uuid, Object value, StatOperator operator, long timestamp) {
         this.info = info;
@@ -24,7 +30,7 @@ public class StatChange implements Comparable<StatChange> {
         this.timestamp = timestamp;
     }
     
-    public StatChange(Info info, int id, UUID uuid, Object value, StatOperator operator, long timestamp) {
+    public StatChange(Info info, long id, UUID uuid, Object value, StatOperator operator, long timestamp) {
         this.info = info;
         this.id = id;
         this.uuid = uuid;
@@ -53,11 +59,11 @@ public class StatChange implements Comparable<StatChange> {
         return operator;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
     

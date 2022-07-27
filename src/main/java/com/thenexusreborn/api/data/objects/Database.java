@@ -44,7 +44,11 @@ public class Database {
     }
     
     public void registerClass(Class<?> clazz) {
-        addTable(new Table(clazz));
+        try {
+            addTable(new Table(clazz));
+        } catch (Exception e) {
+            NexusAPI.logMessage(Level.SEVERE, "Error while registering a table", "Error Message: " + e.getMessage());
+        }
     }
     
     public Set<Table> getTables() {

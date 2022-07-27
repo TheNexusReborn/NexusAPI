@@ -64,7 +64,7 @@ public class Table implements Comparable<Table> {
         }
     
         if (primaryColumn == null) {
-            NexusAPI.logMessage(Level.SEVERE, "Could not find a primary column. This column must be a long, and must be set to auto-increment and as the primary key. Or use the @Primary annotation");
+            NexusAPI.logMessage(Level.SEVERE, "Could not find a primary column. This column must be a long, and must be set to auto-increment and as the primary key. Or use the @Primary annotation", "Model Class: " + modelClass.getName());
         }
     }
     
