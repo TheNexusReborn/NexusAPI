@@ -7,7 +7,7 @@ import java.util.*;
 public abstract class ServerManager {
     
     protected ServerInfo currentServer;
-    protected List<ServerInfo> servers = new ArrayList<>();
+    protected final List<ServerInfo> servers = new ArrayList<>();
     
     public abstract void setupCurrentServer();
     

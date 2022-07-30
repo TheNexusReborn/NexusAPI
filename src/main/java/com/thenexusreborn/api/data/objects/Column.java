@@ -6,8 +6,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class Column implements Comparable<Column> {
-    private Class<?> modelClass;
-    private Field field;
+    private final Class<?> modelClass;
+    private final Field field;
     
     private String name, type;
     private boolean primaryKey, autoIncrement, notNull;

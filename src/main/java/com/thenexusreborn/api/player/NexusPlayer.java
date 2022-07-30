@@ -21,13 +21,13 @@ public abstract class NexusPlayer {
     protected String name;
     
     @ColumnIgnored
-    protected Set<IPEntry> ipHistory = new HashSet<>();
+    protected final Set<IPEntry> ipHistory = new HashSet<>();
     
     @ColumnInfo(type = "varchar(1000)", codec = RanksCodec.class)
     protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
     
     @ColumnIgnored
-    protected Map<String, Preference> preferences = new HashMap<>();
+    protected final Map<String, Preference> preferences = new HashMap<>();
     
     @ColumnIgnored
     protected NexusScoreboard scoreboard;
@@ -36,10 +36,10 @@ public abstract class NexusPlayer {
     protected UUID lastMessage;
     
     @ColumnIgnored
-    protected Map<String, Stat> stats = new HashMap<>();
+    protected final Map<String, Stat> stats = new HashMap<>();
     
     @ColumnIgnored
-    protected Set<StatChange> statChanges = new TreeSet<>();
+    protected final Set<StatChange> statChanges = new TreeSet<>();
     
     private NexusPlayer() {}
     
@@ -322,6 +322,8 @@ public abstract class NexusPlayer {
     public void setTag(Tag tag) {
         if (tag != null) {
             changeStat("tag", tag.getName(), StatOperator.SET);
+        } else {
+            changeStat("tag", "null", StatOperator.SET);
         }
     }
     

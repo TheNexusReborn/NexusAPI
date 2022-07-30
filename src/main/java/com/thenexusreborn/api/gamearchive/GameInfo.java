@@ -7,7 +7,7 @@ import com.thenexusreborn.api.data.handler.GamesObjectHandler;
 import java.util.*;
 
 @TableInfo(value = "games", handler = GamesObjectHandler.class)
-public class GameInfo {
+public class GameInfo implements Comparable<GameInfo> {
     @Primary
     private long id;
     private long gameStart, gameEnd;
@@ -18,7 +18,7 @@ public class GameInfo {
     private int playerCount;
     private long length;
     @ColumnIgnored
-    private List<GameAction> actions = new ArrayList<>();
+    private final Set<GameAction> actions = new TreeSet<>();
     
     public GameInfo() {
     }
@@ -89,7 +89,7 @@ public class GameInfo {
         return length;
     }
     
-    public List<GameAction> getActions() {
+    public Set<GameAction> getActions() {
         return actions;
     }
     
@@ -127,5 +127,30 @@ public class GameInfo {
     
     public void setLength(long length) {
         this.length = length;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GameInfo gameInfo = (GameInfo) o;
+        return gameStart == gameInfo.gameStart && gameEnd == gameInfo.gameEnd && playerCount == gameInfo.playerCount && length == gameInfo.length && Objects.equals(serverName, gameInfo.serverName) && Arrays.equals(players, gameInfo.players) && Objects.equals(winner, gameInfo.winner) && Objects.equals(mapName, gameInfo.mapName) && Objects.equals(settings, gameInfo.settings) && Objects.equals(firstBlood, gameInfo.firstBlood);
+    }
+    
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameStart, gameEnd, serverName, winner, mapName, settings, firstBlood, playerCount, length);
+        result = 31 * result + Arrays.hashCode(players);
+        return result;
+    }
+    
+    @Override
+    public int compareTo(GameInfo o) {
+        // TODO return Long.compare(this.id, o.id);
+        return Long.compare(this.gameEnd, o.gameEnd); //This is only for the migration system
     }
 }

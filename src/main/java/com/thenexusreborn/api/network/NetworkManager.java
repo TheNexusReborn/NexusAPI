@@ -9,9 +9,9 @@ import java.util.*;
 
 public class NetworkManager {
     
-    private Map<String, NetworkCommand> commandMap = new HashMap<>();
+    private final Map<String, NetworkCommand> commandMap = new HashMap<>();
     
-    private NetworkContext context;
+    private final NetworkContext context;
     
     private NettyApp nettyApp;
     
@@ -19,7 +19,7 @@ public class NetworkManager {
         this.context = context;
     }
     
-    public void init(String host, int port) throws Exception {
+    public void init(String host, int port) {
         if (context == NetworkContext.CLIENT) {
             nettyApp = new NettyClient(host, port);
         } else {

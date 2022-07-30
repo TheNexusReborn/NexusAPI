@@ -1,8 +1,9 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.data.*;
-import com.thenexusreborn.api.data.objects.*;
+import com.thenexusreborn.api.data.objects.Database;
 import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.migration.Migrator;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
@@ -11,6 +12,7 @@ import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
+import com.thenexusreborn.api.util.*;
 
 import java.io.*;
 import java.net.URL;
@@ -30,23 +32,25 @@ public abstract class NexusAPI {
         return instance;
     }
     
-    protected Logger logger;
-    protected DataManager dataManager;
+    protected final Logger logger;
+    protected final DataManager dataManager;
     protected IOManager ioManager;
-    protected PlayerManager playerManager;
-    protected ThreadFactory threadFactory;
-    protected PlayerFactory playerFactory;
-    protected ServerManager serverManager;
+    protected final PlayerManager playerManager;
+    protected final ThreadFactory threadFactory;
+    protected final PlayerFactory playerFactory;
+    protected final ServerManager serverManager;
     protected final Environment environment;
-    protected NetworkManager networkManager;
-    protected PunishmentManager punishmentManager;
+    protected final NetworkManager networkManager;
+    protected final PunishmentManager punishmentManager;
     protected Tournament tournament;
-    protected String version;
+    protected Version version;
     
     protected StatRegistry statRegistry;
     protected PreferenceRegistry preferenceRegistry;
     
     protected Database primaryDatabase;
+    
+    protected final Migrator migrator;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
@@ -58,6 +62,8 @@ public abstract class NexusAPI {
         this.playerFactory = playerFactory;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
+        
+        this.migrator = new DataBackendMigrator();
     
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -66,7 +72,7 @@ public abstract class NexusAPI {
             if (line == null || line.equals("")) {
                 logger.warning("Could not find the NexusAPI Version.");
             } else {
-                this.version = line;
+                this.version = new Version(line);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,17 +127,17 @@ public abstract class NexusAPI {
     
         for (Database database : databaseRegistry.getObjects()) {
             if (database.isPrimary()) {
-                database.registerClass(NexusPlayer.class);
-                database.registerClass(Stat.class);
+                database.registerClass(IPEntry.class);
                 database.registerClass(Stat.Info.class);
-                database.registerClass(StatChange.class);
+                database.registerClass(Stat.class); 
+                database.registerClass(StatChange.class); 
+                database.registerClass(Preference.Info.class);
+                database.registerClass(Preference.class);
+                database.registerClass(NexusPlayer.class);
                 database.registerClass(ServerInfo.class);
                 database.registerClass(GameInfo.class);
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
-                database.registerClass(IPEntry.class);
-                database.registerClass(Preference.Info.class);
-                database.registerClass(Preference.class);
                 database.registerClass(Tournament.class);
                 this.primaryDatabase = database;
             }
@@ -140,9 +146,47 @@ public abstract class NexusAPI {
         this.ioManager = new IOManager(databaseRegistry);
         this.ioManager.setup();
         
+        File lastMigrationFile = new File(getFolder(), "lastMigration.txt");
+        Version previousVersion = null;
+        if (lastMigrationFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(lastMigrationFile); BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
+                previousVersion = new Version(reader.readLine());
+            }
+        }
+
+        boolean migrationSuccess = false;
+
+        if (migrator != null) {
+            int compareResult = this.version.compareTo(previousVersion);
+            if (compareResult > 0) {
+                if (migrator.getTargetVersion().equals(this.version)) {
+                    migrationSuccess = migrator.migrate();
+
+                    if (!migrationSuccess) {
+                        NexusAPI.logMessage(Level.INFO, "Error while processing migration", "Migrator Class: " + migrator.getClass().getName());
+                    }
+                }
+            }
+        }
+
+        if (migrator == null || migrationSuccess) {
+            if (!lastMigrationFile.exists()) {
+                lastMigrationFile.createNewFile();
+            }
+            String version = getVersion().getMajor() + "." + getVersion().getMinor();
+            if (getVersion().getPatch() > 0) {
+                version += "." + getVersion().getPatch();
+            }
+            version += "-" + getVersion().getStage().name();
+            try (FileOutputStream fos = new FileOutputStream(lastMigrationFile); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos))) {
+                writer.write(version);
+                writer.flush();
+            }
+        }
+        
         //TODO
 //        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("insert into statinfo (name, type, defaultValue) values (?, ?, ?);")) {
-//            for (Info info : registry.getObjects()) {
+//            for (Info info : statRegistry.getObjects()) {
 //                if (!dataManager.getStatsInDatabase().contains(info.getName())) {
 //                    statement.setString(1, info.getName());
 //                    statement.setString(2, info.getType().name());
@@ -153,8 +197,7 @@ public abstract class NexusAPI {
 //        }
         
         serverManager.setupCurrentServer();
-        
-        //TODO
+        //TODO      
 //        List<Punishment> punishments = dataManager.getPunishments();
 //        for (Punishment punishment : punishments) {
 //            punishmentManager.addPunishment(punishment);
@@ -169,7 +212,9 @@ public abstract class NexusAPI {
 //        }
         
         //TODO
-        //playerManager.getIpHistory().addAll(getDataManager().getIpHistory());
+//        playerManager.getIpHistory().addAll(getDataManager().getIpHistory());
+        
+        //TODO Have the ranks and tags things updated via the network framework instead of having to query the database
     }
     
     public abstract void registerDatabases(DatabaseRegistry registry);
@@ -184,7 +229,7 @@ public abstract class NexusAPI {
         this.tournament = tournament;
     }
     
-    public String getVersion() {
+    public Version getVersion() {
         return version;
     }
     

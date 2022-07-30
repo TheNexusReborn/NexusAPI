@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.*;
 
 public class IOManager {
-    private DatabaseRegistry registry;
+    private final DatabaseRegistry registry;
     
     public IOManager(DatabaseRegistry registry) {
         this.registry = registry;

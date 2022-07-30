@@ -26,6 +26,7 @@ public class GamesObjectHandler extends ObjectHandler {
     public void afterSave() {
         GameInfo gameInfo = (GameInfo) object;
         for (GameAction action : gameInfo.getActions()) {
+            action.setGameId(gameInfo.getId());
             database.push(action);
         }
     }

@@ -1,13 +1,8 @@
 package com.thenexusreborn.api.punishment;
 
-import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.annotations.*;
 import com.thenexusreborn.api.data.codec.*;
 import com.thenexusreborn.api.helper.*;
-import com.thenexusreborn.api.player.NexusPlayer;
-
-import java.sql.*;
-import java.util.UUID;
 
 @TableInfo("punishments")
 public class Punishment implements Comparable<Punishment> {
@@ -44,22 +39,22 @@ public class Punishment implements Comparable<Punishment> {
         this.type = type;
         this.visibility = visibility;
         
-        try {
-            UUID uuid = UUID.fromString(getActor());
-            NexusPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
-            if (actorCachePlayer == null) {
-                try (Connection connection = NexusAPI.getApi().getConnection(); Statement s = connection.createStatement()) {
-                    ResultSet rs = s.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
-                    if (rs.next()) {
-                        actorNameCache = rs.getString("lastKnownName");
-                    }
-                }
-            } else {
-                actorNameCache = actorCachePlayer.getName();
-            }
-        } catch (Exception e) {
-            this.actorNameCache = actor;
-        }
+//        try {
+//            UUID uuid = UUID.fromString(getActor());
+//            NexusPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+//            if (actorCachePlayer == null) {
+//                try (Connection connection = NexusAPI.getApi().getConnection(); Statement s = connection.createStatement()) {
+//                    ResultSet rs = s.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
+//                    if (rs.next()) {
+//                        actorNameCache = rs.getString("lastKnownName");
+//                    }
+//                }
+//            } else {
+//                actorNameCache = actorCachePlayer.getName();
+//            }
+//        } catch (Exception e) {
+//            this.actorNameCache = actor;
+//        }
     }
     
     public Punishment(long date, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {

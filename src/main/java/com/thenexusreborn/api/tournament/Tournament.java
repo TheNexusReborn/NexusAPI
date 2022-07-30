@@ -17,7 +17,7 @@ public class Tournament {
     private String[] servers;
     
     @ColumnIgnored
-    private Map<UUID, ScoreInfo> scoreCache = new HashMap<>();
+    private final Map<UUID, ScoreInfo> scoreCache = new HashMap<>();
     
     private Tournament() {}
     

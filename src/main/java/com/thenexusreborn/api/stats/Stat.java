@@ -114,12 +114,12 @@ public class Stat {
             return false;
         }
         Stat stat = (Stat) o;
-        return id == stat.id && Objects.equals(info, stat.info);
+        return Objects.equals(info, stat.info) && Objects.equals(uuid, stat.uuid);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(info, id);
+        return Objects.hash(info, uuid);
     }
     
     @Override
@@ -184,12 +184,12 @@ public class Stat {
                 return false;
             }
             Info info = (Info) o;
-            return Objects.equals(name, info.name);
+            return Objects.equals(name, info.name) && type == info.type;
         }
     
         @Override
         public int hashCode() {
-            return Objects.hash(name);
+            return Objects.hash(name, type);
         }
     
         @Override

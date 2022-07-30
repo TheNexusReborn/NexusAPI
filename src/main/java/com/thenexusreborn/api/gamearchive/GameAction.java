@@ -2,8 +2,10 @@ package com.thenexusreborn.api.gamearchive;
 
 import com.thenexusreborn.api.data.annotations.*;
 
+import java.util.Objects;
+
 @TableInfo("gameactions")
-public class GameAction {
+public class GameAction implements Comparable<GameAction> {
     @Primary
     private long id;
     private long gameId;
@@ -39,5 +41,35 @@ public class GameAction {
     
     public String getValue() {
         return value;
+    }
+    
+    public void setGameId(long gameId) {
+        this.gameId = gameId;
+    }
+    
+    @Override
+    public int compareTo(GameAction o) {
+        if (this.timestamp > o.timestamp) {
+            return 1;
+        }
+    
+        return -1;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GameAction that = (GameAction) o;
+        return gameId == that.gameId && timestamp == that.timestamp && Objects.equals(type, that.type) && Objects.equals(value, that.value);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameId, timestamp, type, value);
     }
 }

@@ -3,7 +3,7 @@ package com.thenexusreborn.api.registry;
 import java.util.*;
 
 public abstract class Registry<T> {
-    private Set<T> objects = new HashSet<>();
+    private final Set<T> objects = new HashSet<>();
     
     public void register(T object) {
         this.objects.add(object);

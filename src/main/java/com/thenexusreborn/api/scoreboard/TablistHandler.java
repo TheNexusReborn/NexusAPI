@@ -6,8 +6,8 @@ import com.thenexusreborn.api.scoreboard.wrapper.ITeam;
 import java.util.*;
 
 public abstract class TablistHandler {
-    protected NexusScoreboard scoreboard;
-    protected Map<UUID, ITeam> playerTeams = new HashMap<>();
+    protected final NexusScoreboard scoreboard;
+    protected final Map<UUID, ITeam> playerTeams = new HashMap<>();
     
     public TablistHandler(NexusScoreboard scoreboard) {
         this.scoreboard = scoreboard;

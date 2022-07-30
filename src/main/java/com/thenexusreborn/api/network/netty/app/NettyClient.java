@@ -17,7 +17,7 @@ public class NettyClient extends NettyApp {
         super(host, port);
     }
     
-    public void init() throws Exception {
+    public void init() {
         EventLoopGroup group = new NioEventLoopGroup();
         this.groups.add(group);
         try {

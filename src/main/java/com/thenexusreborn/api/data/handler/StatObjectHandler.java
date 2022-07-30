@@ -18,30 +18,29 @@ public class StatObjectHandler extends ObjectHandler {
     public void beforeSave() {
         try {
             value = null;
-            Field valueField = null;
             StatType type = null;
             
             if (object instanceof Stat) {
                 Stat stat = (Stat) object; 
                 value = stat.getValue();
                 type = stat.getType();
-                valueField = object.getClass().getField("value");
+                field = object.getClass().getDeclaredField("value");
             } else if (object instanceof StatChange) {
                 StatChange change = (StatChange) object;
                 value = change.getValue();
                 type = change.getType();
-                valueField = object.getClass().getField("value");
+                field = object.getClass().getDeclaredField("value");
             } else if (object instanceof Stat.Info) {
                 Stat.Info info = (Stat.Info) object;
                 value = info.getDefaultValue();
                 type = info.getType();
-                valueField = object.getClass().getField("defaultValue");
+                field = object.getClass().getDeclaredField("defaultValue");
             }
-            
-            valueField.setAccessible(true);
+    
+            field.setAccessible(true);
             
             //This code will convert the stored field value to the serialized value
-            valueField.set(object, StatHelper.serializeStatValue(type, value));
+            field.set(object, StatHelper.serializeStatValue(type, value));
         } catch (Exception e) {
             e.printStackTrace();
         }

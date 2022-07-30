@@ -7,7 +7,7 @@ import java.util.*;
 
 public abstract class NexusScoreboard {
     
-    protected NexusPlayer player;
+    protected final NexusPlayer player;
     protected ScoreboardView view;
     protected IScoreboard scoreboard;
     protected TablistHandler tablistHandler;

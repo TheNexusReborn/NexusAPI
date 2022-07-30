@@ -4,7 +4,7 @@ import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.annotations.*;
 import com.thenexusreborn.api.data.codec.PreferenceInfoCodec;
 
-import java.util.UUID;
+import java.util.*;
 
 @TableInfo("preferences")
 public class Preference {
@@ -23,7 +23,7 @@ public class Preference {
         this.uuid = uuid;
     }
     
-    public Preference(Info info, UUID uuid, int id, boolean value) {
+    public Preference(Info info, UUID uuid, long id, boolean value) {
         this.info = info;
         this.id = id;
         this.value = value;
@@ -42,6 +42,10 @@ public class Preference {
         }
     }
     
+    public UUID getUuid() {
+        return uuid;
+    }
+    
     public NexusPlayer getPlayer() {
         return NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
     }
@@ -56,6 +60,23 @@ public class Preference {
     
     public Info getInfo() {
         return info;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Preference that = (Preference) o;
+        return Objects.equals(info, that.info) && Objects.equals(uuid, that.uuid);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(info, uuid);
     }
     
     @TableInfo("preferenceinfo")
@@ -97,6 +118,23 @@ public class Preference {
         
         public void setHandler(Handler handler) {
             this.handler = handler;
+        }
+    
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Info info = (Info) o;
+            return Objects.equals(name, info.name);
+        }
+    
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
         }
     }
     

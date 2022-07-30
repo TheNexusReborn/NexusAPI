@@ -13,7 +13,9 @@ public class Database {
     public static final String URL = "jdbc:mysql://%s/%s?user=%s&password=%s";
     private final String name, host, user, password;
     private final boolean primary;
-    private Set<Table> tables = new HashSet<>();
+    private final Set<Table> tables = new HashSet<>();
+    
+    private final LinkedList<Object> queue = new LinkedList<>();
     
     public Database(String name, String host, String user, String password, boolean primary) {
         this.name = name;
@@ -258,6 +260,13 @@ public class Database {
                     }
                 }
                 
+                if (value instanceof String) {
+                    String str = (String) value;
+                    str = str.replace("\\", "\\\\");
+                    str = str.replace("'", "\\'");
+                    value = str;
+                }
+                
                 if (column.isPrimaryKey()) {
                     id = (long) value;
                     primaryField = field;
@@ -328,6 +337,29 @@ public class Database {
         }
     }
     
+    public void delete(Class<?> clazz, long id) {
+        Table table = getTable(clazz);
+        if (table == null) {
+            NexusAPI.logMessage(Level.WARNING, "Tried to delete data to the database without a registered table.",
+                    "Class Name: " + clazz.getName(),
+                    "Database Name: " + this.host + "/" + this.name);
+            return;
+        }
+        
+        Column primaryColumn = null;
+        for (Column column : table.getColumns()) {
+            if (column.isPrimaryKey()) {
+                primaryColumn = column;
+            }
+        }
+        
+        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+            statement.execute("delete from " + table.getName() + " where " + primaryColumn.getName() + "='" + id + "';");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public Table getTable(String name) {
         for (Table table : new ArrayList<>(this.tables)) {
             if (table.getName().equalsIgnoreCase(name)) {
@@ -339,10 +371,15 @@ public class Database {
     
     public Table getTable(Class<?> clazz) {
         for (Table table : new ArrayList<>(this.tables)) {
-            if (table.getModelClass() == clazz) {
+            if (table.getModelClass().equals(clazz)) {
                 return table;
             }
         }
+        
+        if (clazz.getSuperclass() != null && !clazz.getSuperclass().equals(Object.class)) {
+            return getTable(clazz.getSuperclass());
+        }
+        
         return null;
     }
     
@@ -436,6 +473,19 @@ public class Database {
     
     public boolean isPrimary() {
         return primary;
+    }
+    
+    public void queue(Object object) {
+        this.queue.add(object);
+    }
+    
+    public void flush() {
+        NexusAPI.getApi().getLogger().info("Processing Database Queue...");
+        if (!this.queue.isEmpty()) {
+            for (Object object : this.queue) {
+                push(object); //TODO Improve this with separate methods and an object so that it can be done in a single connection and statement object
+            }
+        }
     }
     
     @Override

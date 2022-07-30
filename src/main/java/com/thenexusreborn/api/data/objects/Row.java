@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class Row {
-    private Map<String, Object> data = new HashMap<>();
+    private final Map<String, Object> data = new HashMap<>();
     
     public Row(ResultSet rs, Database database) {
         try {

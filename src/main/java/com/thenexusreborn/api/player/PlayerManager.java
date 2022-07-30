@@ -3,7 +3,6 @@ package com.thenexusreborn.api.player;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.helper.MojangHelper;
 
-import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -12,23 +11,21 @@ public abstract class PlayerManager {
     public static final Set<UUID> NEXUS_TEAM = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(UUID.fromString("3f7891ce-5a73-4d52-a2ba-299839053fdc"),
             UUID.fromString("fc6a3e38-c1c0-40a6-b7b9-152ffdadc053"), UUID.fromString("84c55f0c-2f09-4cf6-9924-57f536eb2228"))));
     
-    protected Map<UUID, NexusPlayer> players = new HashMap<>();
-    protected Set<IPEntry> ipHistory = new HashSet<>();
+    protected final Map<UUID, NexusPlayer> players = new HashMap<>();
+    protected final Set<IPEntry> ipHistory = new HashSet<>();
+    
+    protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>(); //TODO Implement loading
     
     public Map<UUID, NexusPlayer> getPlayers() {
         return players;
     }
     
+    public Map<UUID, CachedPlayer> getCachedPlayers() {
+        return cachedPlayers;
+    }
+    
     public boolean hasData(UUID uuid) {
-        try (Connection connection = NexusAPI.getApi().getConnection()) {
-            try (Statement queryStatement = connection.createStatement()) {
-                ResultSet resultSet = queryStatement.executeQuery("SELECT * FROM players where uuid='" + uuid.toString() + "';");
-                return resultSet.next();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return getCachedPlayers().get(uuid) != null;
     }
     
     public void saveToMySQLAsync(NexusPlayer player) {
@@ -76,35 +73,12 @@ public abstract class PlayerManager {
         }
         
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
-            try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
-                ResultSet nameSet = statement.executeQuery("select uuid from players where lastKnownName='" + name + "';");
-                if (nameSet.next()) {
-                    getNexusPlayerAsync(UUID.fromString(nameSet.getString("uuid")), action);
-                    return;
-                } 
-                
-                UUID uuid = MojangHelper.getUUIDFromName(name);
-                if (uuid == null) {
-                    return;
+            for (CachedPlayer cachedPlayer : getCachedPlayers().values()) {
+                if (cachedPlayer.getName().equalsIgnoreCase(name)) {
+                    NexusPlayer nexusPlayer = cachedPlayer.loadFully();
+                    players.put(nexusPlayer.getUniqueId(), nexusPlayer);
+                    action.accept(nexusPlayer);
                 }
-                
-                ResultSet uuidSet = statement.executeQuery("select lastKnownName from players where uuid='" + uuid + "';");
-                if (uuidSet.next()) {
-                    getNexusPlayerAsync(uuid, action);
-                    return;
-                }
-    
-                try {
-                    NexusPlayer player = createPlayerData(uuid, name);
-                    NexusAPI.getApi().getThreadFactory().runSync(() -> {
-                        players.put(uuid, player);
-                        action.accept(player);
-                    });
-                } catch (Exception e) {
-                    
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         });
     }

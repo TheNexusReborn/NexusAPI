@@ -13,13 +13,13 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class NettyServer extends NettyApp {
     
-    private ChannelGroup channels = new DefaultChannelGroup("channels", GlobalEventExecutor.INSTANCE);
+    private final ChannelGroup channels = new DefaultChannelGroup("channels", GlobalEventExecutor.INSTANCE);
     
     public NettyServer(String host, int port) {
         super(host, port);
     }
     
-    public void init() throws Exception {
+    public void init() {
         EventLoopGroup boss = new NioEventLoopGroup();
         EventLoopGroup worker = new NioEventLoopGroup();
         this.groups.add(boss);

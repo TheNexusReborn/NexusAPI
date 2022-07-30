@@ -6,9 +6,9 @@ import java.util.Arrays;
 public class NexusPacket {
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     
-    private String origin;
-    private String action;
-    private String[] data;
+    private final String origin;
+    private final String action;
+    private final String[] data;
     
     public NexusPacket(String origin, String action, String[] data) {
         this.origin = origin;

@@ -71,7 +71,8 @@ public final class StatHelper {
                 oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
             } else if (operator == StatOperator.SET) {
                 oldValue.clear();
-                oldValue.add((String) value);
+                Set<String> nv = (Set<String>) value;
+                oldValue.addAll(nv);
             }
             
             newValue = oldValue;

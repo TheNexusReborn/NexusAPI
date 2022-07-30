@@ -1,5 +1,6 @@
-package com.thenexusreborn.api;
+package com.thenexusreborn.api.util;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
