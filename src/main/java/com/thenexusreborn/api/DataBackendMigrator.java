@@ -74,7 +74,6 @@ public class DataBackendMigrator extends Migrator {
                 try {
                     type = StatType.valueOf(resultSet.getString("type"));
                 } catch (Exception e) {
-                    //TODO Removed for testing
                     if (info == null) {
                         continue;
                     }
@@ -148,8 +147,7 @@ public class DataBackendMigrator extends Migrator {
                 }
                 
                 if (info == null) {
-                    System.out.println("Preference Info for " + player + ": " + name + " was null");
-                    continue; //TODO save to file (raw data)
+                   continue;
                 }
                 
                 Preference preference = new Preference(info, player, id, value);

@@ -150,7 +150,7 @@ public class GameInfo implements Comparable<GameInfo> {
     
     @Override
     public int compareTo(GameInfo o) {
-        // TODO return Long.compare(this.id, o.id);
-        return Long.compare(this.gameEnd, o.gameEnd); //This is only for the migration system
+        // return Long.compare(this.id, o.id); TODO Reimplement this after the 1.5-ALPHA Update
+        return Long.compare(this.gameEnd, o.gameEnd);
     }
 }
