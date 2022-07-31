@@ -40,13 +40,13 @@ public class Table implements Comparable<Table> {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
-            
-            if (Modifier.isFinal(field.getModifiers())) {
-                NexusAPI.logMessage(Level.WARNING, "Field in a table class is final. These will be ignored", "Class Name: " + modelClass.getName(), "Field Name: " + field.getName());
+    
+            if (field.isAnnotationPresent(ColumnIgnored.class)) {
                 continue;
             }
             
-            if (field.isAnnotationPresent(ColumnIgnored.class)) {
+            if (Modifier.isFinal(field.getModifiers())) {
+                NexusAPI.logMessage(Level.WARNING, "Field in a table class is final. These will be ignored", "Class Name: " + modelClass.getName(), "Field Name: " + field.getName());
                 continue;
             }
     
