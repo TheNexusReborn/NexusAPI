@@ -57,7 +57,8 @@ public class Database {
         return tables;
     }
     
-    private <T> T parseObjectFromRow(Class<T> clazz, Table table, Row row) {
+    public <T> T parseObjectFromRow(Class<T> clazz, Row row) {
+        Table table = getTable(clazz);
         T object;
         try {
             Constructor<T> constructor = clazz.getDeclaredConstructor();
@@ -171,7 +172,7 @@ public class Database {
         
         List<T> objects = new ArrayList<>();
         for (Row row : rows) {
-            objects.add(parseObjectFromRow(clazz, table, row));
+            objects.add(parseObjectFromRow(clazz, row));
         }
     
         return objects;
@@ -193,7 +194,7 @@ public class Database {
     
         List<T> objects = new ArrayList<>();
         for (Row row : rows) {
-            objects.add(parseObjectFromRow(clazz, table, row));
+            objects.add(parseObjectFromRow(clazz, row));
         }
         return objects;
     }
@@ -209,7 +210,7 @@ public class Database {
     
         List<Row> rows = executeQuery("select * from " + table.getName());
         for (Row row : rows) {
-            objects.add(parseObjectFromRow(clazz, table, row));
+            objects.add(parseObjectFromRow(clazz, row));
         }
     
         return objects;
