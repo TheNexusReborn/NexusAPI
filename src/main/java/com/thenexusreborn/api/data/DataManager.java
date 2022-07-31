@@ -97,12 +97,14 @@ public class DataManager {
     @Deprecated
     public void updateServerInfo(ServerInfo serverInfo) {
         ServerInfo infoFromDatabase = getServerInfo(serverInfo.getMulticraftId());
-        serverInfo.setHiddenPlayers(infoFromDatabase.getHiddenPlayers());
-        serverInfo.setMaxPlayers(infoFromDatabase.getMaxPlayers());
-        serverInfo.setPlayers(infoFromDatabase.getPlayers());
-        serverInfo.setState(infoFromDatabase.getState());
-        serverInfo.setStatus(infoFromDatabase.getStatus());
-        serverInfo.setType(infoFromDatabase.getType());
+        if (infoFromDatabase != null) {
+            serverInfo.setHiddenPlayers(infoFromDatabase.getHiddenPlayers());
+            serverInfo.setMaxPlayers(infoFromDatabase.getMaxPlayers());
+            serverInfo.setPlayers(infoFromDatabase.getPlayers());
+            serverInfo.setState(infoFromDatabase.getState());
+            serverInfo.setStatus(infoFromDatabase.getStatus());
+            serverInfo.setType(infoFromDatabase.getType());
+        }
     }
     
     @Deprecated
@@ -128,11 +130,15 @@ public class DataManager {
     @Deprecated
     public ServerInfo getServerInfo(long multicraftId) {
         try {
-            return NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class, "multicraftId", multicraftId).get(0);
+            List<ServerInfo> servers = NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class, "multicraftId", multicraftId);
+            if (servers != null) {
+                return servers.get(0);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
         }
+        
+        return null;
     }
     
     @Deprecated
