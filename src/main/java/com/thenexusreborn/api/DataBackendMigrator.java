@@ -62,7 +62,6 @@ public class DataBackendMigrator extends Migrator {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from stats");
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
                 String name = StatHelper.formatStatName(resultSet.getString("name"));
                 StatType type;
                 Stat.Info info = StatHelper.getInfo(name);
@@ -83,7 +82,7 @@ public class DataBackendMigrator extends Migrator {
                 long created = Long.parseLong(resultSet.getString("created"));
                 long modified = Long.parseLong(resultSet.getString("modified"));
                 
-                Stat stat = new Stat(info, id, uuid, value, created, modified);
+                Stat stat = new Stat(info, 0, uuid, value, created, modified);
                 stats.add(stat);
             }
         } catch (Exception e) {
@@ -134,7 +133,6 @@ public class DataBackendMigrator extends Migrator {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from playerpreferences;");
             while (resultSet.next()) {
-                long id = resultSet.getInt("id");
                 String name = resultSet.getString("name");
                 boolean value = Boolean.parseBoolean(resultSet.getString("value"));
                 UUID player = UUID.fromString(resultSet.getString("uuid"));
@@ -150,7 +148,7 @@ public class DataBackendMigrator extends Migrator {
                    continue;
                 }
                 
-                Preference preference = new Preference(info, player, id, value);
+                Preference preference = new Preference(info, player, 0, value);
                 preferences.add(preference);
             }
         } catch (Exception e) {
@@ -296,7 +294,6 @@ public class DataBackendMigrator extends Migrator {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from punishments;");
             while (resultSet.next()) {
-                long id = resultSet.getLong("id");
                 long date = Long.parseLong(resultSet.getString("date"));
                 long length = Long.parseLong(resultSet.getString("length"));
                 String actor = resultSet.getString("actor");
@@ -308,7 +305,7 @@ public class DataBackendMigrator extends Migrator {
                 PardonInfo pardonInfo = new PardonInfoCodec().decode(resultSet.getString("pardonInfo"));
                 AcknowledgeInfo acknowledgeInfo = new AcknowledgeInfoCodec().decode(resultSet.getString("acknowledgeInfo"));
                 Punishment punishment = new Punishment(date, length, actor, target, server, reason, type, visibility);
-                punishment.setId(id);
+                punishment.setId(0);
                 punishment.setPardonInfo(pardonInfo);
                 punishment.setAcknowledgeInfo(acknowledgeInfo);
                 punishments.add(punishment);
@@ -323,7 +320,6 @@ public class DataBackendMigrator extends Migrator {
         try (Connection connection = NexusAPI.getApi().getConnection(); Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("select * from tournaments;");
             while (resultSet.next()) {
-                long id = resultSet.getLong("id");
                 UUID host = UUID.fromString(resultSet.getString("host"));
                 String name = resultSet.getString("name");
                 boolean active = Boolean.parseBoolean(resultSet.getString("active"));
@@ -332,7 +328,7 @@ public class DataBackendMigrator extends Migrator {
                 int pointsPerSurvival = resultSet.getInt("pointspersurvival");
                 String rawServers = resultSet.getString("servers");
                 Tournament tournament = new Tournament(host, name);
-                tournament.setId(id);
+                tournament.setId(0);
                 tournament.setActive(active);
                 tournament.setPointsPerKill(pointsPerKill);
                 tournament.setPointsPerWin(pointsPerWin);
