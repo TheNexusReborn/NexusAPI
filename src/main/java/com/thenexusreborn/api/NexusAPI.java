@@ -10,6 +10,7 @@ import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 import com.thenexusreborn.api.util.*;
@@ -17,7 +18,7 @@ import com.thenexusreborn.api.util.*;
 import java.io.*;
 import java.net.URL;
 import java.sql.*;
-import java.util.HashSet;
+import java.util.*;
 import java.util.logging.*;
 
 public abstract class NexusAPI {
@@ -184,35 +185,24 @@ public abstract class NexusAPI {
             }
         }
         
-        //TODO
-//        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("insert into statinfo (name, type, defaultValue) values (?, ?, ?);")) {
-//            for (Info info : statRegistry.getObjects()) {
-//                if (!dataManager.getStatsInDatabase().contains(info.getName())) {
-//                    statement.setString(1, info.getName());
-//                    statement.setString(2, info.getType().name());
-//                    statement.setString(3, StatHelper.serializeStatValue(info.getType(), info.getDefaultValue()));
-//                    statement.executeUpdate();
-//                }
-//            }
-//        }
+        for (Info statInfo : StatHelper.getRegistry().getObjects()) {
+            getPrimaryDatabase().push(statInfo);
+        }
         
         serverManager.setupCurrentServer();
-        //TODO      
-//        List<Punishment> punishments = dataManager.getPunishments();
-//        for (Punishment punishment : punishments) {
-//            punishmentManager.addPunishment(punishment);
-//        }
+    
+        for (Punishment punishment : getPrimaryDatabase().get(Punishment.class)) {
+            punishmentManager.addPunishment(punishment);
+        }
+    
+        List<Tournament> tournaments = getPrimaryDatabase().get(Tournament.class);
+        for (Tournament t : tournaments) {
+            if (t.isActive()) {
+                this.tournament = t;
+            }
+        }
         
-        //TODO
-//        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
-//            ResultSet resultSet = statement.executeQuery("select id from tournaments;");
-//            if (resultSet.next()) {
-//                this.tournament = NexusAPI.getApi().getDataManager().getTournament(resultSet.getInt("id"));
-//            }
-//        }
-        
-        //TODO
-//        playerManager.getIpHistory().addAll(getDataManager().getIpHistory());
+        playerManager.getIpHistory().addAll(getPrimaryDatabase().get(IPEntry.class));
         
         //TODO Have the ranks and tags things updated via the network framework instead of having to query the database
     }
