@@ -6,7 +6,6 @@ import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.migration.Migrator;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.player.Preference.Info;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
@@ -86,24 +85,25 @@ public abstract class NexusAPI {
     }
     
     public final void init() throws Exception {
-        getLogger().info("Detected NexusAPI Version: " + version);
+        getLogger().info("Loading NexusAPI Version v" + this.version);
         
         try {
             Driver mysqlDriver = new com.mysql.cj.jdbc.Driver();
             DriverManager.registerDriver(mysqlDriver);
+            getLogger().info("Registered the correct MySQL Driver");
         } catch (SQLException e) {
             getLogger().severe("Error while loading the MySQL driver, disabling plugin");
-            e.printStackTrace();
-            return;
+            throw e;
         }
-        
         
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
         networkManager.init("localhost", 3408);
+        getLogger().info("Loaded the Networking System");
         
         DatabaseRegistry databaseRegistry = ioManager.getRegistry();
         registerDatabases(databaseRegistry);
+        getLogger().info("Registered the databases");
         
         for (Database database : databaseRegistry.getObjects()) {
             if (database.isPrimary()) {
@@ -120,26 +120,39 @@ public abstract class NexusAPI {
                 database.registerClass(Punishment.class);
                 database.registerClass(Tournament.class);
                 this.primaryDatabase = database;
+                getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
         }
         
+        if (primaryDatabase == null) {
+            throw new SQLException("Could not find the primary database.");
+        }
+        
         this.ioManager.setup();
+        getLogger().info("Successfully setup the database tables");
         
         File lastMigrationFile = new File(getFolder(), "lastMigration.txt");
         Version previousVersion = null;
         if (lastMigrationFile.exists()) {
             try (FileInputStream fis = new FileInputStream(lastMigrationFile); BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
                 previousVersion = new Version(reader.readLine());
+                getLogger().info("Found last migration version: " + previousVersion);
             }
+        } else {
+            getLogger().info("Could not find a last migration version.");
         }
         
         boolean migrationSuccess = false;
         
         if (migrator != null) {
+            getLogger().info("Found a Migrator");
             int compareResult = this.version.compareTo(previousVersion);
             if (compareResult > 0) {
+                getLogger().info("Current version is higher than previous version.");
                 if (migrator.getTargetVersion().equals(this.version)) {
+                    getLogger().info("Migrator version is for the current version");
                     migrationSuccess = migrator.migrate();
+                    getLogger().info("Migration success: " + migrationSuccess);
                     
                     if (!migrationSuccess) {
                         NexusAPI.logMessage(Level.INFO, "Error while processing migration", "Migrator Class: " + migrator.getClass().getName());
@@ -161,6 +174,7 @@ public abstract class NexusAPI {
                 writer.write(version);
                 writer.flush();
             }
+            getLogger().info("Updated last migration version to the current version.");
         }
         
         statRegistry = StatHelper.getRegistry();
@@ -184,35 +198,44 @@ public abstract class NexusAPI {
             StatHelper.getRegistry().register(statInfo);
         }
         registerStats(statRegistry);
+        getLogger().info("Registered Stat types");
+        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
+            getPrimaryDatabase().push(statInfo);
+        }
+        getLogger().info("Pushed stat types to the database");
         
         preferenceRegistry = new PreferenceRegistry();
         preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
         preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
         List<Preference.Info> preferenceInfos = primaryDatabase.get(Preference.Info.class);
-        for (Info preferenceInfo : preferenceInfos) {
+        for (Preference.Info preferenceInfo : preferenceInfos) {
             preferenceRegistry.register(preferenceInfo);
         }
-        
         registerPreferences(preferenceRegistry);
-        
-        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
-            getPrimaryDatabase().push(statInfo);
+        getLogger().info("Registered preference types");
+        for (Preference.Info object : preferenceRegistry.getObjects()) {
+            getPrimaryDatabase().push(object);
         }
+        getLogger().info("Pushed preference types to the database");
         
         serverManager.setupCurrentServer();
+        getLogger().info("Set up the current server");
         
         for (Punishment punishment : getPrimaryDatabase().get(Punishment.class)) {
             punishmentManager.addPunishment(punishment);
         }
+        getLogger().info("Cached punishments in memory");
         
         List<Tournament> tournaments = getPrimaryDatabase().get(Tournament.class);
         for (Tournament t : tournaments) {
             if (t.isActive()) {
                 this.tournament = t;
+                getLogger().info("Loaded data for tournament: " + tournament.getName());
             }
         }
         
         playerManager.getIpHistory().addAll(getPrimaryDatabase().get(IPEntry.class));
+        getLogger().info("Loaded IP History");
         
         Database database = getPrimaryDatabase();
         List<Row> playerRows = database.executeQuery("select * from players;");
@@ -220,6 +243,7 @@ public abstract class NexusAPI {
             CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), UUID.fromString(row.getString("uniqueId")), row.getString("name"));
             playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
         }
+        getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
         
         List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name`='server' or `name`='online' or `name`='lastlogout';");
         for (Row row : statsRows) {
@@ -237,6 +261,7 @@ public abstract class NexusAPI {
                 player.setLastLogout((long) value);
             }
         }
+        getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
         
         List<Row> preferencesRows = database.executeQuery("select `name`, `uuid`, `value` from preferences where `name`='vanish' or `name`='incognito'");
         for (Row row : preferencesRows) {
@@ -250,13 +275,17 @@ public abstract class NexusAPI {
                 player.setIncognito(value);
             }
         }
+        getLogger().info("Loaded preference info for player profiles: Incognito and Vanish");
         
         for (IPEntry entry : playerManager.getIpHistory()) {
             CachedPlayer player = playerManager.getCachedPlayers().get(entry.getUuid());
             player.getIpHistory().add(entry);
         }
+        getLogger().info("Sorted IP History for player profiles.");
         
         //TODO Have the ranks and tags things updated via the network framework instead of having to query the database
+        
+        getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
     public abstract void registerDatabases(DatabaseRegistry registry);

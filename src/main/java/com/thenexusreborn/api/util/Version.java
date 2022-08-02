@@ -71,7 +71,7 @@ public class Version implements Comparable<Version> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("v").append(this.major).append(".").append(this.minor);
+        sb.append(this.major).append(".").append(this.minor);
         if (this.patch > 0) {
             sb.append(".").append(this.patch);
         }
