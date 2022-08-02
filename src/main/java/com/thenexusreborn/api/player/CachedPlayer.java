@@ -26,6 +26,12 @@ public class CachedPlayer {
         this.name = name;
     }
     
+    public CachedPlayer(long id, UUID uniqueId, String name) {
+        this.id = id;
+        this.uniqueId = uniqueId;
+        this.name = name;
+    }
+    
     public CachedPlayer(NexusPlayer nexusPlayer) {
         this.id = nexusPlayer.id;
         this.uniqueId = nexusPlayer.uniqueId;
@@ -38,12 +44,48 @@ public class CachedPlayer {
         this.server = (String) nexusPlayer.getStatValue("server");
     }
     
-    public long getId() {
-        return id;
+    public long getLastLogout() {
+        return lastLogout;
     }
     
-    public void setId(long id) {
-        this.id = id;
+    public void setLastLogout(long lastLogout) {
+        this.lastLogout = lastLogout;
+    }
+    
+    public boolean isOnline() {
+        return online;
+    }
+    
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+    
+    public boolean isVanish() {
+        return vanish;
+    }
+    
+    public void setVanish(boolean vanish) {
+        this.vanish = vanish;
+    }
+    
+    public boolean isIncognito() {
+        return incognito;
+    }
+    
+    public void setIncognito(boolean incognito) {
+        this.incognito = incognito;
+    }
+    
+    public String getServer() {
+        return server;
+    }
+    
+    public void setServer(String server) {
+        this.server = server;
+    }
+    
+    public long getId() {
+        return id;
     }
     
     public void setName(String name) {

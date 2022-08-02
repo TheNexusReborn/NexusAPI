@@ -14,7 +14,7 @@ public abstract class PlayerManager {
     protected final Map<UUID, NexusPlayer> players = new HashMap<>();
     protected final Set<IPEntry> ipHistory = new HashSet<>();
     
-    protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>(); //TODO Implement loading
+    protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>();
     
     public Map<UUID, NexusPlayer> getPlayers() {
         return players;

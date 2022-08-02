@@ -90,4 +90,8 @@ public class IOManager {
             }
         }
     }
+    
+    public DatabaseRegistry getRegistry() {
+        return this.registry;
+    }
 }

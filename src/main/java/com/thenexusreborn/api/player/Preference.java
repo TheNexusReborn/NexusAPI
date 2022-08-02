@@ -10,7 +10,7 @@ import java.util.*;
 public class Preference {
     @Primary
     private long id;
-    @ColumnInfo(type = "varchar(100)", codec = PreferenceInfoCodec.class)
+    @ColumnInfo(name = "name", type = "varchar(100)", codec = PreferenceInfoCodec.class)
     private Info info;
     private UUID uuid;
     private boolean value;
