@@ -130,6 +130,32 @@ public abstract class NexusAPI {
         
         this.ioManager.setup();
         getLogger().info("Successfully setup the database tables");
+    
+        statRegistry = StatHelper.getRegistry();
+        statRegistry.register("xp", StatType.DOUBLE, 0.0);
+        statRegistry.register("level", StatType.INTEGER, 0);
+        statRegistry.register("nexites", StatType.DOUBLE, 0.0);
+        statRegistry.register("credits", StatType.DOUBLE, 0.0);
+        statRegistry.register("playtime", StatType.LONG, 0L);
+        statRegistry.register("firstjoined", StatType.LONG, 0L);
+        statRegistry.register("lastlogin", StatType.LONG, 0L);
+        statRegistry.register("lastlogout", StatType.LONG, 0L);
+        statRegistry.register("prealpha", StatType.BOOLEAN, false);
+        statRegistry.register("alpha", StatType.BOOLEAN, false);
+        statRegistry.register("beta", StatType.BOOLEAN, false);
+        statRegistry.register("tag", StatType.STRING, "");
+        statRegistry.register("online", StatType.BOOLEAN, false);
+        statRegistry.register("server", StatType.STRING, "");
+        statRegistry.register("unlockedtags", StatType.STRING_SET, new HashSet<>());
+        
+        registerStats(statRegistry);
+        getLogger().info("Registered Stat types");
+        
+        preferenceRegistry = new PreferenceRegistry();
+        preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
+        preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+        
+        registerPreferences(preferenceRegistry);
         
         File lastMigrationFile = new File(getFolder(), "lastMigration.txt");
         Version previousVersion = null;
@@ -176,42 +202,22 @@ public abstract class NexusAPI {
             }
             getLogger().info("Updated last migration version to the current version.");
         }
-        
-        statRegistry = StatHelper.getRegistry();
-        statRegistry.register("xp", StatType.DOUBLE, 0.0);
-        statRegistry.register("level", StatType.INTEGER, 0);
-        statRegistry.register("nexites", StatType.DOUBLE, 0.0);
-        statRegistry.register("credits", StatType.DOUBLE, 0.0);
-        statRegistry.register("playtime", StatType.LONG, 0L);
-        statRegistry.register("firstjoined", StatType.LONG, 0L);
-        statRegistry.register("lastlogin", StatType.LONG, 0L);
-        statRegistry.register("lastlogout", StatType.LONG, 0L);
-        statRegistry.register("prealpha", StatType.BOOLEAN, false);
-        statRegistry.register("alpha", StatType.BOOLEAN, false);
-        statRegistry.register("beta", StatType.BOOLEAN, false);
-        statRegistry.register("tag", StatType.STRING, "");
-        statRegistry.register("online", StatType.BOOLEAN, false);
-        statRegistry.register("server", StatType.STRING, "");
-        statRegistry.register("unlockedtags", StatType.STRING_SET, new HashSet<>());
+    
         List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
         for (Stat.Info statInfo : statInfos) {
             StatHelper.getRegistry().register(statInfo);
         }
-        registerStats(statRegistry);
-        getLogger().info("Registered Stat types");
+    
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
             getPrimaryDatabase().push(statInfo);
         }
         getLogger().info("Pushed stat types to the database");
-        
-        preferenceRegistry = new PreferenceRegistry();
-        preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
-        preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+    
         List<Preference.Info> preferenceInfos = primaryDatabase.get(Preference.Info.class);
         for (Preference.Info preferenceInfo : preferenceInfos) {
             preferenceRegistry.register(preferenceInfo);
         }
-        registerPreferences(preferenceRegistry);
+    
         getLogger().info("Registered preference types");
         for (Preference.Info object : preferenceRegistry.getObjects()) {
             getPrimaryDatabase().push(object);
@@ -266,7 +272,7 @@ public abstract class NexusAPI {
         List<Row> preferencesRows = database.executeQuery("select `name`, `uuid`, `value` from preferences where `name`='vanish' or `name`='incognito'");
         for (Row row : preferencesRows) {
             String name = row.getString("name");
-            UUID uuid = UUID.fromString("uuid");
+            UUID uuid = UUID.fromString(row.getString("uuid"));
             boolean value = row.getBoolean("value");
             CachedPlayer player = playerManager.getCachedPlayers().get(uuid);
             if (name.equalsIgnoreCase("vanish")) {
