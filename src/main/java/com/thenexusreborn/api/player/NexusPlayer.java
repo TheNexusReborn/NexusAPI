@@ -14,7 +14,8 @@ import java.util.*;
 import java.util.Map.Entry;
 
 @TableInfo(value = "players", handler = PlayerObjectHandler.class)
-public abstract class NexusPlayer {
+public class NexusPlayer {
+    
     @Primary
     protected long id;
     protected UUID uniqueId;
@@ -40,6 +41,15 @@ public abstract class NexusPlayer {
     
     @ColumnIgnored
     protected final Set<StatChange> statChanges = new TreeSet<>();
+    
+    @ColumnIgnored
+    protected IActionBar actionBar;
+    
+    @ColumnIgnored
+    protected boolean spokenInChat;
+    
+    @ColumnIgnored
+    protected PlayerProxy playerProxy;
     
     private NexusPlayer() {}
     
@@ -93,7 +103,9 @@ public abstract class NexusPlayer {
         }
     }
     
-    public abstract void sendMessage(String message);
+    public void sendMessage(String message) {
+        playerProxy.sendMessage(message);
+    }
     
     public String getTablistName() {
         if (getRank() == Rank.MEMBER) {
@@ -128,6 +140,10 @@ public abstract class NexusPlayer {
     @Deprecated
     public void setLastLogout(long lastLogout) {
         changeStat("lastlogout", lastLogout, StatOperator.SET);
+    }
+    
+    public PlayerProxy getPlayer() {
+        return this.playerProxy;
     }
     
     @Deprecated
@@ -244,13 +260,13 @@ public abstract class NexusPlayer {
         return Rank.MEMBER;
     }
     
-    public void addRank(Rank rank, long expire) throws Exception {
+    public void addRank(Rank rank, long expire) {
         if (rank == Rank.NEXUS) {
-            throw new Exception("Cannot add the Nexus Team rank.");
+            throw new RuntimeException("Cannot add the Nexus Team rank.");
         }
         
         if (System.currentTimeMillis() > expire) {
-            throw new Exception("Cannot add the rank as it has already expired.");
+            throw new RuntimeException("Cannot add the rank as it has already expired.");
         }
         
         this.ranks.put(rank, expire);
@@ -401,5 +417,27 @@ public abstract class NexusPlayer {
         return ranks;
     }
     
-    public abstract boolean isOnline();
+    public boolean isOnline() {
+        return playerProxy.isOnline();
+    }
+    
+    public IActionBar getActionBar() {
+        return actionBar;
+    }
+    
+    public void setActionBar(IActionBar actionBar) {
+        this.actionBar = actionBar;
+    }
+    
+    public void setSpokenInChat(boolean spokenInChat) {
+        this.spokenInChat = spokenInChat;
+    }
+    
+    public boolean hasSpokenInChat() {
+        return this.spokenInChat;
+    }
+    
+    public void setPlayerProxy(PlayerProxy playerProxy) {
+        this.playerProxy = playerProxy;
+    }
 }

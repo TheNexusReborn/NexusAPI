@@ -16,6 +16,7 @@ public class PlayerObjectHandler extends ObjectHandler {
     @Override
     public void afterLoad() {
         NexusPlayer player = (NexusPlayer) object;
+        player.setPlayerProxy(NexusAPI.getApi().getPlayerFactory().createProxy(player));
     
         try {
             List<Preference> preferences = database.get(Preference.class, "uuid", player.getUniqueId());
