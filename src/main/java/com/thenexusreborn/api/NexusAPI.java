@@ -4,7 +4,6 @@ import com.thenexusreborn.api.data.*;
 import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.helper.MemoryHelper;
-import com.thenexusreborn.api.migration.Migrator;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
@@ -51,8 +50,6 @@ public abstract class NexusAPI {
     
     protected Database primaryDatabase;
     
-    protected final Migrator migrator;
-    
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
         this.environment = environment;
         this.logger = logger;
@@ -64,8 +61,6 @@ public abstract class NexusAPI {
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.ioManager = new IOManager(new DatabaseRegistry());
-        
-        this.migrator = new DataBackendMigrator();
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -159,52 +154,6 @@ public abstract class NexusAPI {
         
         registerPreferences(preferenceRegistry);
         
-        File lastMigrationFile = new File(getFolder(), "lastMigration.txt");
-        Version previousVersion = null;
-        if (lastMigrationFile.exists()) {
-            try (FileInputStream fis = new FileInputStream(lastMigrationFile); BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
-                previousVersion = new Version(reader.readLine());
-                getLogger().info("Found last migration version: " + previousVersion);
-            }
-        } else {
-            getLogger().info("Could not find a last migration version.");
-        }
-        
-        boolean migrationSuccess = false;
-        
-        if (migrator != null) {
-            getLogger().info("Found a Migrator");
-            int compareResult = this.version.compareTo(previousVersion);
-            if (compareResult > 0) {
-                getLogger().info("Current version is higher than previous version.");
-                if (migrator.getTargetVersion().equals(this.version)) {
-                    getLogger().info("Migrator version is for the current version");
-                    migrationSuccess = migrator.migrate();
-                    getLogger().info("Migration success: " + migrationSuccess);
-                    
-                    if (!migrationSuccess) {
-                        NexusAPI.logMessage(Level.INFO, "Error while processing migration", "Migrator Class: " + migrator.getClass().getName());
-                    }
-                }
-            }
-        }
-        
-        if (migrator == null || migrationSuccess) {
-            if (!lastMigrationFile.exists()) {
-                lastMigrationFile.createNewFile();
-            }
-            String version = getVersion().getMajor() + "." + getVersion().getMinor();
-            if (getVersion().getPatch() > 0) {
-                version += "." + getVersion().getPatch();
-            }
-            version += "-" + getVersion().getStage().name();
-            try (FileOutputStream fos = new FileOutputStream(lastMigrationFile); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos))) {
-                writer.write(version);
-                writer.flush();
-            }
-            getLogger().info("Updated last migration version to the current version.");
-        }
-    
         List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
         for (Stat.Info statInfo : statInfos) {
             StatHelper.getRegistry().register(statInfo);
