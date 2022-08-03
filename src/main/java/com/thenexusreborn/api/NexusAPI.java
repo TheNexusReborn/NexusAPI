@@ -3,6 +3,7 @@ package com.thenexusreborn.api;
 import com.thenexusreborn.api.data.*;
 import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.helper.MemoryHelper;
 import com.thenexusreborn.api.migration.Migrator;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.player.*;
@@ -85,6 +86,7 @@ public abstract class NexusAPI {
     }
     
     public final void init() throws Exception {
+        long memoryBeforeLoad = Runtime.getRuntime().freeMemory();
         getLogger().info("Loading NexusAPI Version v" + this.version);
         
         try {
@@ -292,6 +294,9 @@ public abstract class NexusAPI {
         //TODO Have the ranks and tags things updated via the network framework instead of having to query the database
         
         getLogger().info("NexusAPI v" + this.version + " load complete.");
+        long memoryAfterLoad = Runtime.getRuntime().freeMemory();
+        long memoryUsed = memoryBeforeLoad - memoryAfterLoad;
+        getLogger().info("Total Memory Change after loading cached data: " + ((long) MemoryHelper.toMegabytes(memoryUsed)) + "MB");
     }
     
     public abstract void registerDatabases(DatabaseRegistry registry);
