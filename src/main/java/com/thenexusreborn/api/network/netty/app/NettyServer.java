@@ -36,11 +36,6 @@ public class NettyServer extends NettyApp {
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(host, port);
-            channelFuture.addListener((ChannelFutureListener) f -> {
-                if (f == channelFuture) {
-                    NexusAPI.getApi().getLogger().info("Netty server started successfully");
-                }
-            });
         } catch (Exception e) {
             e.printStackTrace();
             NexusAPI.getApi().getLogger().info("Netty server shutting down.");
