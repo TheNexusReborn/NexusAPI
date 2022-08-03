@@ -186,8 +186,8 @@ public class Database {
         }
         
         Column column = table.getColumn(columnName);
-        if (column != null) {
-            return null;
+        if (column == null) {
+            return new ArrayList<>();
         }
         
         List<Row> rows = executeQuery("select * from " + table.getName() + " where " + column.getName() + "='" + value + "';");
