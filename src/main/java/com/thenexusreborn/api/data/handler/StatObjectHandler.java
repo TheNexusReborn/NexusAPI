@@ -47,6 +47,11 @@ public class StatObjectHandler extends ObjectHandler {
     }
     
     @Override
+    public void afterLoad() {
+        
+    }
+    
+    @Override
     public void afterSave() {
         try {
             field.setAccessible(true);

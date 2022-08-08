@@ -65,6 +65,9 @@ public class Stat {
     }
     
     public String getName() {
+        if (info == null) {
+            return null;
+        }
         return info.getName();
     }
     
@@ -73,6 +76,9 @@ public class Stat {
     }
     
     public StatType getType() {
+        if (info == null) {
+            return null;
+        }
         return info.getType();
     }
     
@@ -102,6 +108,9 @@ public class Stat {
     }
     
     public Object getDefaultValue() {
+        if (info == null) {
+            return null;
+        }
         return info.getDefaultValue();
     }
     

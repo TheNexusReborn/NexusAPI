@@ -302,7 +302,9 @@ public class NexusPlayer {
     }
     
     public void addStat(Stat stat) {
-        this.stats.put(stat.getName(), stat);
+        if (stat.getName() != null) {
+            this.stats.put(stat.getName(), stat);
+        }
     }
     
     public void addStatChange(StatChange statChange) {
