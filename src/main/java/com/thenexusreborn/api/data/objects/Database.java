@@ -107,7 +107,11 @@ public class Database {
                     try {
                         SqlCodec<?> codecInstance = codec.getDeclaredConstructor().newInstance();
                         data = codecInstance.decode(row.getString(key));
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        if (column.getType().startsWith("varchar")) {
+                            data = row.getString(key);
+                        }
+                    }
                 }
     
                 column.getField().setAccessible(true);

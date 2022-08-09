@@ -324,6 +324,7 @@ public class NexusPlayer {
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
             stat = new Stat(info, uniqueId, System.currentTimeMillis());
+            stat.setValue(info.getDefaultValue());
             this.addStat(stat);
         }
         return stat.getValue();
