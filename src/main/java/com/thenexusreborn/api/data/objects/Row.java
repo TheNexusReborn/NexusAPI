@@ -24,15 +24,15 @@ public class Row {
                 
                 Object object = null;
                 
-                if (column.getType().equalsIgnoreCase("int")) {
+                if (column.getType().startsWith("int")) {
                     object = rs.getInt(i);
-                } else if (column.getType().equalsIgnoreCase("bigint")) {
+                } else if (column.getType().startsWith("bigint")) {
                     object = rs.getLong(i);
                 } else if (column.getType().toLowerCase().startsWith("varchar")) {
                     object = rs.getString(i);
-                } else if (column.getType().equalsIgnoreCase("double")) {
+                } else if (column.getType().startsWith("double")) {
                     object = rs.getDouble(i);
-                } else if (column.getType().equalsIgnoreCase("float")) {
+                } else if (column.getType().startsWith("float")) {
                     object = rs.getFloat(i);
                 } else {
                     NexusAPI.logMessage(Level.WARNING, "Unhandled MySQL Type", "Type: " + column.getType());
