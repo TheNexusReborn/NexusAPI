@@ -261,26 +261,10 @@ public class NexusPlayer {
     }
     
     public void addRank(Rank rank, long expire) {
-        if (rank == Rank.NEXUS) {
-            throw new RuntimeException("Cannot add the Nexus Team rank.");
-        }
-        
-        if (System.currentTimeMillis() > expire) {
-            throw new RuntimeException("Cannot add the rank as it has already expired.");
-        }
-        
         this.ranks.put(rank, expire);
     }
     
     public void setRank(Rank rank, long expire) throws Exception {
-        if (rank == Rank.NEXUS) {
-            throw new Exception("Cannot set the Nexus Team rank.");
-        }
-        
-        if (System.currentTimeMillis() > expire) {
-            throw new Exception("Cannot set the rank as it has already expired.");
-        }
-        
         if (this.ranks.containsKey(Rank.NEXUS)) {
             throw new Exception("Cannot set a rank lower than The Nexus Team on a Nexus Team member.");
         }
