@@ -93,7 +93,7 @@ public class Table implements Comparable<Table> {
         sb.append("create table if not exists ");
         sb.append(getName()).append("(");
         getColumns().forEach(column -> {
-            sb.append(column.getName()).append(" ").append(column.getType());
+            sb.append("`").append(column.getName()).append("`").append(" ").append(column.getType());
             if (column.isPrimaryKey()) {
                 sb.append(" primary key");
             }
