@@ -85,6 +85,10 @@ public abstract class NexusAPI {
         getLogger().info("Loading NexusAPI Version v" + this.version);
         
         try {
+            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements();) {
+                Driver driver = e.nextElement();
+                DriverManager.deregisterDriver(driver);
+            }
             Driver mysqlDriver = new com.mysql.cj.jdbc.Driver();
             DriverManager.registerDriver(mysqlDriver);
             getLogger().info("Registered the correct MySQL Driver");
