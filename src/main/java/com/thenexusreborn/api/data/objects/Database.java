@@ -332,7 +332,7 @@ public class Database {
         } catch (SQLException e) {
             NexusAPI.logMessage(Level.SEVERE, "Error while saving data to the database", "SQL: " + sql ,"Exception: ");
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             NexusAPI.logMessage(Level.SEVERE, "Could not set the primary field for generated keys", "Exception: ");
             e.printStackTrace();
         }
