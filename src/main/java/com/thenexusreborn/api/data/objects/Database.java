@@ -298,7 +298,7 @@ public class Database {
             StringBuilder cb = new StringBuilder(), vb = new StringBuilder();
             while (iterator.hasNext()) {
                 Entry<String, Object> entry = iterator.next();
-                cb.append(entry.getKey());
+                cb.append("`").append(entry.getKey()).append("`");
                 vb.append("'").append(entry.getValue()).append("'");
                 if (iterator.hasNext()) {
                     cb.append(", ");
@@ -312,7 +312,7 @@ public class Database {
             StringBuilder sb = new StringBuilder();
             while (iterator.hasNext()) {
                 Entry<String, Object> entry = iterator.next();
-                sb.append(entry.getKey()).append("='").append(entry.getValue()).append("'");
+                sb.append("`").append(entry.getKey()).append("`='").append(entry.getValue()).append("'");
                 if (iterator.hasNext()) {
                     sb.append(", ");
                 }
