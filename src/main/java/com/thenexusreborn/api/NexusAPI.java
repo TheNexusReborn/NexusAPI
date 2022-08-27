@@ -5,6 +5,7 @@ import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.helper.MemoryHelper;
 import com.thenexusreborn.api.network.*;
+import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
@@ -100,6 +101,9 @@ public abstract class NexusAPI {
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
         networkManager.init("localhost", 3408);
+        for (NetworkCommand netCmd : networkCommandRegistry.getObjects()) {
+            networkManager.addCommand(netCmd);
+        }
         getLogger().info("Loaded the Networking System");
         
         DatabaseRegistry databaseRegistry = ioManager.getRegistry();
