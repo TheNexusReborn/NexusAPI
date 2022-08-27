@@ -32,7 +32,10 @@ public final class StatHelper {
     }
     
     public static String formatStatName(String name) {
-        return name.toLowerCase().replace(" ", "_");
+        if (name != null) {
+            return name.toLowerCase().replace(" ", "_");
+        }
+        return "";
     }
     
     public static double calculate(StatOperator operator, Number number1, Number number2) {
