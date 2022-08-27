@@ -114,8 +114,11 @@ public class Punishment implements Comparable<Punishment> {
         if (this.type == PunishmentType.WARN) {
             return !(this.acknowledgeInfo.getTime() > 0);
         }
-        
-        if (getTimeRemaining() > 0) {
+    
+        long timeRemaining = getTimeRemaining();
+        if (timeRemaining == -1) {
+            return true;
+        } else if (timeRemaining > 0) {
             return true;
         }
         
