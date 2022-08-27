@@ -294,7 +294,7 @@ public class Database {
         String sql;
         Iterator<Entry<String, Object>> iterator = data.entrySet().iterator();
         boolean getGeneratedKeys = false;
-        if (id == 0) {
+        if (id <= 0) {
             StringBuilder cb = new StringBuilder(), vb = new StringBuilder();
             while (iterator.hasNext()) {
                 Entry<String, Object> entry = iterator.next();
