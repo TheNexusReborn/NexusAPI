@@ -31,7 +31,9 @@ public class Punishment implements Comparable<Punishment> {
     @ColumnIgnored
     private String actorNameCache, targetNameCache;
     
-    private Punishment() {}
+    private Punishment() {
+        
+    }
     
     public Punishment(long date, long length, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
         this.date = date;
@@ -42,30 +44,6 @@ public class Punishment implements Comparable<Punishment> {
         this.reason = reason;
         this.type = type;
         this.visibility = visibility;
-        
-        try {
-            UUID uuid = UUID.fromString(getActor());
-            CachedPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
-            if (actorCachePlayer == null) {
-                actorNameCache = actor;
-            } else {
-                actorNameCache = actorCachePlayer.getName();
-            }
-        } catch (Exception e) {
-            this.actorNameCache = actor;
-        }
-    
-        try {
-            UUID uuid = UUID.fromString(getTarget());
-            CachedPlayer targetCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
-            if (targetCachePlayer == null) {
-                targetNameCache = actor;
-            } else {
-                targetNameCache = targetCachePlayer.getName();
-            }
-        } catch (Exception e) {
-            this.targetNameCache = actor;
-        }
     }
     
     public Punishment(long date, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
@@ -145,6 +123,20 @@ public class Punishment implements Comparable<Punishment> {
     }
     
     public String getActorNameCache() {
+        if (actorNameCache == null) {
+            try {
+                UUID uuid = UUID.fromString(getActor());
+                CachedPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
+                if (actorCachePlayer == null) {
+                    actorNameCache = actor;
+                } else {
+                    actorNameCache = actorCachePlayer.getName();
+                }
+            } catch (Exception e) {
+                this.actorNameCache = actor;
+            }
+        }
+        
         return actorNameCache;
     }
     
@@ -153,6 +145,19 @@ public class Punishment implements Comparable<Punishment> {
     }
     
     public String getTargetNameCache() {
+        if (targetNameCache == null) {
+            try {
+                UUID uuid = UUID.fromString(getTarget());
+                CachedPlayer targetCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
+                if (targetCachePlayer == null) {
+                    targetNameCache = actor;
+                } else {
+                    targetNameCache = targetCachePlayer.getName();
+                }
+            } catch (Exception e) {
+                this.targetNameCache = actor;
+            }
+        }
         return targetNameCache;
     }
     
