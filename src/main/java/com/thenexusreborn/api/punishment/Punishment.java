@@ -8,6 +8,7 @@ import com.thenexusreborn.api.player.CachedPlayer;
 
 import java.util.UUID;
 
+@SuppressWarnings("DuplicatedCode")
 @TableInfo("punishments")
 public class Punishment implements Comparable<Punishment> {
     public static final String KICK_FORMAT = "&d&lThe Nexus Reborn &7- {type}\n \n" +
@@ -31,9 +32,7 @@ public class Punishment implements Comparable<Punishment> {
     @ColumnIgnored
     private String actorNameCache, targetNameCache;
     
-    private Punishment() {
-        
-    }
+    private Punishment() {}
     
     public Punishment(long date, long length, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
         this.date = date;

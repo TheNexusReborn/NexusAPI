@@ -17,7 +17,7 @@ public class PardonInfoCodec extends SqlCodec<PardonInfo> {
     @Override
     public PardonInfo decode(String encoded) {
         PardonInfo pardonInfo = null;
-        if (encoded != null && !encoded.equals("")) {
+        if (encoded != null && !encoded.equals("") && !encoded.equalsIgnoreCase("null")) {
             String[] piSplit = encoded.split(",");
             long pardonDate = 0;
             String pardonActor = "";
