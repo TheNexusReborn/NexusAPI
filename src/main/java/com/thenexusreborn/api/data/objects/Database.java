@@ -276,6 +276,7 @@ public class Database {
                     id = (long) value;
                     primaryField = field;
                     primaryColumn = column;
+                    continue;
                 }
                 
                 data.put(column.getName(), value);
