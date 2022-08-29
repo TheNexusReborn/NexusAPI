@@ -34,7 +34,6 @@ public abstract class NexusAPI {
     }
     
     protected final Logger logger;
-    protected final DataManager dataManager;
     protected final IOManager ioManager;
     protected final PlayerManager playerManager;
     protected final ThreadFactory threadFactory;
@@ -55,7 +54,6 @@ public abstract class NexusAPI {
         this.environment = environment;
         this.logger = logger;
         this.networkManager = new NetworkManager(context);
-        this.dataManager = new DataManager();
         this.playerManager = playerManager;
         this.threadFactory = threadFactory;
         this.playerFactory = playerFactory;
@@ -276,10 +274,6 @@ public abstract class NexusAPI {
     public abstract Connection getConnection() throws SQLException;
     
     public abstract File getFolder();
-    
-    public DataManager getDataManager() {
-        return dataManager;
-    }
     
     public PlayerManager getPlayerManager() {
         return playerManager;

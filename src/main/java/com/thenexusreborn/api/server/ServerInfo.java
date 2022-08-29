@@ -119,4 +119,13 @@ public class ServerInfo {
     public int hashCode() {
         return Objects.hash(name);
     }
+    
+    public void updateInfo(ServerInfo info) {
+        setHiddenPlayers(info.getHiddenPlayers());
+        setMaxPlayers(info.getMaxPlayers());
+        setPlayers(info.getPlayers());
+        setState(info.getState());
+        setStatus(info.getStatus());
+        setType(info.getType());
+    }
 }

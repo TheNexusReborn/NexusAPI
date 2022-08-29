@@ -29,27 +29,57 @@ public abstract class PlayerManager {
     }
     
     public void saveToMySQLAsync(NexusPlayer player) {
-        NexusAPI.getApi().getDataManager().pushPlayerAsync(player);
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().push(player));
     }
     
     public abstract NexusPlayer createPlayerData(UUID uniqueId, String name);
+    
+    public Set<UUID> getPlayersByIp(String ip) {
+        Set<IPEntry> allIps = new HashSet<>();
+        Set<UUID> players = new HashSet<>();
+        for (IPEntry ipEntry : getIpHistory()) {
+            if (ipEntry.getIp().equalsIgnoreCase(ip)) {
+                allIps.add(ipEntry);
+                players.add(ipEntry.getUuid());
+            }
+        }
+        
+        for (UUID player : players) {
+            CachedPlayer cachedPlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(player);
+            allIps.addAll(cachedPlayer.getIpHistory());
+        }
+        
+        for (IPEntry ipEntry : allIps) {
+            players.add(ipEntry.getUuid());
+        }
+        
+        return players;
+    }
     
     public void getNexusPlayerAsync(UUID uniqueId, Consumer<NexusPlayer> action) {
         if (players.containsKey(uniqueId)) {
             action.accept(players.get(uniqueId));
         } else {
             NexusAPI.getApi().getThreadFactory().runAsync(() -> {
-                NexusPlayer nexusPlayer;
+                NexusPlayer nexusPlayer = null;
                 if (hasData(uniqueId)) {
                     do {
-                        nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
+                        try {
+                            nexusPlayer = NexusAPI.getApi().getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uniqueId).get(0);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } while (nexusPlayer == null);
                 } else {
                     try {
                         nexusPlayer = createPlayerData(uniqueId, MojangHelper.getNameFromUUID(uniqueId));
                     } catch (Exception e) {
                         do {
-                            nexusPlayer = NexusAPI.getApi().getDataManager().loadPlayer(uniqueId);
+                            try {
+                                nexusPlayer = NexusAPI.getApi().getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uniqueId).get(0);
+                            } catch (Exception ex) {
+                                e.printStackTrace();
+                            }
                         } while (nexusPlayer == null);
                     }
                 }
@@ -89,7 +119,7 @@ public abstract class PlayerManager {
     
     public void saveData() {
         for (NexusPlayer nexusPlayer : this.players.values()) {
-            NexusAPI.getApi().getDataManager().pushPlayer(nexusPlayer);
+            NexusAPI.getApi().getPrimaryDatabase().push(nexusPlayer);
         }
     }
     
@@ -105,5 +135,32 @@ public abstract class PlayerManager {
     
     public Set<IPEntry> getIpHistory() {
         return ipHistory;
+    }
+    
+    public void addIpHistory(UUID uniqueId, String hostName) {
+        CachedPlayer cachedPlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uniqueId);
+        for (IPEntry ipEntry : cachedPlayer.getIpHistory()) {
+            if (ipEntry.getIp().equalsIgnoreCase(hostName)) {
+                return;
+            }
+        }
+    
+        IPEntry ipEntry = new IPEntry(hostName, uniqueId);
+        NexusAPI.getApi().getPrimaryDatabase().push(ipEntry);
+        NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);
+        cachedPlayer.getIpHistory().add(ipEntry);
+    }
+    
+    public CachedPlayer getCachedPlayer(String name) {
+        for (CachedPlayer cachedPlayer : new ArrayList<>(this.cachedPlayers.values())) {
+            if (cachedPlayer.getName().equalsIgnoreCase(name)) {
+                return cachedPlayer;
+            }
+        }
+        return null;
+    }
+    
+    public CachedPlayer getCachedPlayer(UUID uuid) {
+        return this.cachedPlayers.get(uuid);
     }
 }

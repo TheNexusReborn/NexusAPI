@@ -2,6 +2,7 @@ package com.thenexusreborn.api.server;
 
 import com.thenexusreborn.api.NexusAPI;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public abstract class ServerManager {
@@ -20,7 +21,11 @@ public abstract class ServerManager {
     }
     
     public void addServer(int multicraftId) {
-        this.servers.add(NexusAPI.getApi().getDataManager().getServerInfo(multicraftId));
+        try {
+            this.servers.add(NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class, "multicraftId", multicraftId).get(0));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public void addServer(ServerInfo info) {
@@ -28,6 +33,29 @@ public abstract class ServerManager {
     }
     
     public void updateStoredData() {
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getDataManager().updateAllServers(new ArrayList<>(servers)));
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            try {
+                List<ServerInfo> allServers = NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class);
+                for (ServerInfo server : new ArrayList<>(getServers())) {
+                    ServerInfo infoFromDatabase = null;
+                    for (ServerInfo s : allServers) {
+                        if (s.getId() == server.getId()) {
+                            infoFromDatabase = s;
+                        }
+                    }
+                    if (infoFromDatabase != null) {
+                        server.updateInfo(infoFromDatabase);
+                    }
+                }
+    
+                for (ServerInfo server : allServers) {
+                    if (!this.servers.contains(server)) {
+                        this.servers.add(server);
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

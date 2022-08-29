@@ -146,7 +146,6 @@ public class NexusPlayer {
         return this.playerProxy;
     }
     
-    @Deprecated
     public int getLevel() {
         double xp = (double) getStatValue("xp");
         int playerLevel = 0;
