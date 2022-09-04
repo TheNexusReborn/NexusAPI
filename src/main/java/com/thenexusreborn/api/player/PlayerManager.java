@@ -12,9 +12,9 @@ public abstract class PlayerManager {
             UUID.fromString("fc6a3e38-c1c0-40a6-b7b9-152ffdadc053"), UUID.fromString("84c55f0c-2f09-4cf6-9924-57f536eb2228"))));
     
     protected final Map<UUID, NexusPlayer> players = new HashMap<>();
-    protected final Set<IPEntry> ipHistory = new HashSet<>();
-    
     protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>();
+    
+    protected final Set<IPEntry> ipHistory = new HashSet<>();
     
     public Map<UUID, NexusPlayer> getPlayers() {
         return players;
@@ -33,6 +33,10 @@ public abstract class PlayerManager {
     }
     
     public abstract NexusPlayer createPlayerData(UUID uniqueId, String name);
+    
+    public void handlePlayerLeave(NexusPlayer player) {
+        this.cachedPlayers.put(player.getUniqueId(), new CachedPlayer(player));
+    }
     
     public Set<UUID> getPlayersByIp(String ip) {
         Set<IPEntry> allIps = new HashSet<>();
@@ -56,6 +60,7 @@ public abstract class PlayerManager {
         return players;
     }
     
+    @Deprecated
     public void getNexusPlayerAsync(UUID uniqueId, Consumer<NexusPlayer> action) {
         if (players.containsKey(uniqueId)) {
             action.accept(players.get(uniqueId));
@@ -92,6 +97,7 @@ public abstract class PlayerManager {
         }
     }
     
+    @Deprecated
     public void getNexusPlayerAsync(String name, Consumer<NexusPlayer> action) {
         for (NexusPlayer player : players.values()) {
             if (player != null) {
@@ -162,5 +168,14 @@ public abstract class PlayerManager {
     
     public CachedPlayer getCachedPlayer(UUID uuid) {
         return this.cachedPlayers.get(uuid);
+    }
+    
+    public NexusPlayer getOrLoadNexusPlayer(UUID uuid) {
+        NexusPlayer player = getNexusPlayer(uuid);
+        if (player != null) {
+            return player;
+        }
+        
+        return getCachedPlayer(uuid).loadFully();
     }
 }

@@ -263,18 +263,18 @@ public class NexusPlayer {
         this.ranks.put(rank, expire);
     }
     
-    public void setRank(Rank rank, long expire) throws Exception {
+    public void setRank(Rank rank, long expire) {
         if (this.ranks.containsKey(Rank.NEXUS)) {
-            throw new Exception("Cannot set a rank lower than The Nexus Team on a Nexus Team member.");
+            return;
         }
         
         this.ranks.clear();
         this.ranks.put(rank, expire);
     }
     
-    public void removeRank(Rank rank) throws Exception {
+    public void removeRank(Rank rank) {
         if (rank == Rank.NEXUS) {
-            throw new Exception("Cannot remove the Nexus Team rank.");
+            return;
         }
         
         this.ranks.remove(rank);

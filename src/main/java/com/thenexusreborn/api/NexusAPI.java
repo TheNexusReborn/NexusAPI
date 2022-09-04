@@ -1,9 +1,9 @@
 package com.thenexusreborn.api;
 
-import com.thenexusreborn.api.data.*;
+import com.thenexusreborn.api.data.IOManager;
+import com.thenexusreborn.api.data.codec.RanksCodec;
 import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
-import com.thenexusreborn.api.helper.MemoryHelper;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
@@ -11,6 +11,7 @@ import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 import com.thenexusreborn.api.util.*;
@@ -80,7 +81,6 @@ public abstract class NexusAPI {
     }
     
     public final void init() throws Exception {
-        long memoryBeforeLoad = Runtime.getRuntime().freeMemory();
         getLogger().info("Loading NexusAPI Version v" + this.version);
         
         try {
@@ -98,6 +98,60 @@ public abstract class NexusAPI {
         
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
+        networkCommandRegistry.register(new NetworkCommand("updaterank", (cmd, origin, args) -> {
+            UUID uuid = UUID.fromString(args[0]);
+            String action = args[1];
+            Rank rank = Rank.valueOf(args[2]);
+            long expire = args.length > 3 ? Long.parseLong(args[3]) : -1;
+            
+            NexusPlayer nexusPlayer = getPlayerManager().getNexusPlayer(uuid);
+            CachedPlayer cachedPlayer = getPlayerManager().getCachedPlayer(uuid);
+            if (nexusPlayer != null) {
+                if (action.equals("add")) {
+                    nexusPlayer.addRank(rank, expire);
+                } else if (action.equals("remove")) {
+                    nexusPlayer.removeRank(rank);
+                } else if (action.equals("set")) {
+                    nexusPlayer.setRank(rank, expire);
+                }
+            } else if (cachedPlayer != null) {
+                if (action.equals("add")) {
+                    cachedPlayer.getRanks().put(rank, expire);
+                } else if (action.equals("remove")) {
+                    cachedPlayer.getRanks().remove(rank);
+                } else if (action.equals("set")) {
+                    cachedPlayer.getRanks().clear();
+                    cachedPlayer.getRanks().put(rank, expire);
+                }
+            }
+        }));
+        
+        networkCommandRegistry.register(new NetworkCommand("updatetag", ((cmd, origin, args) -> {
+            UUID uuid = UUID.fromString(args[0]);
+            String action = args[1];
+            String tag = args.length > 2 ? args[2] : "";
+            NexusPlayer player = playerManager.getNexusPlayer(uuid);
+            if (action.equalsIgnoreCase("reset")) {
+                if (player != null) {
+                    player.setTag(null);
+                }
+            } else if (action.equalsIgnoreCase("set")) {
+                if (player != null) {
+                    player.setTag(new Tag(tag));
+                }
+            } else {
+                if (player == null) {
+                    player = playerManager.getCachedPlayer(uuid).loadFully();
+                }
+                
+                if (action.equalsIgnoreCase("unlock")) {
+                    player.unlockTag(tag);
+                } else if (action.equalsIgnoreCase("remove")) {
+                    player.lockTag(tag);
+                }
+            }
+        })));
+        
         networkManager.init("localhost", 3408);
         for (NetworkCommand netCmd : networkCommandRegistry.getObjects()) {
             networkManager.addCommand(netCmd);
@@ -204,6 +258,7 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
             CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), UUID.fromString(row.getString("uniqueId")), row.getString("name"));
+            cachedPlayer.setRanks(new RanksCodec().decode(row.getString("ranks")));
             playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
@@ -215,7 +270,7 @@ public abstract class NexusAPI {
             String rawValue = row.getString("value");
             Stat.Info info = StatHelper.getInfo(name);
             Object value = StatHelper.parseValue(info.getType(), rawValue);
-            CachedPlayer player = playerManager.getCachedPlayers().get(uuid);
+            CachedPlayer player = playerManager.getCachedPlayer(uuid);
             if (name.equalsIgnoreCase("server")) {
                 player.setServer((String) value);
             } else if (name.equalsIgnoreCase("online")) {
@@ -241,7 +296,7 @@ public abstract class NexusAPI {
         getLogger().info("Loaded preference info for player profiles: Incognito and Vanish");
         
         for (IPEntry entry : playerManager.getIpHistory()) {
-            CachedPlayer player = playerManager.getCachedPlayers().get(entry.getUuid());
+            CachedPlayer player = playerManager.getCachedPlayer(entry.getUuid());
             player.getIpHistory().add(entry);
         }
         getLogger().info("Sorted IP History for player profiles.");
@@ -249,9 +304,6 @@ public abstract class NexusAPI {
         //TODO Have the ranks and tags things updated via the network framework instead of having to query the database
         
         getLogger().info("NexusAPI v" + this.version + " load complete.");
-        long memoryAfterLoad = Runtime.getRuntime().freeMemory();
-        long memoryUsed = memoryBeforeLoad - memoryAfterLoad;
-        getLogger().info("Total Memory Change after loading cached data: " + ((long) MemoryHelper.toMegabytes(memoryUsed)) + "MB");
     }
     
     public abstract void registerDatabases(DatabaseRegistry registry);

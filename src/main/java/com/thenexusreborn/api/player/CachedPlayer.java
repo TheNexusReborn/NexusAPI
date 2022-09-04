@@ -13,6 +13,7 @@ public class CachedPlayer {
     protected long lastLogout;
     protected boolean online, vanish, incognito;
     protected String server;
+    protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
     
     private CachedPlayer() {
     }
@@ -42,6 +43,7 @@ public class CachedPlayer {
         this.vanish = nexusPlayer.getPreferenceValue("vanish");
         this.incognito = nexusPlayer.getPreferenceValue("incognito");
         this.server = (String) nexusPlayer.getStatValue("server");
+        this.ranks = nexusPlayer.getRanks();
     }
     
     public long getLastLogout() {
@@ -114,5 +116,14 @@ public class CachedPlayer {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public Map<Rank, Long> getRanks() {
+        return ranks;
+    }
+    
+    public void setRanks(Map<Rank, Long> ranks) {
+        this.ranks.clear();
+        this.ranks.putAll(ranks);
     }
 }
