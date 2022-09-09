@@ -40,4 +40,12 @@ public final class NumberHelper {
     public static String formatNumber(Number number) {
         return new DecimalFormat(Constants.NUMBER_FORMAT).format(number);
     }
+    
+    public static int randomInRange(int min, int max) {
+        return randomInRange(new Random(), min, max);
+    }
+    
+    public static int randomInRange(Random random, int min, int max) {
+        return random.nextInt(max - min) + min;
+    }
 }
