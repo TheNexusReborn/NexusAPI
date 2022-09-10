@@ -318,7 +318,11 @@ public class NexusPlayer {
     }
     
     public Tag getTag() {
-        return new Tag((String) getStatValue("tag"));
+        String tag = (String) this.getStatValue("tag");
+        if (tag == null || tag.equalsIgnoreCase("null")) {
+            return null;
+        }
+        return new Tag(tag);
     }
     
     public void setTag(Tag tag) {
