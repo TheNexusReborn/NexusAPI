@@ -39,6 +39,7 @@ public class Column implements Comparable<Column> {
     
         if (name == null || name.equals("")) {
             name = field.getName();
+            //TODO make this to lower case after test
         }
     
         if (type == null || type.equals("")) {
