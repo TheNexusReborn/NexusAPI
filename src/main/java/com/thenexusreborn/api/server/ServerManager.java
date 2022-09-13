@@ -33,29 +33,27 @@ public abstract class ServerManager {
     }
     
     public void updateStoredData() {
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
-            try {
-                List<ServerInfo> allServers = NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class);
-                for (ServerInfo server : new ArrayList<>(getServers())) {
-                    ServerInfo infoFromDatabase = null;
-                    for (ServerInfo s : allServers) {
-                        if (s.getId() == server.getId()) {
-                            infoFromDatabase = s;
-                        }
-                    }
-                    if (infoFromDatabase != null) {
-                        server.updateInfo(infoFromDatabase);
+        try {
+            List<ServerInfo> allServers = NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class);
+            for (ServerInfo server : new ArrayList<>(getServers())) {
+                ServerInfo infoFromDatabase = null;
+                for (ServerInfo s : allServers) {
+                    if (s.getId() == server.getId()) {
+                        infoFromDatabase = s;
                     }
                 }
-    
-                for (ServerInfo server : allServers) {
-                    if (!this.servers.contains(server)) {
-                        this.servers.add(server);
-                    }
+                if (infoFromDatabase != null) {
+                    server.updateInfo(infoFromDatabase);
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-        });
+        
+            for (ServerInfo server : allServers) {
+                if (!this.servers.contains(server)) {
+                    this.servers.add(server);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

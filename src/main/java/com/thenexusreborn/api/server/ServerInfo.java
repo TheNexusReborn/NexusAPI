@@ -112,12 +112,12 @@ public class ServerInfo {
             return false;
         }
         ServerInfo that = (ServerInfo) o;
-        return Objects.equals(name, that.name);
+        return id == that.id;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(id);
     }
     
     public void updateInfo(ServerInfo info) {
