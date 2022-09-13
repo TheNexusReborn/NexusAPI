@@ -83,7 +83,6 @@ public abstract class PlayerManager {
                             try {
                                 nexusPlayer = NexusAPI.getApi().getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uniqueId).get(0);
                             } catch (Exception ex) {
-                                e.printStackTrace();
                             }
                         } while (nexusPlayer == null);
                     }
