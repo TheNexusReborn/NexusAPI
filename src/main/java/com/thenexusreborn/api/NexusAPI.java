@@ -189,21 +189,21 @@ public abstract class NexusAPI {
         getLogger().info("Successfully setup the database tables");
     
         statRegistry = StatHelper.getRegistry();
-        statRegistry.register("xp", StatType.DOUBLE, 0.0);
-        statRegistry.register("level", StatType.INTEGER, 0);
-        statRegistry.register("nexites", StatType.DOUBLE, 0.0);
-        statRegistry.register("credits", StatType.DOUBLE, 0.0);
-        statRegistry.register("playtime", StatType.LONG, 0L);
-        statRegistry.register("firstjoined", StatType.LONG, 0L);
-        statRegistry.register("lastlogin", StatType.LONG, 0L);
-        statRegistry.register("lastlogout", StatType.LONG, 0L);
-        statRegistry.register("prealpha", StatType.BOOLEAN, false);
-        statRegistry.register("alpha", StatType.BOOLEAN, false);
-        statRegistry.register("beta", StatType.BOOLEAN, false);
-        statRegistry.register("tag", StatType.STRING, "");
-        statRegistry.register("online", StatType.BOOLEAN, false);
-        statRegistry.register("server", StatType.STRING, "");
-        statRegistry.register("unlockedtags", StatType.STRING_SET, new HashSet<>());
+        statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0);
+        statRegistry.register("level", "Level", StatType.INTEGER, 0);
+        statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0);
+        statRegistry.register("credits", "Credits", StatType.DOUBLE, 0.0);
+        statRegistry.register("playtime", "Playtime", StatType.LONG, 0L);
+        statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L);
+        statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L);
+        statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L);
+        statRegistry.register("prealpha", "PreAlpha", StatType.BOOLEAN, false);
+        statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false);
+        statRegistry.register("beta", "Beta", StatType.BOOLEAN, false);
+        statRegistry.register("tag", "Tag", StatType.STRING, "");
+        statRegistry.register("online", "Online", StatType.BOOLEAN, false);
+        statRegistry.register("server", "Server", StatType.STRING, "");
+        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, new HashSet<>());
         
         registerStats(statRegistry);
         getLogger().info("Registered Stat types");

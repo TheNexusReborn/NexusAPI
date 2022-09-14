@@ -114,6 +114,10 @@ public class Stat {
         return info.getDefaultValue();
     }
     
+    public String getDisplayName() {
+        return info.getDisplayName();
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -147,7 +151,7 @@ public class Stat {
     public static class Info {
         @Primary 
         private long id;
-        private String name;
+        private String name, displayName;
         private StatType type;
         @ColumnInfo(type = "varchar(1000)")
         private Object defaultValue;
@@ -155,7 +159,12 @@ public class Stat {
         private Info() {}
     
         public Info(String name, StatType type, Object defaultValue) {
-            this.name = StatHelper.formatStatName(name);
+            this(name, "", type, defaultValue);
+        }
+    
+        public Info(String name, String displayName, StatType type, Object defaultValue) {
+            this.name = name;
+            this.displayName = displayName;
             this.type = type;
             this.defaultValue = defaultValue;
         }
@@ -182,6 +191,10 @@ public class Stat {
     
         public void setDefaultValue(Object defaultValue) {
             this.defaultValue = defaultValue;
+        }
+    
+        public String getDisplayName() {
+            return displayName;
         }
     
         @Override

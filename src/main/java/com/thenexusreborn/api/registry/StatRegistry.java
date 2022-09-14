@@ -8,6 +8,10 @@ public class StatRegistry extends Registry<Stat.Info> {
         register(new Stat.Info(StatHelper.formatStatName(name), type, defaultValue));
     }
     
+    public void register(String name, String displayName, StatType type, Object defaultValue) {
+        register(new Stat.Info(StatHelper.formatStatName(name), displayName, type, defaultValue));
+    }
+    
     @Override
     public Info get(String str) {
         for (Info object : getObjects()) {
