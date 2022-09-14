@@ -20,6 +20,18 @@ public abstract class ServerManager {
         return servers;
     }
     
+    public List<ServerInfo> getServersByType(String type) {
+        List<ServerInfo> servers = new ArrayList<>();
+    
+        for (ServerInfo server : new ArrayList<>(this.servers)) {
+            if (server.getType().equalsIgnoreCase(type)) {
+                servers.add(server);
+            }
+        }
+        
+        return servers;
+    }
+    
     public void addServer(int multicraftId) {
         try {
             this.servers.add(NexusAPI.getApi().getPrimaryDatabase().get(ServerInfo.class, "multicraftId", multicraftId).get(0));
