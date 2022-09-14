@@ -217,7 +217,9 @@ public class Stat {
         @Override
         public String toString() {
             return "Info{" +
-                    "name='" + name + '\'' +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", displayName='" + displayName + '\'' +
                     ", type=" + type +
                     ", defaultValue=" + defaultValue +
                     '}';

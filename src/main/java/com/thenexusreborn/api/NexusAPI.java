@@ -11,6 +11,7 @@ import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
@@ -189,6 +190,13 @@ public abstract class NexusAPI {
         getLogger().info("Successfully setup the database tables");
     
         statRegistry = StatHelper.getRegistry();
+        
+        List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
+    
+        for (Info statInfo : statInfos) {
+            statRegistry.register(statInfo);
+        }
+        
         statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0);
         statRegistry.register("level", "Level", StatType.INTEGER, 0);
         statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0);
@@ -204,8 +212,14 @@ public abstract class NexusAPI {
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
         statRegistry.register("server", "Server", StatType.STRING, "");
         statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, new HashSet<>());
-        
         registerStats(statRegistry);
+    
+        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
+            getPrimaryDatabase().push(statInfo);
+        }
+        
+        getLogger().info("Pushed stat types to the database");
+        
         getLogger().info("Registered Stat types");
         
         preferenceRegistry = new PreferenceRegistry();
@@ -213,16 +227,6 @@ public abstract class NexusAPI {
         preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
         
         registerPreferences(preferenceRegistry);
-        
-        List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
-        for (Stat.Info statInfo : statInfos) {
-            StatHelper.getRegistry().register(statInfo);
-        }
-    
-        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
-            getPrimaryDatabase().push(statInfo);
-        }
-        getLogger().info("Pushed stat types to the database");
     
         List<Preference.Info> preferenceInfos = primaryDatabase.get(Preference.Info.class);
         for (Preference.Info preferenceInfo : preferenceInfos) {

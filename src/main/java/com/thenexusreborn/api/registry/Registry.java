@@ -6,7 +6,9 @@ public abstract class Registry<T> {
     private final Set<T> objects = new HashSet<>();
     
     public void register(T object) {
-        this.objects.add(object);
+        if (!objects.contains(object)) {
+            this.objects.add(object);
+        }
     }
     
     public Set<T> getObjects() {
