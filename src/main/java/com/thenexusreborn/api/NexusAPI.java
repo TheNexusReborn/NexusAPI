@@ -305,8 +305,6 @@ public abstract class NexusAPI {
         }
         getLogger().info("Sorted IP History for player profiles.");
         
-        //TODO Have the ranks and tags things updated via the network framework instead of having to query the database
-        
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
