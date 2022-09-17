@@ -70,27 +70,22 @@ public class NexusPlayer {
         this.scoreboard = scoreboard;
     }
     
-    @Deprecated
     public long getFirstJoined() {
         return (long) getStatValue("firstjoined");
     }
     
-    @Deprecated
     public void setFirstJoined(long firstJoined) {
         changeStat("firstjoined", firstJoined, StatOperator.SET);
     }
     
-    @Deprecated
     public long getLastLogin() {
         return (long) getStatValue("lastlogin");
     }
     
-    @Deprecated
     public void setLastLogin(long lastLogin) {
         changeStat("lastlogin", lastLogin, StatOperator.SET);
     }
     
-    @Deprecated
     public void setUnlockedTags(Set<String> unlockedTags) {
         changeStat("unlockedtags", unlockedTags, StatOperator.SET);
     }
@@ -132,12 +127,10 @@ public class NexusPlayer {
         return Objects.hash(uniqueId);
     }
     
-    @Deprecated
     public long getLastLogout() {
         return (long) getStatValue("lastlogout");
     }
     
-    @Deprecated
     public void setLastLogout(long lastLogout) {
         changeStat("lastlogout", lastLogout, StatOperator.SET);
     }
@@ -175,32 +168,26 @@ public class NexusPlayer {
         this.lastMessage = nexusPlayer.getUniqueId();
     }
     
-    @Deprecated
     public boolean isPrealpha() {
         return (boolean) getStatValue("prealpha");
     }
     
-    @Deprecated
     public void setPrealpha(boolean prealpha) {
         changeStat("prealpha", prealpha, StatOperator.SET);
     }
     
-    @Deprecated
     public boolean isAlpha() {
         return (boolean) getStatValue("prealpha");
     }
     
-    @Deprecated
     public void setAlpha(boolean alpha) {
         changeStat("alpha", alpha, StatOperator.SET);
     }
     
-    @Deprecated
     public boolean isBeta() {
         return (boolean) getStatValue("prealpha");
     }
     
-    @Deprecated
     public void setBeta(boolean beta) {
         changeStat("beta", beta, StatOperator.SET);
     }
@@ -306,9 +293,7 @@ public class NexusPlayer {
         Stat stat = getStat(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
-            stat = new Stat(info, uniqueId, System.currentTimeMillis());
-            stat.setValue(info.getDefaultValue());
-            this.addStat(stat);
+            return info.getDefaultValue();
         }
         return stat.getValue();
     }
