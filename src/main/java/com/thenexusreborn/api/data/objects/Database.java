@@ -496,7 +496,6 @@ public class Database {
     }
     
     public void flush() {
-        NexusAPI.getApi().getLogger().info("Processing Database Queue...");
         if (!this.queue.isEmpty()) {
             try (Connection connection = getConnection()) {
                 for (Object object : this.queue) {
