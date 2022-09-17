@@ -220,14 +220,14 @@ public class Database {
         return objects;
     }
     
-    public void push(Object object) {
+    private PushInfo generateObjectPushInfo(Object object) {
         Class<?> clazz = object.getClass();
         Table table = getTable(clazz);
         if (table == null) {
             NexusAPI.logMessage(Level.WARNING, "Tried to push data to the database without a registered table.",
                     "Class Name: " + clazz.getName(),
                     "Database Name: " + this.host + "/" + this.name);
-            return;
+            return null;
         }
     
         Class<? extends ObjectHandler> handler = table.getHandler();
@@ -241,7 +241,7 @@ public class Database {
                 e.printStackTrace();
             }
         }
-        
+    
         Map<String, SqlCodec<?>> codecInstances = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
         long id = 0;
@@ -256,7 +256,7 @@ public class Database {
                     if (!column.getCodec().equals(SqlCodec.class)) {
                         SqlCodec<?> codec;
                         if (codecInstances.containsKey(column.getCodec().getName())) {
-                            codec = codecInstances.get(column.getCodec().getName());   
+                            codec = codecInstances.get(column.getCodec().getName());
                         } else {
                             codec = column.getCodec().getConstructor().newInstance();
                             codecInstances.put(column.getCodec().getName(), codec);
@@ -264,34 +264,34 @@ public class Database {
                         value = codec.encode(value);
                     }
                 }
-                
+            
                 if (value instanceof String) {
                     String str = (String) value;
                     str = str.replace("\\", "\\\\");
                     str = str.replace("'", "\\'");
                     value = str;
                 }
-                
+            
                 if (column.isPrimaryKey()) {
                     id = (long) value;
                     primaryField = field;
                     primaryColumn = column;
                     continue;
                 }
-                
+            
                 data.put(column.getName(), value);
             } catch (IllegalAccessException e) {
                 NexusAPI.logMessage(Level.WARNING, "Could not access a field while saving to the database",
                         "Class: " + clazz.getName(),
                         "Field: " + field.getName());
             } catch (InstantiationException | InvocationTargetException | NoSuchMethodException e) {
-                NexusAPI.logMessage(Level.WARNING, "Could not instantiate codec class", 
-                        "Codec Class: " + column.getCodec().getName(), 
-                        "Object Class: " + clazz.getName(), 
+                NexusAPI.logMessage(Level.WARNING, "Could not instantiate codec class",
+                        "Codec Class: " + column.getCodec().getName(),
+                        "Object Class: " + clazz.getName(),
                         "Field: " + field.getName());
             }
         }
-        
+    
         String sql;
         Iterator<Entry<String, Object>> iterator = data.entrySet().iterator();
         boolean getGeneratedKeys = false;
@@ -306,7 +306,7 @@ public class Database {
                     vb.append(", ");
                 }
             }
-            
+        
             getGeneratedKeys = true;
             sql = "insert into " + table.getName() + " (" + cb +  ") values (" + vb +  ");";
         } else {
@@ -320,6 +320,15 @@ public class Database {
             }
             sql = "update " + table.getName() + " set " + sb + " where " + primaryColumn.getName() + "='" + id + "';";
         }
+        
+        return new PushInfo(sql, getGeneratedKeys, primaryField, objectHandler);
+    }
+    
+    public void push(Object object) {
+        PushInfo pushInfo = generateObjectPushInfo(object);
+        boolean getGeneratedKeys = pushInfo.isGenerateKeys();
+        String sql = pushInfo.getSql();
+        Field primaryField = pushInfo.getPrimaryField();
         
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             if (getGeneratedKeys) {
@@ -338,6 +347,7 @@ public class Database {
             e.printStackTrace();
         }
         
+        ObjectHandler objectHandler = pushInfo.getObjectHandler();
         if (objectHandler != null) {
             objectHandler.afterSave();
         }
@@ -488,8 +498,25 @@ public class Database {
     public void flush() {
         NexusAPI.getApi().getLogger().info("Processing Database Queue...");
         if (!this.queue.isEmpty()) {
-            for (Object object : this.queue) {
-                push(object); //TODO Improve this with separate methods and an object so that it can be done in a single connection and statement object
+            try (Connection connection = getConnection()) {
+                for (Object object : this.queue) {
+                    PushInfo pushInfo = generateObjectPushInfo(object);
+                    Statement statement = connection.createStatement();
+                    if (pushInfo.isGenerateKeys()) {
+                        statement.executeUpdate(pushInfo.getSql(), Statement.RETURN_GENERATED_KEYS);
+                        ResultSet generatedKeys = statement.getGeneratedKeys();
+                        generatedKeys.next();
+                        pushInfo.getPrimaryField().set(object, generatedKeys.getLong(1));
+                    } else {
+                        statement.executeUpdate(pushInfo.getSql());
+                    }
+                    
+                    if (pushInfo.getObjectHandler() != null) {
+                        pushInfo.getObjectHandler().afterSave();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();;
             }
         }
     }
