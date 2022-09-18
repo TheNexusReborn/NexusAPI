@@ -369,6 +369,11 @@ public class NexusPlayer {
     }
     
     public String getName() {
+        PlayerProxy proxy = getPlayer();
+        if (!proxy.getName().equals(name)) {
+            this.name = proxy.getName();
+        }
+        
         return name;
     }
     
