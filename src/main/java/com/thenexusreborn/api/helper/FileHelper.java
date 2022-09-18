@@ -7,16 +7,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-/**
- * A collection of helper methods for files and paths
- */
 public final class FileHelper {
     
-    /**
-     * Creates a file if it does not exist using Java NIO. This will also create parent directories
-     * This catches the IOException and outputs the stacktrace using Exception.printStackTrace(). Do not use this method if you want to handle this exception yourself
-     * @param path The file path to create
-     */
     public static void createFileIfNotExists(Path path) {
         createDirectoryIfNotExists(path.getParent());
         
@@ -29,21 +21,10 @@ public final class FileHelper {
         }
     }
     
-    /**
-     * Creates a sub path based on a parent and as many child paths using a varargs parameter
-     * @param parent The parent path
-     * @param child The child path(s)
-     * @return The generated path
-     */
     public static Path subPath(Path parent, String... child) {
         return FileSystems.getDefault().getPath(parent.toString(), child);
     }
     
-    /**
-     * Creates a directory if it does not exist, it also creates parent directories
-     * This catches the IOException and outputs the stacktrace using Exception.printStackTrace(). Do not use this method if you want to handle this exception yourself
-     * @param path The directory path
-     */
     public static void createDirectoryIfNotExists(Path path) {
         if (Files.notExists(path)) {
             try {
@@ -54,14 +35,6 @@ public final class FileHelper {
         }
     }
     
-    /**
-     * Downloads a file from a URL and saves it to the disk and provides the path
-     * @param downloadUrl The URL to download from
-     * @param downloadDir The directory to download to
-     * @param fileName The name for the downloaded file
-     * @param userAgent If to use the UserAgent option
-     * @return The path of the downloaded file as Java NIO
-     */
     public static Path downloadFile(String downloadUrl, Path downloadDir, String fileName, boolean userAgent) {
         try {
             Path tmpFile = FileSystems.getDefault().getPath(downloadDir.toString(), fileName + ".tmp");
@@ -91,12 +64,6 @@ public final class FileHelper {
         return null;
     }
     
-    /**
-     * Copies a folder and all sub files to a new destination
-     * This catches the IOException and outputs the stacktrace using Exception.printStackTrace(). Do not use this method if you want to handle this exception yourself
-     * @param src The source folder
-     * @param dest The destination folder
-     */
     public static void copyFolder(Path src, Path dest) {
         try {
             Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
@@ -119,12 +86,6 @@ public final class FileHelper {
         }
     }
     
-    /**
-     * Copies a file from one location to another while replacing the existing file
-     * This catches the IOException and outputs the stacktrace using Exception.printStackTrace(). Do not use this method if you want to handle this exception yourself
-     * @param source The source file
-     * @param dest The destination file
-     */
     public static void copy(Path source, Path dest) {
         try {
             Files.copy(source, dest, REPLACE_EXISTING);
@@ -134,11 +95,6 @@ public final class FileHelper {
         }
     }
     
-    /**
-     * Deletes a directory and all of it's contents within it
-     * This catches the IOException and outputs the stacktrace using Exception.printStackTrace(). Do not use this method if you want to handle this exception yourself
-     * @param directory The directory in which to delete
-     */
     public static void deleteDirectory(Path directory) {
         try {
             Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {

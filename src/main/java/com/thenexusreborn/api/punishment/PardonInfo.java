@@ -1,5 +1,11 @@
 package com.thenexusreborn.api.punishment;
 
+import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.player.CachedPlayer;
+
+import java.util.UUID;
+
+@SuppressWarnings("DuplicatedCode")
 public class PardonInfo {
     private final long date;
     private final String actor, reason;
@@ -37,6 +43,20 @@ public class PardonInfo {
     }
     
     public String getActorNameCache() {
+        if (actorNameCache == null) {
+            try {
+                UUID uuid = UUID.fromString(getActor());
+                CachedPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
+                if (actorCachePlayer == null) {
+                    actorNameCache = actor;
+                } else {
+                    actorNameCache = actorCachePlayer.getName();
+                }
+            } catch (Exception e) {
+                this.actorNameCache = actor;
+            }
+        }
+        
         return actorNameCache;
     }
 }

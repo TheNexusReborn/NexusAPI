@@ -1,21 +1,29 @@
 package com.thenexusreborn.api.gamearchive;
 
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StringArrayCodec;
+import com.thenexusreborn.api.data.handler.GamesObjectHandler;
+
 import java.util.*;
 
-public class GameInfo {
-    private int id;
+@TableInfo(value = "games", handler = GamesObjectHandler.class)
+public class GameInfo implements Comparable<GameInfo> {
+    @Primary
+    private long id;
     private long gameStart, gameEnd;
     private String serverName;
+    @ColumnInfo(type = "varchar(1000)", codec = StringArrayCodec.class) 
     private String[] players;
     private String winner, mapName, settings, firstBlood;
     private int playerCount;
     private long length;
-    private List<GameAction> actions = new ArrayList<>();
+    @ColumnIgnored
+    private final Set<GameAction> actions = new TreeSet<>();
     
     public GameInfo() {
     }
     
-    public GameInfo(int id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
+    public GameInfo(long id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
         this.id = id;
         this.gameStart = gameStart;
         this.gameEnd = gameEnd;
@@ -45,7 +53,7 @@ public class GameInfo {
         this.winner = winner;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
@@ -81,7 +89,7 @@ public class GameInfo {
         return length;
     }
     
-    public List<GameAction> getActions() {
+    public Set<GameAction> getActions() {
         return actions;
     }
     
@@ -119,5 +127,30 @@ public class GameInfo {
     
     public void setLength(long length) {
         this.length = length;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GameInfo gameInfo = (GameInfo) o;
+        return gameStart == gameInfo.gameStart && gameEnd == gameInfo.gameEnd && playerCount == gameInfo.playerCount && length == gameInfo.length && Objects.equals(serverName, gameInfo.serverName) && Arrays.equals(players, gameInfo.players) && Objects.equals(winner, gameInfo.winner) && Objects.equals(mapName, gameInfo.mapName) && Objects.equals(settings, gameInfo.settings) && Objects.equals(firstBlood, gameInfo.firstBlood);
+    }
+    
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameStart, gameEnd, serverName, winner, mapName, settings, firstBlood, playerCount, length);
+        result = 31 * result + Arrays.hashCode(players);
+        return result;
+    }
+    
+    @Override
+    public int compareTo(GameInfo o) {
+        // return Long.compare(this.id, o.id); TODO Reimplement this after the 1.5-ALPHA Update
+        return Long.compare(this.gameEnd, o.gameEnd);
     }
 }

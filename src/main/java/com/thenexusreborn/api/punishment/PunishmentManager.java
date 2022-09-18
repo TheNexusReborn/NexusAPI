@@ -1,19 +1,19 @@
 package com.thenexusreborn.api.punishment;
 
-import com.thenexusreborn.api.*;
+import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.player.IPEntry;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 public class PunishmentManager {
     
-    private Map<Integer, Punishment> punishments = new HashMap<>();
+    private final Map<Long, Punishment> punishments = new HashMap<>();
     
     public void addPunishment(Punishment punishment) {
         this.punishments.put(punishment.getId(), punishment);
     }
     
-    public Punishment getPunishment(int id) {
+    public Punishment getPunishment(long id) {
         return punishments.get(id);
     }
     
@@ -30,7 +30,7 @@ public class PunishmentManager {
     public List<Punishment> getPunishmentsByTarget(UUID target) {
         List<Punishment> punishments = new ArrayList<>();
     
-        Map<String, Set<UUID>> ipHistory = new HashMap<>(NexusAPI.getApi().getPlayerManager().getIpHistory());
+        Set<IPEntry> ipHistory = new HashSet<>(NexusAPI.getApi().getPlayerManager().getIpHistory());
         List<String> methodTargetIPs = getIpHistory(ipHistory, target);
     
         for (Punishment punishment : this.punishments.values()) {
@@ -57,13 +57,11 @@ public class PunishmentManager {
         return punishments;
     }
     
-    private List<String> getIpHistory(Map<String, Set<UUID>> ipHistory, UUID punishmentTarget) {
+    private List<String> getIpHistory(Set<IPEntry> ipHistory, UUID punishmentTarget) {
         List<String> ips = new ArrayList<>();
-        for (Entry<String, Set<UUID>> entry : ipHistory.entrySet()) {
-            for (UUID uuid : entry.getValue()) {
-                if (uuid.equals(punishmentTarget)) {
-                    ips.add(entry.getKey());
-                }
+        for (IPEntry entry : ipHistory) {
+            if (entry.getUuid().equals(punishmentTarget)) {
+                ips.add(entry.getIp());
             }
         }
         return ips;

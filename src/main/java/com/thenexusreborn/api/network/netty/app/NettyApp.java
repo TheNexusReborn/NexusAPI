@@ -10,14 +10,14 @@ public abstract class NettyApp {
     protected final String host;
     protected final int port;
     
-    protected List<EventLoopGroup> groups = new ArrayList<>();
+    protected final List<EventLoopGroup> groups = new ArrayList<>();
     
     public NettyApp(String host, int port) {
         this.host = host;
         this.port = port;
     }
     
-    public abstract void init() throws Exception;
+    public abstract void init();
     
     public void send(String origin, String action, String[] data) {
         send(new NexusPacket(origin, action, data));

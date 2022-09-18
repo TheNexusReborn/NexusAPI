@@ -6,8 +6,9 @@ import java.util.List;
 
 public abstract class ScoreboardView {
     
-    protected NexusScoreboard scoreboard;
-    protected String name, displayName;
+    protected final NexusScoreboard scoreboard;
+    protected final String name;
+    protected final String displayName;
     
     public ScoreboardView(NexusScoreboard scoreboard, String name, String displayName) {
         this.scoreboard = scoreboard;

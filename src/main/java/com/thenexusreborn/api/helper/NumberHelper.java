@@ -5,9 +5,6 @@ import com.thenexusreborn.api.util.Constants;
 import java.text.DecimalFormat;
 import java.util.*;
 
-/**
- * A collection of helper methods for numbers
- */
 public final class NumberHelper {
     
     private static final LinkedHashMap<String, Integer> romanNumerals = new LinkedHashMap<>();
@@ -28,12 +25,6 @@ public final class NumberHelper {
         romanNumerals.put("I", 1);
     }
     
-    /**
-     * Converts a number into the roman numeral equivilent
-     *
-     * @param number The number to convert
-     * @return The roman numeral representation
-     */
     public static String romanNumerals(int number) {
         StringBuilder res = new StringBuilder();
         for (Map.Entry<String, Integer> entry : romanNumerals.entrySet()) {
@@ -46,12 +37,15 @@ public final class NumberHelper {
         return res.toString();
     }
     
-    /**
-     * Formats a number using Constants.NUMBER_FORMAT. This is a simple wrapper method
-     * @param number The number for format
-     * @return The formatted number from DecimalFormat
-     */
     public static String formatNumber(Number number) {
         return new DecimalFormat(Constants.NUMBER_FORMAT).format(number);
+    }
+    
+    public static int randomInRange(int min, int max) {
+        return randomInRange(new Random(), min, max);
+    }
+    
+    public static int randomInRange(Random random, int min, int max) {
+        return random.nextInt(max - min) + min;
     }
 }

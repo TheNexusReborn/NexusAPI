@@ -17,7 +17,7 @@ public class NettyClient extends NettyApp {
         super(host, port);
     }
     
-    public void init() throws Exception {
+    public void init() {
         EventLoopGroup group = new NioEventLoopGroup();
         this.groups.add(group);
         try {
@@ -28,17 +28,11 @@ public class NettyClient extends NettyApp {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) {
-                            NexusAPI.getApi().getLogger().info("Init channel on client.");
                             setChannel(socketChannel);
                             socketChannel.pipeline().addLast(new PacketDecoder(), new PacketEncoder(), new ProcessingHandler());
                         }
                     });
             ChannelFuture channelFuture = clientBootstrap.connect(host, port);
-            channelFuture.addListener((ChannelFutureListener) f -> {
-                if (f == channelFuture) {
-                    NexusAPI.getApi().getLogger().info("Netty client connected successfully");
-                }
-            });
         } catch (Exception e) {
             NexusAPI.getApi().getLogger().info("Netty Client shutting down.");
             group.shutdownGracefully();

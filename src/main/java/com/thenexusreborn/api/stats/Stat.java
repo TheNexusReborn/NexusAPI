@@ -1,32 +1,63 @@
 package com.thenexusreborn.api.stats;
 
-import java.util.UUID;
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StatInfoCodec;
+import com.thenexusreborn.api.data.handler.StatObjectHandler;
 
-public class Stat<T> {
-    public static final int version = 1;
+import java.util.*;
+
+@TableInfo(value = "stats", handler = StatObjectHandler.class)
+public class Stat {
+    @ColumnInfo(name = "name", type = "varchar(100)", codec = StatInfoCodec.class) 
+    private Info info;
     
-    private int id;
-    private final UUID uuid;
-    private final String name;
-    private T value;
-    private final long created;
+    @Primary 
+    private long id;
+    private UUID uuid;
+    @ColumnInfo(type = "varchar(1000)")
+    private Object value;
+    private long created;
     private long modified;
     
-    public Stat(UUID uuid, String name, T value, long created) {
-        this(uuid, name, value, created, created);
+    private Stat() {}
+    
+    public Stat(Info info, int id, UUID uuid, long created, long modified) {
+        this(info, id, uuid, info.getDefaultValue(), created, modified);
     }
     
-    public Stat(UUID uuid, String name, T value, long created, long modified) {
-        this(-1, uuid, name, value, created, modified);
+    public Stat(Info info, UUID uuid, long created, long modified) {
+        this(info, 0, uuid, created, modified);
     }
     
-    public Stat(int id, UUID uuid, String name, T value, long created, long modified) {
+    public Stat(Info info, UUID uuid, long created) {
+        this(info, uuid, created, created);
+    }
+    
+    public Stat(Info info, UUID uuid, Object value, long created) {
+        this(info, uuid, value, created, created);
+    }
+    
+    public Stat(Info info, UUID uuid, Object value, long created, long modified) {
+        this(info, -1, uuid, value, created, modified);
+    }
+    
+    public Stat(Info info, int id, UUID uuid, Object value, long created, long modified) {
+        this.info = info;
         this.id = id;
         this.uuid = uuid;
-        this.name = name;
-        this.value = value;
         this.created = created;
         this.modified = modified;
+    
+        if (info.getType() == StatType.DOUBLE || info.getType() == StatType.INTEGER || info.getType() == StatType.LONG) {
+            Number number = (Number) value;
+            if (info.getType() == StatType.DOUBLE) {
+                this.value = number.doubleValue();
+            } else if (info.getType() == StatType.INTEGER) {
+                this.value = number.intValue();
+            } else if (info.getType() == StatType.LONG) {
+                this.value = number.longValue();
+            }
+        }
     }
     
     public UUID getUuid() {
@@ -34,14 +65,24 @@ public class Stat<T> {
     }
     
     public String getName() {
-        return name;
+        if (info == null) {
+            return null;
+        }
+        return info.getName();
     }
     
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
     
-    public void setValue(T value) {
+    public StatType getType() {
+        if (info == null) {
+            return null;
+        }
+        return info.getType();
+    }
+    
+    public void setValue(Object value) {
         this.value = value;
         this.modified = System.currentTimeMillis();
     }
@@ -58,23 +99,130 @@ public class Stat<T> {
         this.modified = modified;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
+    }
+    
+    public Object getDefaultValue() {
+        if (info == null) {
+            return null;
+        }
+        return info.getDefaultValue();
+    }
+    
+    public String getDisplayName() {
+        return info.getDisplayName();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Stat stat = (Stat) o;
+        return Objects.equals(info, stat.info) && Objects.equals(uuid, stat.uuid);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(info, uuid);
     }
     
     @Override
     public String toString() {
         return "Stat{" +
-                "id=" + id +
+                "info=" + info +
+                ", id=" + id +
                 ", uuid=" + uuid +
-                ", name='" + name + '\'' +
                 ", value=" + value +
                 ", created=" + created +
                 ", modified=" + modified +
                 '}';
+    }
+    
+    @TableInfo(value = "statinfo", handler = StatObjectHandler.class)
+    public static class Info {
+        @Primary 
+        private long id;
+        private String name, displayName;
+        private StatType type;
+        @ColumnInfo(type = "varchar(1000)")
+        private Object defaultValue;
+        
+        private Info() {}
+    
+        public Info(String name, StatType type, Object defaultValue) {
+            this(name, "", type, defaultValue);
+        }
+    
+        public Info(String name, String displayName, StatType type, Object defaultValue) {
+            this.name = name;
+            this.displayName = displayName;
+            this.type = type;
+            this.defaultValue = defaultValue;
+        }
+    
+        public String getName() {
+            return name;
+        }
+    
+        public void setName(String name) {
+            this.name = name;
+        }
+    
+        public StatType getType() {
+            return type;
+        }
+    
+        public void setType(StatType type) {
+            this.type = type;
+        }
+    
+        public Object getDefaultValue() {
+            return defaultValue;
+        }
+    
+        public void setDefaultValue(Object defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+    
+        public String getDisplayName() {
+            return displayName;
+        }
+    
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Info info = (Info) o;
+            return Objects.equals(name, info.name) && type == info.type;
+        }
+    
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, type);
+        }
+    
+        @Override
+        public String toString() {
+            return "Info{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", displayName='" + displayName + '\'' +
+                    ", type=" + type +
+                    ", defaultValue=" + defaultValue +
+                    '}';
+        }
     }
 }

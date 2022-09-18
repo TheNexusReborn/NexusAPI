@@ -37,7 +37,7 @@ public class MulticraftAPI {
             try (BufferedReader input = new BufferedReader(new FileReader(mcFile))) {
                 String line = input.readLine();
                 if (line != null && !line.isEmpty()) {
-                    INSTANCE = new MulticraftAPI("https://firecraftmc.net/multicraft/api.php", "admin", line);
+                    INSTANCE = new MulticraftAPI(line);
                 }
             } catch (Exception e) {
                 System.out.println("Error loading MulcraftAPI: " + e.getMessage());
@@ -49,9 +49,9 @@ public class MulticraftAPI {
         return INSTANCE;
     }
     
-    private MulticraftAPI(String url, String user, String key) {
-        this.url = url;
-        this.user = user;
+    private MulticraftAPI(String key) {
+        this.url = "https://firecraftmc.net/multicraft/api.php";
+        this.user = "admin";
         this.key = key;
     }
     

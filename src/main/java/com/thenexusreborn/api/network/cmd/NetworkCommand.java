@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.network.cmd;
 
 public class NetworkCommand {
-    protected String name;
+    protected final String name;
     protected NetworkCommandExecutor executor;
     
     public NetworkCommand(String name) {

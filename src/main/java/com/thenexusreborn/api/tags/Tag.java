@@ -21,7 +21,11 @@ public class Tag {
     }
     
     public String getDisplayName() {
-        return "&d&l" + this.name.toUpperCase();
+        if (this.name != null) {
+            return "&d&l" + this.name.toUpperCase();
+        } else {
+            return "";
+        }
     }
     
     @Override

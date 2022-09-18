@@ -1,11 +1,20 @@
 package com.thenexusreborn.api.gamearchive;
 
-public class GameAction {
-    private int gameId;
+import com.thenexusreborn.api.data.annotations.*;
+
+import java.util.Objects;
+
+@TableInfo("gameactions")
+public class GameAction implements Comparable<GameAction> {
+    @Primary
+    private long id;
+    private long gameId;
     private long timestamp;
     private String type, value;
     
-    public GameAction(int gameId, long timestamp, String type, String value) {
+    private GameAction() {}
+    
+    public GameAction(long gameId, long timestamp, String type, String value) {
         this.gameId = gameId;
         this.timestamp = timestamp;
         this.type = type;
@@ -18,7 +27,7 @@ public class GameAction {
         this.value = value;
     }
     
-    public int getGameId() {
+    public long getGameId() {
         return gameId;
     }
     
@@ -32,5 +41,35 @@ public class GameAction {
     
     public String getValue() {
         return value;
+    }
+    
+    public void setGameId(long gameId) {
+        this.gameId = gameId;
+    }
+    
+    @Override
+    public int compareTo(GameAction o) {
+        if (this.timestamp > o.timestamp) {
+            return 1;
+        }
+    
+        return -1;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GameAction that = (GameAction) o;
+        return gameId == that.gameId && timestamp == that.timestamp && Objects.equals(type, that.type) && Objects.equals(value, that.value);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameId, timestamp, type, value);
     }
 }

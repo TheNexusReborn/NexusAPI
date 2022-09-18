@@ -13,13 +13,13 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class NettyServer extends NettyApp {
     
-    private ChannelGroup channels = new DefaultChannelGroup("channels", GlobalEventExecutor.INSTANCE);
+    private final ChannelGroup channels = new DefaultChannelGroup("channels", GlobalEventExecutor.INSTANCE);
     
     public NettyServer(String host, int port) {
         super(host, port);
     }
     
-    public void init() throws Exception {
+    public void init() {
         EventLoopGroup boss = new NioEventLoopGroup();
         EventLoopGroup worker = new NioEventLoopGroup();
         this.groups.add(boss);
@@ -36,11 +36,6 @@ public class NettyServer extends NettyApp {
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(host, port);
-            channelFuture.addListener((ChannelFutureListener) f -> {
-                if (f == channelFuture) {
-                    NexusAPI.getApi().getLogger().info("Netty server started successfully");
-                }
-            });
         } catch (Exception e) {
             e.printStackTrace();
             NexusAPI.getApi().getLogger().info("Netty server shutting down.");

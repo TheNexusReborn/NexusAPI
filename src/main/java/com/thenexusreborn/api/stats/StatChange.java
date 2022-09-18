@@ -1,27 +1,39 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.util.Operator;
+import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.codec.StatInfoCodec;
+import com.thenexusreborn.api.data.handler.StatObjectHandler;
+import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
 
-public class StatChange<T> implements Comparable<StatChange<?>> {
-    public static final int version = 1;
+@TableInfo(value = "statchanges", handler = StatObjectHandler.class)
+public class StatChange implements Comparable<StatChange> {
+    @ColumnInfo(type = "varchar(100)", codec = StatInfoCodec.class)
+    private Info info;
     
-    private int id;
-    private final UUID uuid;
-    private final String statName;
-    private final T value;
-    private final Operator operator;
-    private final long timestamp;
+    @Primary
+    private long id;
+    private UUID uuid;
+    @ColumnInfo(type = "varchar(1000)")
+    private Object value;
+    private StatOperator operator;
+    private long timestamp;
     
-    public StatChange(UUID uuid, String statName, T value, Operator operator, long timestamp) {
-        this(-1, uuid, statName, value, operator, timestamp);
+    private StatChange() {}
+    
+    public StatChange(Info info, UUID uuid, Object value, StatOperator operator, long timestamp) {
+        this.info = info;
+        this.uuid = uuid;
+        this.value = value;
+        this.operator = operator;
+        this.timestamp = timestamp;
     }
     
-    public StatChange(int id, UUID uuid, String statName, T value, Operator operator, long timestamp) {
+    public StatChange(Info info, long id, UUID uuid, Object value, StatOperator operator, long timestamp) {
+        this.info = info;
         this.id = id;
         this.uuid = uuid;
-        this.statName = statName;
         this.value = value;
         this.operator = operator;
         this.timestamp = timestamp;
@@ -32,10 +44,10 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
     }
     
     public String getStatName() {
-        return statName;
+        return info.getName();
     }
     
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
     
@@ -43,20 +55,24 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
         return timestamp;
     }
     
-    public Operator getOperator() {
+    public StatOperator getOperator() {
         return operator;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
     
+    public StatType getType() {
+        return info.getType();
+    }
+    
     @Override
-    public int compareTo(StatChange<?> o) {
+    public int compareTo(StatChange o) {
         if (timestamp <= o.timestamp) {
             return 1;
         }
@@ -71,12 +87,12 @@ public class StatChange<T> implements Comparable<StatChange<?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        StatChange<?> that = (StatChange<?>) o;
-        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(statName, that.statName) && Objects.equals(value, that.value) && operator == that.operator;
+        StatChange that = (StatChange) o;
+        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(info.getName(), that.info.getName()) && Objects.equals(info.getType(), that.info.getType()) && Objects.equals(value, that.value) && operator == that.operator;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, uuid, statName, value, operator, timestamp);
+        return Objects.hash(id, uuid, info.getName(), info.getType(), value, operator, timestamp);
     }
 }
