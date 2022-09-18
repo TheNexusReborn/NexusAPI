@@ -318,18 +318,20 @@ public class NexusPlayer {
         }
     }
     
-    public void changeStat(String statName, Object statValue, StatOperator operator) {
+    public StatChange changeStat(String statName, Object statValue, StatOperator operator) {
         Stat stat = getStat(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
             if (info == null) {
                 NexusAPI.getApi().getLogger().warning("Could not find a stat with the name " + statName);
-                return;
+                return null;
             }
             stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
             this.addStat(stat);
         }
-        StatHelper.changeStat(stat, operator, statValue);
+        StatChange statChange = StatHelper.changeStat(stat, operator, statValue);
+        NexusAPI.getApi().getPrimaryDatabase().push(statChange); //Temporary for now until a change to the game stuff
+        return statChange;
     }
     
     public String serializeRanks() {

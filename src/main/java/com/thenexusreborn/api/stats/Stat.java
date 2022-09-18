@@ -147,6 +147,10 @@ public class Stat {
                 '}';
     }
     
+    public Info getInfo() {
+        return this.info;
+    }
+    
     @TableInfo(value = "statinfo", handler = StatObjectHandler.class)
     public static class Info {
         @Primary 

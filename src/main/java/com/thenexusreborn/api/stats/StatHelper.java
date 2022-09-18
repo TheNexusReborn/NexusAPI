@@ -58,7 +58,7 @@ public final class StatHelper {
         return 0;
     }
     
-    public static void changeStat(Stat stat, StatOperator operator, Object value) {
+    public static StatChange changeStat(Stat stat, StatOperator operator, Object value) {
         Object newValue = null;
     
         if (stat.getType() == StatType.STRING_SET) {
@@ -97,11 +97,12 @@ public final class StatHelper {
                     newValue = (long) calculated;
                 } else {
                     NexusAPI.getApi().getLogger().warning("Unhandled number type for stat " + stat.getName());
-                    return;
+                    return null;
                 }
             }
         }
         stat.setValue(newValue);
+        return new StatChange(stat.getInfo(), stat.getUuid(), newValue, operator, System.currentTimeMillis());
     }
     
     public static void consolidateStats(NexusPlayer player) {
