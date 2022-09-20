@@ -11,7 +11,7 @@ public class CachedPlayer {
     protected String name;
     protected Set<IPEntry> ipHistory = new HashSet<>();
     protected long lastLogout;
-    protected boolean online, vanish, incognito;
+    protected boolean online, vanish, incognito, fly;
     protected String server;
     protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
     
@@ -125,5 +125,13 @@ public class CachedPlayer {
     public void setRanks(Map<Rank, Long> ranks) {
         this.ranks.clear();
         this.ranks.putAll(ranks);
+    }
+    
+    public void setFly(boolean value) {
+        this.fly = value;
+    }
+    
+    public boolean isFly() {
+        return fly;
     }
 }

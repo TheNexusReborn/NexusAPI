@@ -225,6 +225,7 @@ public abstract class NexusAPI {
         preferenceRegistry = new PreferenceRegistry();
         preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
         preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+        preferenceRegistry.register("fly", "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
         registerPreferences(preferenceRegistry);
     
@@ -285,7 +286,7 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
         
-        List<Row> preferencesRows = database.executeQuery("select `name`, `uuid`, `value` from preferences where `name`='vanish' or `name`='incognito'");
+        List<Row> preferencesRows = database.executeQuery("select `name`, `uuid`, `value` from preferences;");
         for (Row row : preferencesRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
@@ -295,6 +296,8 @@ public abstract class NexusAPI {
                 player.setVanish(value);
             } else if (name.equalsIgnoreCase("incognito")) {
                 player.setIncognito(value);
+            } else if (name.equalsIgnoreCase("fly")) {
+                player.setFly(value);
             }
         }
         getLogger().info("Loaded preference info for player profiles: Incognito and Vanish");
