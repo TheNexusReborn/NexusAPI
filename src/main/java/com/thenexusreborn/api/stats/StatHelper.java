@@ -5,6 +5,7 @@ import com.thenexusreborn.api.player.NexusPlayer;
 import com.thenexusreborn.api.registry.StatRegistry;
 import com.thenexusreborn.api.stats.Stat.Info;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -106,25 +107,35 @@ public final class StatHelper {
     }
     
     public static void consolidateStats(NexusPlayer player) {
-        for (StatChange statChange : new TreeSet<>(player.getStatChanges())) {
-            Stat stat = player.getStats().get(statChange.getStatName());
-            if (stat == null) {
-                Info info = getInfo(statChange.getStatName());
-                stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
-                player.addStat(stat);
+        try {
+            List<StatChange> statChanges = NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString());
+            statChanges.addAll(player.getStatChanges());
+            for (StatChange statChange : new TreeSet<>(statChanges)) {
+                Stat stat = player.getStats().get(statChange.getStatName());
+                if (stat == null) {
+                    Info info = getInfo(statChange.getStatName());
+                    stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
+                    player.addStat(stat);
+                }
+        
+                if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
+                    NexusAPI.getApi().getLogger().severe("Stat change for stat " + stat.getName() + " had the invalid operator " + statChange.getOperator().name() + " for type " + stat.getType().name());
+                    continue;
+                }
+        
+                if (stat.getValue() == null) {
+                    NexusAPI.getApi().getLogger().warning("Stat " + stat.getName() + " failed to load a value or has no default value, using Java Defaults.");
+                    stat.setValue(stat.getType().getDefaultValue());
+                }
+        
+                changeStat(stat, statChange.getOperator(), statChange.getValue());
+                if (statChange.getId() > 0) {
+                    NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
+                }
             }
-            
-            if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
-                NexusAPI.getApi().getLogger().severe("Stat change for stat " + stat.getName() + " had the invalid operator " + statChange.getOperator().name() + " for type " + stat.getType().name());
-                continue;
-            }
-            
-            if (stat.getValue() == null) {
-                NexusAPI.getApi().getLogger().warning("Stat " + stat.getName() + " failed to load a value or has no default value, using Java Defaults.");
-                stat.setValue(stat.getType().getDefaultValue());
-            }
-            
-            changeStat(stat, statChange.getOperator(), statChange.getValue());
+            player.getStatChanges().clear();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
     
