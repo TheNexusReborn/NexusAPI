@@ -1,4 +1,4 @@
-package com.thenexusreborn.api.util;
+package com.thenexusreborn.api.server;
 
 import com.thenexusreborn.api.NexusAPI;
 
