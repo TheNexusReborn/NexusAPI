@@ -6,6 +6,7 @@ import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
+import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
@@ -176,6 +177,7 @@ public abstract class NexusAPI {
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
                 database.registerClass(Tournament.class);
+                database.registerClass(Nickname.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }

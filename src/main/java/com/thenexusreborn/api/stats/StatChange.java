@@ -17,26 +17,32 @@ public class StatChange implements Comparable<StatChange> {
     private UUID uuid;
     @ColumnInfo(type = "varchar(1000)")
     private Object value;
+    private boolean fake;
     private StatOperator operator;
     private long timestamp;
     
     private StatChange() {}
     
     public StatChange(Info info, UUID uuid, Object value, StatOperator operator, long timestamp) {
-        this.info = info;
-        this.uuid = uuid;
-        this.value = value;
-        this.operator = operator;
-        this.timestamp = timestamp;
+        this(info, 0, uuid, value, operator, false, timestamp);
     }
     
     public StatChange(Info info, long id, UUID uuid, Object value, StatOperator operator, long timestamp) {
+        this(info, uuid, value, operator, false, timestamp);
+    }
+    
+    public StatChange(Info info, UUID uuid, Object value, StatOperator operator, boolean fake, long timestamp) {
+        this(info, 0, uuid, value, operator, fake, timestamp);
+    }
+    
+    public StatChange(Info info, long id, UUID uuid, Object value, StatOperator operator, boolean fake, long timestamp) {
         this.info = info;
         this.id = id;
         this.uuid = uuid;
         this.value = value;
         this.operator = operator;
         this.timestamp = timestamp;
+        this.fake = fake;
     }
     
     public UUID getUuid() {
@@ -69,6 +75,10 @@ public class StatChange implements Comparable<StatChange> {
     
     public StatType getType() {
         return info.getType();
+    }
+    
+    public boolean isFake() {
+        return fake;
     }
     
     @Override

@@ -16,6 +16,8 @@ public class Stat {
     private UUID uuid;
     @ColumnInfo(type = "varchar(1000)")
     private Object value;
+    @ColumnInfo(type = "varchar(1000)")
+    private Object fakedValue;
     private long created;
     private long modified;
     
@@ -118,6 +120,14 @@ public class Stat {
         return info.getDisplayName();
     }
     
+    public Object getFakedValue() {
+        return fakedValue;
+    }
+    
+    public void setFakedValue(Object fakedValue) {
+        this.fakedValue = fakedValue;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -142,6 +152,7 @@ public class Stat {
                 ", id=" + id +
                 ", uuid=" + uuid +
                 ", value=" + value +
+                ", fakedValue=" + fakedValue +
                 ", created=" + created +
                 ", modified=" + modified +
                 '}';
