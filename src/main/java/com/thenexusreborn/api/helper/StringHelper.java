@@ -1,8 +1,11 @@
 package com.thenexusreborn.api.helper;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 public final class StringHelper {
+    private static final Pattern UUID_PATTERN = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+    
     public static String capitalizeEveryWord(String string) {
         string = string.toLowerCase();
         String[] words = string.split("_");
@@ -62,5 +65,20 @@ public final class StringHelper {
     
     public static boolean isEmpty(String str) {
         return str == null || str.length() == 0;
+    }
+    
+    public static UUID toUUID(String id) {
+        if (UUID_PATTERN.matcher(id).matches()) {
+            return UUID.fromString(id);
+        }
+    
+    
+        id = id.substring(0, 8) + "-" +
+                id.substring(8, 12) + "-" +
+                id.substring(12, 16) + "-" +
+                id.substring(16, 20) + "-" +
+                id.substring(20, 32);
+    
+        return UUID.fromString(id);
     }
 }

@@ -1,5 +1,6 @@
 package com.thenexusreborn.api;
 
+import com.google.gson.*;
 import com.thenexusreborn.api.data.IOManager;
 import com.thenexusreborn.api.data.codec.RanksCodec;
 import com.thenexusreborn.api.data.objects.*;
@@ -26,6 +27,8 @@ import java.util.logging.*;
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.ALPHA;
+    
+    public static final Gson GSON = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
     
     public static void setApi(NexusAPI api) {
         instance = api;
