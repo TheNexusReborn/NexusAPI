@@ -2,7 +2,9 @@ package com.thenexusreborn.api.player;
 
 public enum Rank {
     NEXUS("&4", true, 10), 
-    ADMIN("&c", true, 9),
+    ADMIN("&c", true, 10),
+    HEAD_MOD("&5", true, "HEAD MOD", 9),
+    SR_MOD("&5", true, "SR MOD", 8.5),
     MOD("&5", true, 8), 
     HELPER("&2", true, 7), 
     VIP("&e", true, 6),
