@@ -46,7 +46,7 @@ public class RanksCodec extends SqlCodec<Map<Rank, Long>> {
                 continue;
             }
         
-            Rank rank = Rank.valueOf(rankSplit[0]);
+            Rank rank = Rank.parseRank(rankSplit[0]);
             long expire = Long.parseLong(rankSplit[1]);
             ranks.put(rank, expire);
         }

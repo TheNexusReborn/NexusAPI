@@ -105,7 +105,7 @@ public abstract class NexusAPI {
         networkCommandRegistry.register(new NetworkCommand("updaterank", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             String action = args[1];
-            Rank rank = Rank.valueOf(args[2]);
+            Rank rank = Rank.parseRank(args[2]);
             long expire = args.length > 3 ? Long.parseLong(args[3]) : -1;
             
             NexusPlayer nexusPlayer = getPlayerManager().getNexusPlayer(uuid);
