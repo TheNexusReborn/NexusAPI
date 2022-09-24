@@ -1,28 +1,46 @@
 package com.thenexusreborn.api;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.thenexusreborn.api.data.IOManager;
 import com.thenexusreborn.api.data.codec.RanksCodec;
-import com.thenexusreborn.api.data.objects.*;
-import com.thenexusreborn.api.gamearchive.*;
-import com.thenexusreborn.api.network.*;
+import com.thenexusreborn.api.data.objects.Database;
+import com.thenexusreborn.api.data.objects.Row;
+import com.thenexusreborn.api.gamearchive.GameAction;
+import com.thenexusreborn.api.gamearchive.GameInfo;
+import com.thenexusreborn.api.network.NetworkContext;
+import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.*;
-import com.thenexusreborn.api.registry.*;
+import com.thenexusreborn.api.punishment.Punishment;
+import com.thenexusreborn.api.punishment.PunishmentManager;
+import com.thenexusreborn.api.registry.DatabaseRegistry;
+import com.thenexusreborn.api.registry.NetworkCommandRegistry;
+import com.thenexusreborn.api.registry.PreferenceRegistry;
+import com.thenexusreborn.api.registry.StatRegistry;
 import com.thenexusreborn.api.server.*;
-import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat;
 import com.thenexusreborn.api.stats.Stat.Info;
+import com.thenexusreborn.api.stats.StatChange;
+import com.thenexusreborn.api.stats.StatHelper;
+import com.thenexusreborn.api.stats.StatType;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.thread.ThreadFactory;
 import com.thenexusreborn.api.tournament.Tournament;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class NexusAPI {
     private static NexusAPI instance;
@@ -272,7 +290,7 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
         
-        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name`='server' or `name`='online' or `name`='lastlogout';");
+        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','unlockedtags');");
         for (Row row : statsRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
@@ -286,6 +304,8 @@ public abstract class NexusAPI {
                 player.setOnline((boolean) value);
             } else if (name.equalsIgnoreCase("lastlogout")) {
                 player.setLastLogout((long) value);
+            } else if (name.equalsIgnoreCase("unlockedtags")) {
+                player.setUnlockedTags((Set<String>) value);
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");

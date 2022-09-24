@@ -1,5 +1,9 @@
 package com.thenexusreborn.api.player;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.UUID;
+
 public enum Rank {
     NEXUS("&4", true, 10), 
     ADMIN("&c", true, 10),
@@ -86,5 +90,23 @@ public enum Rank {
         }
         
         return null;
+    }
+
+    public static Rank getPrimaryRank(UUID uniqueId, Map<Rank, Long> ranks) {
+        if (PlayerManager.NEXUS_TEAM.contains(uniqueId)) {
+            return Rank.NEXUS;
+        }
+
+        for (Map.Entry<Rank, Long> entry : new EnumMap<>(ranks).entrySet()) {
+            if (entry.getValue() == -1) {
+                return entry.getKey();
+            }
+
+            if (System.currentTimeMillis() <= entry.getValue()) {
+                return entry.getKey();
+            }
+        }
+
+        return Rank.MEMBER;
     }
 }

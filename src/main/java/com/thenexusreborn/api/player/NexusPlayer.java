@@ -1,20 +1,25 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.data.annotations.ColumnIgnored;
+import com.thenexusreborn.api.data.annotations.ColumnInfo;
+import com.thenexusreborn.api.data.annotations.Primary;
+import com.thenexusreborn.api.data.annotations.TableInfo;
 import com.thenexusreborn.api.data.codec.RanksCodec;
 import com.thenexusreborn.api.data.handler.PlayerObjectHandler;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.player.Preference.Info;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat;
+import com.thenexusreborn.api.stats.StatChange;
+import com.thenexusreborn.api.stats.StatHelper;
+import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 @TableInfo(value = "players", handler = PlayerObjectHandler.class)
-public class NexusPlayer {
+public class NexusPlayer implements NexusProfile {
     
     @Primary
     protected long id;
@@ -232,21 +237,7 @@ public class NexusPlayer {
     }
     
     public Rank getRank() {
-        if (PlayerManager.NEXUS_TEAM.contains(this.uniqueId)) {
-            return Rank.NEXUS;
-        }
-        
-        for (Entry<Rank, Long> entry : new EnumMap<>(this.ranks).entrySet()) {
-            if (entry.getValue() == -1) {
-                return entry.getKey();
-            }
-            
-            if (System.currentTimeMillis() <= entry.getValue()) {
-                return entry.getKey();
-            }
-        }
-        
-        return Rank.MEMBER;
+        return Rank.getPrimaryRank(this.uniqueId, ranks);
     }
     
     public void addRank(Rank rank, long expire) {
@@ -261,7 +252,17 @@ public class NexusPlayer {
         this.ranks.clear();
         this.ranks.put(rank, expire);
     }
-    
+
+    @Override
+    public void setFly(boolean value) {
+
+    }
+
+    @Override
+    public boolean isFly() {
+        return false;
+    }
+
     public void removeRank(Rank rank) {
         if (rank == Rank.NEXUS) {
             return;
@@ -393,7 +394,12 @@ public class NexusPlayer {
     public Set<IPEntry> getIpHistory() {
         return ipHistory;
     }
-    
+
+    @Override
+    public NexusPlayer loadFully() {
+        return null;
+    }
+
     public Map<String, Preference> getPreferences() {
         return preferences;
     }
@@ -401,11 +407,46 @@ public class NexusPlayer {
     public Map<Rank, Long> getRanks() {
         return ranks;
     }
-    
+
     public boolean isOnline() {
         return playerProxy.isOnline();
     }
-    
+
+    @Override
+    public void setOnline(boolean online) {
+
+    }
+
+    @Override
+    public boolean isVanish() {
+        return getPreferenceValue("vanish");
+    }
+
+    @Override
+    public void setVanish(boolean vanish) {
+        setPreferenceValue("vanish", vanish);
+    }
+
+    @Override
+    public boolean isIncognito() {
+        return getPreferenceValue("incognito");
+    }
+
+    @Override
+    public void setIncognito(boolean incognito) {
+        setPreferenceValue("incognito", incognito);
+    }
+
+    @Override
+    public String getServer() {
+        return (String) getStatValue("server");
+    }
+
+    @Override
+    public void setServer(String server) {
+        changeStat("server", server, StatOperator.SET);
+    }
+
     public IActionBar getActionBar() {
         return actionBar;
     }

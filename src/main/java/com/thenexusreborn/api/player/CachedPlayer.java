@@ -5,7 +5,7 @@ import com.thenexusreborn.api.NexusAPI;
 import java.sql.SQLException;
 import java.util.*;
 
-public class CachedPlayer {
+public class CachedPlayer implements NexusProfile {
     protected long id;
     protected UUID uniqueId;
     protected String name;
@@ -14,6 +14,7 @@ public class CachedPlayer {
     protected boolean online, vanish, incognito, fly;
     protected String server;
     protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
+    protected Set<String> unlockedTags = new HashSet<>();
     
     private CachedPlayer() {
     }
@@ -46,66 +47,82 @@ public class CachedPlayer {
         this.ranks = nexusPlayer.getRanks();
     }
     
+    @Override
     public long getLastLogout() {
         return lastLogout;
     }
     
+    @Override
     public void setLastLogout(long lastLogout) {
         this.lastLogout = lastLogout;
     }
     
+    @Override
     public boolean isOnline() {
         return online;
     }
     
+    @Override
     public void setOnline(boolean online) {
         this.online = online;
     }
     
+    @Override
     public boolean isVanish() {
         return vanish;
     }
     
+    @Override
     public void setVanish(boolean vanish) {
         this.vanish = vanish;
     }
     
+    @Override
     public boolean isIncognito() {
         return incognito;
     }
     
+    @Override
     public void setIncognito(boolean incognito) {
         this.incognito = incognito;
     }
     
+    @Override
     public String getServer() {
         return server;
     }
     
+    @Override
     public void setServer(String server) {
         this.server = server;
     }
     
+    @Override
     public long getId() {
         return id;
     }
     
+    @Override
     public void setName(String name) {
         this.name = name;
     }
     
+    @Override
     public UUID getUniqueId() {
         return uniqueId;
     }
     
+    @Override
     public String getName() {
         return name;
     }
     
+    @Override
     public Set<IPEntry> getIpHistory() {
         return ipHistory;
     }
     
+    @Override
     public NexusPlayer loadFully() {
         try {
             List<NexusPlayer> players = NexusAPI.getApi().getPrimaryDatabase().get(NexusPlayer.class, "id", this.id);
@@ -117,21 +134,71 @@ public class CachedPlayer {
         }
         return null;
     }
-    
+
+    @Override
     public Map<Rank, Long> getRanks() {
         return ranks;
     }
-    
-    public void setRanks(Map<Rank, Long> ranks) {
-        this.ranks.clear();
-        this.ranks.putAll(ranks);
+
+    @Override
+    public Rank getRank() {
+        return Rank.getPrimaryRank(this.uniqueId, ranks);
     }
-    
+
+    @Override
+    public void addRank(Rank rank, long expire) {
+        this.ranks.put(rank, expire);
+    }
+
+    @Override
+    public void removeRank(Rank rank) {
+        if (rank != Rank.NEXUS) {
+            this.ranks.remove(rank);
+        }
+    }
+
+    @Override
+    public void setRank(Rank rank, long expire) {
+        this.ranks.clear();
+        this.ranks.put(rank, expire);
+    }
+
+    @Override
     public void setFly(boolean value) {
         this.fly = value;
     }
     
+    @Override
     public boolean isFly() {
         return fly;
+    }
+
+    @Override
+    public Set<String> getUnlockedTags() {
+        return unlockedTags;
+    }
+
+    @Override
+    public void unlockTag(String tag) {
+        this.unlockedTags.add(tag.toLowerCase());
+    }
+
+    @Override
+    public void lockTag(String tag) {
+        this.unlockedTags.remove(tag.toLowerCase());
+    }
+
+    public void setUnlockedTags(Set<String> unlockedTags) {
+        this.unlockedTags.clear();
+        this.unlockedTags.addAll(unlockedTags);
+    }
+
+    @Override
+    public boolean isTagUnlocked(String tag) {
+        return false;
+    }
+
+    public void setRanks(Map<Rank, Long> ranks) {
+        this.ranks = ranks;
     }
 }
