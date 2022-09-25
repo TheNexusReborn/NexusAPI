@@ -1,6 +1,9 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.stats.StatChange;
+import com.thenexusreborn.api.stats.StatHelper;
+import com.thenexusreborn.api.stats.StatOperator;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -196,6 +199,12 @@ public class CachedPlayer implements NexusProfile {
     @Override
     public boolean isTagUnlocked(String tag) {
         return false;
+    }
+
+    @Override
+    public void addCredits(int credits) {
+        StatChange statChange = new StatChange(StatHelper.getInfo("credits"), this.uniqueId, credits, StatOperator.ADD, System.currentTimeMillis());
+        NexusAPI.getApi().getPrimaryDatabase().push(statChange);
     }
 
     public void setRanks(Map<Rank, Long> ranks) {

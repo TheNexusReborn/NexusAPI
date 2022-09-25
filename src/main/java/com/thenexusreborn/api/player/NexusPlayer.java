@@ -349,7 +349,12 @@ public class NexusPlayer implements NexusProfile {
     public boolean isTagUnlocked(String tag) {
         return getUnlockedTags().contains(tag.toLowerCase());
     }
-    
+
+    @Override
+    public void addCredits(int credits) {
+        changeStat("credits", credits, StatOperator.ADD);
+    }
+
     public void unlockTag(String tag) {
         getUnlockedTags().add(tag.toLowerCase());
     }

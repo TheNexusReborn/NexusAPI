@@ -58,4 +58,6 @@ public interface NexusProfile {
     void lockTag(String tag);
 
     boolean isTagUnlocked(String tag);
+
+    void addCredits(int credits);
 }
