@@ -354,7 +354,17 @@ public class NexusPlayer implements NexusProfile {
     public void addCredits(int credits) {
         changeStat("credits", credits, StatOperator.ADD);
     }
-
+    
+    @Override
+    public boolean isPrivateAlpha() {
+        return (boolean) getStatValue("privatealpha");
+    }
+    
+    @Override
+    public void setPrivateAlpha(boolean value) {
+        changeStat("privatealpha", value, StatOperator.SET);
+    }
+    
     public void unlockTag(String tag) {
         getUnlockedTags().add(tag.toLowerCase());
     }

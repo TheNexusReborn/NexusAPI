@@ -18,6 +18,7 @@ public class CachedPlayer implements NexusProfile {
     protected String server;
     protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
     protected Set<String> unlockedTags = new HashSet<>();
+    private boolean privateAlpha;
     
     private CachedPlayer() {
     }
@@ -48,6 +49,7 @@ public class CachedPlayer implements NexusProfile {
         this.incognito = nexusPlayer.getPreferenceValue("incognito");
         this.server = (String) nexusPlayer.getStatValue("server");
         this.ranks = nexusPlayer.getRanks();
+        this.privateAlpha = nexusPlayer.isPrivateAlpha();
     }
     
     @Override
@@ -206,7 +208,17 @@ public class CachedPlayer implements NexusProfile {
         StatChange statChange = new StatChange(StatHelper.getInfo("credits"), this.uniqueId, credits, StatOperator.ADD, System.currentTimeMillis());
         NexusAPI.getApi().getPrimaryDatabase().push(statChange);
     }
-
+    
+    @Override
+    public boolean isPrivateAlpha() {
+        return privateAlpha;
+    }
+    
+    @Override
+    public void setPrivateAlpha(boolean value) {
+        this.privateAlpha = value;
+    }
+    
     public void setRanks(Map<Rank, Long> ranks) {
         this.ranks = ranks;
     }

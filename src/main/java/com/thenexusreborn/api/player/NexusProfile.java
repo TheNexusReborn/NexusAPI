@@ -60,4 +60,8 @@ public interface NexusProfile {
     boolean isTagUnlocked(String tag);
 
     void addCredits(int credits);
+    
+    boolean isPrivateAlpha();
+    
+    void setPrivateAlpha(boolean value);
 }

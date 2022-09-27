@@ -106,7 +106,7 @@ public abstract class NexusAPI {
         getLogger().info("Loading NexusAPI Version v" + this.version);
         
         try {
-            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements();) {
+            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {
                 Driver driver = e.nextElement();
                 DriverManager.deregisterDriver(driver);
             }
@@ -210,11 +210,11 @@ public abstract class NexusAPI {
         
         this.ioManager.setup();
         getLogger().info("Successfully setup the database tables");
-    
+        
         statRegistry = StatHelper.getRegistry();
         
         List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
-    
+        
         for (Info statInfo : statInfos) {
             statRegistry.register(statInfo);
         }
@@ -229,13 +229,14 @@ public abstract class NexusAPI {
         statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L);
         statRegistry.register("prealpha", "PreAlpha", StatType.BOOLEAN, false);
         statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false);
+        statRegistry.register("privatealpha", "Private Alpha", StatType.BOOLEAN, false);
         statRegistry.register("beta", "Beta", StatType.BOOLEAN, false);
         statRegistry.register("tag", "Tag", StatType.STRING, "");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
         statRegistry.register("server", "Server", StatType.STRING, "");
         statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, new HashSet<>());
         registerStats(statRegistry);
-    
+        
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
             getPrimaryDatabase().push(statInfo);
         }
@@ -250,12 +251,12 @@ public abstract class NexusAPI {
         preferenceRegistry.register("fly", "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
         registerPreferences(preferenceRegistry);
-    
+        
         List<Preference.Info> preferenceInfos = primaryDatabase.get(Preference.Info.class);
         for (Preference.Info preferenceInfo : preferenceInfos) {
             preferenceRegistry.register(preferenceInfo);
         }
-    
+        
         getLogger().info("Registered preference types");
         for (Preference.Info object : preferenceRegistry.getObjects()) {
             getPrimaryDatabase().push(object);
@@ -290,7 +291,7 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
         
-        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','unlockedtags');");
+        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','unlockedtags','privatealpha');");
         for (Row row : statsRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
@@ -306,6 +307,8 @@ public abstract class NexusAPI {
                 player.setLastLogout((long) value);
             } else if (name.equalsIgnoreCase("unlockedtags")) {
                 player.setUnlockedTags((Set<String>) value);
+            } else if (name.equalsIgnoreCase("privatealpha")) {
+                player.setPrivateAlpha((boolean) value);
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
