@@ -10,7 +10,7 @@ public enum Rank {
     HEAD_MOD("&5", true, "HEAD MOD", 9),
     SR_MOD("&5", true, "SR MOD", 8.5),
     MOD("&5", true, 8), 
-    HELPER("&2", true, 7), 
+    HELPER("&d", true, 7), 
     VIP("&e", true, 6),
     ARCHITECT("&a", true, 5),
     MEDIA("&3", true, 4), 
