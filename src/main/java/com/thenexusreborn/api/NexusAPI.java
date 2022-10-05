@@ -27,7 +27,6 @@ import com.thenexusreborn.api.stats.StatHelper;
 import com.thenexusreborn.api.stats.StatType;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.thread.ThreadFactory;
-import com.thenexusreborn.api.tournament.Tournament;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -65,7 +64,6 @@ public abstract class NexusAPI {
     protected final Environment environment;
     protected final NetworkManager networkManager;
     protected final PunishmentManager punishmentManager;
-    protected Tournament tournament;
     protected Version version;
     
     protected StatRegistry statRegistry;
@@ -197,7 +195,6 @@ public abstract class NexusAPI {
                 database.registerClass(GameInfo.class);
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
-                database.registerClass(Tournament.class);
                 database.registerClass(Nickname.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
@@ -271,14 +268,6 @@ public abstract class NexusAPI {
         }
         getLogger().info("Cached punishments in memory");
         
-        List<Tournament> tournaments = getPrimaryDatabase().get(Tournament.class);
-        for (Tournament t : tournaments) {
-            if (t.isActive()) {
-                this.tournament = t;
-                getLogger().info("Loaded data for tournament: " + tournament.getName());
-            }
-        }
-        
         playerManager.getIpHistory().addAll(getPrimaryDatabase().get(IPEntry.class));
         getLogger().info("Loaded IP History");
         
@@ -346,10 +335,6 @@ public abstract class NexusAPI {
     
     public abstract void registerPreferences(PreferenceRegistry registry);
     
-    public void setTournament(Tournament tournament) {
-        this.tournament = tournament;
-    }
-    
     public Version getVersion() {
         return version;
     }
@@ -385,10 +370,6 @@ public abstract class NexusAPI {
     
     public PunishmentManager getPunishmentManager() {
         return punishmentManager;
-    }
-    
-    public Tournament getTournament() {
-        return tournament;
     }
     
     public IOManager getIOManager() {
