@@ -19,7 +19,7 @@ public class PlayerObjectHandler extends ObjectHandler {
         player.setPlayerProxy(NexusAPI.getApi().getPlayerFactory().createProxy(player));
     
         try {
-            List<Preference> preferences = database.get(Preference.class, "uuid", player.getUniqueId());
+            List<Toggle> preferences = database.get(Toggle.class, "uuid", player.getUniqueId());
             player.setPreferences(preferences);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -29,7 +29,7 @@ public class PlayerObjectHandler extends ObjectHandler {
             List<Stat> stats = new ArrayList<>(database.get(Stat.class, "uuid", player.getUniqueId()));
             
             for (Stat stat : stats) {
-                player.addStat(stat);
+                player.getStats().add(stat);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -38,7 +38,7 @@ public class PlayerObjectHandler extends ObjectHandler {
         try {
             List<StatChange> statChanges = database.get(StatChange.class, "uuid", player.getUniqueId());
             for (StatChange statChange : statChanges) {
-                player.addStatChange(statChange);
+                player.getStats().addChange(statChange);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,15 +58,15 @@ public class PlayerObjectHandler extends ObjectHandler {
     public void afterSave() {
         NexusPlayer player = (NexusPlayer) object;
     
-        for (Preference preference : player.getPreferences().values()) {
+        for (Toggle preference : player.getPreferences().values()) {
             database.push(preference);
         }
     
-        for (Stat stat : player.getStats().values()) {
+        for (Stat stat : player.getStats().findAll()) {
             database.push(stat);
         }
     
-        for (StatChange statChange : player.getStatChanges()) {
+        for (StatChange statChange : player.getStats().findAllChanges()) {
             database.push(statChange);
         }
     

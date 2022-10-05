@@ -188,8 +188,8 @@ public abstract class NexusAPI {
                 database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
                 database.registerClass(StatChange.class);
-                database.registerClass(Preference.Info.class);
-                database.registerClass(Preference.class);
+                database.registerClass(Toggle.Info.class);
+                database.registerClass(Toggle.class);
                 database.registerClass(NexusPlayer.class);
                 database.registerClass(ServerInfo.class);
                 database.registerClass(GameInfo.class);
@@ -249,13 +249,13 @@ public abstract class NexusAPI {
         
         registerPreferences(preferenceRegistry);
         
-        List<Preference.Info> preferenceInfos = primaryDatabase.get(Preference.Info.class);
-        for (Preference.Info preferenceInfo : preferenceInfos) {
+        List<Toggle.Info> preferenceInfos = primaryDatabase.get(Toggle.Info.class);
+        for (Toggle.Info preferenceInfo : preferenceInfos) {
             preferenceRegistry.register(preferenceInfo);
         }
         
         getLogger().info("Registered preference types");
-        for (Preference.Info object : preferenceRegistry.getObjects()) {
+        for (Toggle.Info object : preferenceRegistry.getObjects()) {
             getPrimaryDatabase().push(object);
         }
         getLogger().info("Pushed preference types to the database");

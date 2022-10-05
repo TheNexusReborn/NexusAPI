@@ -1,9 +1,9 @@
 package com.thenexusreborn.api.registry;
 
-import com.thenexusreborn.api.player.Preference;
-import com.thenexusreborn.api.player.Preference.Info;
+import com.thenexusreborn.api.player.Toggle;
+import com.thenexusreborn.api.player.Toggle.Info;
 
-public class PreferenceRegistry extends Registry<Preference.Info> {
+public class PreferenceRegistry extends Registry<Toggle.Info> {
     public void register(String name, String displayName, String description, boolean defaultValue) {
         register(new Info(name, displayName, description, defaultValue));
     }

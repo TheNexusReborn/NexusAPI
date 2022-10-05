@@ -109,13 +109,13 @@ public final class StatHelper {
     public static void consolidateStats(NexusPlayer player) {
         try {
             List<StatChange> statChanges = NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString());
-            statChanges.addAll(player.getStatChanges());
+            statChanges.addAll(player.getStats().findAllChanges());
             for (StatChange statChange : new TreeSet<>(statChanges)) {
                 Stat stat = player.getStats().get(statChange.getStatName());
                 if (stat == null) {
                     Info info = getInfo(statChange.getStatName());
                     stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
-                    player.addStat(stat);
+                    player.getStats().add(stat);
                 }
         
                 if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
@@ -133,7 +133,7 @@ public final class StatHelper {
                     NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
             }
-            player.getStatChanges().clear();
+            player.getStats().clearChanges();
         } catch (SQLException e) {
             e.printStackTrace();
         }

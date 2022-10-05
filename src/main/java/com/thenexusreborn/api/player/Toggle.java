@@ -7,7 +7,7 @@ import com.thenexusreborn.api.data.codec.PreferenceInfoCodec;
 import java.util.*;
 
 @TableInfo("preferences")
-public class Preference {
+public class Toggle {
     @Primary
     private long id;
     @ColumnInfo(name = "name", type = "varchar(100)", codec = PreferenceInfoCodec.class)
@@ -15,15 +15,15 @@ public class Preference {
     private UUID uuid;
     private boolean value;
     
-    private Preference() {}
+    private Toggle() {}
     
-    public Preference(Info info, UUID uuid, boolean value) {
+    public Toggle(Info info, UUID uuid, boolean value) {
         this.info = info;
         this.value = value;
         this.uuid = uuid;
     }
     
-    public Preference(Info info, UUID uuid, long id, boolean value) {
+    public Toggle(Info info, UUID uuid, long id, boolean value) {
         this.info = info;
         this.id = id;
         this.value = value;
@@ -70,7 +70,7 @@ public class Preference {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Preference that = (Preference) o;
+        Toggle that = (Toggle) o;
         return Objects.equals(info, that.info) && Objects.equals(uuid, that.uuid);
     }
     
@@ -139,6 +139,6 @@ public class Preference {
     }
     
     public interface Handler {
-        void handleChange(Preference preference, NexusPlayer player, boolean oldValue, boolean newValue);
+        void handleChange(Toggle preference, NexusPlayer player, boolean oldValue, boolean newValue);
     }
 }
