@@ -128,20 +128,19 @@ public abstract class NexusAPI {
             CachedPlayer cachedPlayer = getPlayerManager().getCachedPlayer(uuid);
             if (nexusPlayer != null) {
                 if (action.equals("add")) {
-                    nexusPlayer.addRank(rank, expire);
+                    nexusPlayer.getRanks().add(rank, expire);
                 } else if (action.equals("remove")) {
-                    nexusPlayer.removeRank(rank);
+                    nexusPlayer.getRanks().remove(rank);
                 } else if (action.equals("set")) {
-                    nexusPlayer.setRank(rank, expire);
+                    nexusPlayer.getRanks().set(rank, expire);
                 }
             } else if (cachedPlayer != null) {
                 if (action.equals("add")) {
-                    cachedPlayer.getRanks().put(rank, expire);
+                    cachedPlayer.getRanks().add(rank, expire);
                 } else if (action.equals("remove")) {
                     cachedPlayer.getRanks().remove(rank);
                 } else if (action.equals("set")) {
-                    cachedPlayer.getRanks().clear();
-                    cachedPlayer.getRanks().put(rank, expire);
+                    cachedPlayer.getRanks().set(rank, expire);
                 }
             }
         }));
@@ -275,7 +274,7 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
             CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), UUID.fromString(row.getString("uniqueId")), row.getString("name"));
-            cachedPlayer.setRanks(new RanksCodec().decode(row.getString("ranks")));
+            cachedPlayer.getRanks().setAll(new RanksCodec().decode(row.getString("ranks")));
             playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");

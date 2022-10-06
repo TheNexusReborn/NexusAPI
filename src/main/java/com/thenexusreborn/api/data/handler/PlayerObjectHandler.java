@@ -19,8 +19,8 @@ public class PlayerObjectHandler extends ObjectHandler {
         player.setPlayerProxy(NexusAPI.getApi().getPlayerFactory().createProxy(player));
     
         try {
-            List<Toggle> preferences = database.get(Toggle.class, "uuid", player.getUniqueId());
-            player.setPreferences(preferences);
+            List<Toggle> toggles = database.get(Toggle.class, "uuid", player.getUniqueId());
+            player.getToggles().setAll(toggles);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -58,7 +58,7 @@ public class PlayerObjectHandler extends ObjectHandler {
     public void afterSave() {
         NexusPlayer player = (NexusPlayer) object;
     
-        for (Toggle preference : player.getPreferences().values()) {
+        for (Toggle preference : player.getToggles().findAll()) {
             database.push(preference);
         }
     

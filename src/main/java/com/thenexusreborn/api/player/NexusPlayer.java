@@ -2,14 +2,13 @@ package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.RanksCodec;
 import com.thenexusreborn.api.data.handler.PlayerObjectHandler;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.tags.Tag;
 
-import java.util.*;
+import java.util.UUID;
 
 @TableInfo(value = "players", handler = PlayerObjectHandler.class)
 public class NexusPlayer extends NexusProfile {
@@ -58,7 +57,7 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public String getTablistName() {
-        if (getRank() == Rank.MEMBER) {
+        if (getRanks().get() == Rank.MEMBER) {
             return Rank.MEMBER.getColor() + getName();
         } else {
             return "&f" + getName();
@@ -112,10 +111,6 @@ public class NexusPlayer extends NexusProfile {
         } else {
             getStats().change("tag", "null", StatOperator.SET);
         }
-    }
-    
-    public String serializeRanks() {
-        return new RanksCodec().encode(this.ranks);
     }
     
     public void setLastMessage(UUID lastMessage) {

@@ -15,7 +15,7 @@ public abstract class NexusProfile {
     @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     @ColumnInfo(type = "varchar(1000)", codec = RanksCodec.class)
-    protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
+    protected PlayerRanks playerRanks;
     @ColumnIgnored
     protected PlayerStats playerStats;
     @ColumnIgnored
@@ -52,10 +52,10 @@ public abstract class NexusProfile {
     }
     
     public String getDisplayName() {
-        if (getRank() != Rank.MEMBER) {
-            return getRank().getPrefix() + " &f" + getName();
+        if (getRanks().get() != Rank.MEMBER) {
+            return getRanks().get().getPrefix() + " &f" + getName();
         } else {
-            return getRank().getPrefix() + getName();
+            return getRanks().get().getPrefix() + getName();
         }
     }
     
@@ -106,31 +106,6 @@ public abstract class NexusProfile {
     
     public void setBeta(boolean beta) {
         getStats().change("beta", beta, StatOperator.SET);
-    }
-    
-    public Rank getRank() {
-        return Rank.getPrimaryRank(this.uniqueId, ranks);
-    }
-    
-    public void addRank(Rank rank, long expire) {
-        this.ranks.put(rank, expire);
-    }
-    
-    public void setRank(Rank rank, long expire) {
-        if (this.ranks.containsKey(Rank.NEXUS)) {
-            return;
-        }
-        
-        this.ranks.clear();
-        this.ranks.put(rank, expire);
-    }
-    
-    public void removeRank(Rank rank) {
-        if (rank == Rank.NEXUS) {
-            return;
-        }
-        
-        this.ranks.remove(rank);
     }
     
     public PlayerStats getStats() {
@@ -193,8 +168,11 @@ public abstract class NexusProfile {
         return ipHistory;
     }
     
-    public Map<Rank, Long> getRanks() {
-        return ranks;
+    public PlayerRanks getRanks() {
+        if (playerRanks.getUniqueId() == null) {
+            playerRanks.setUniqueId(this.uniqueId);
+        }
+        return playerRanks;
     }
     
     public boolean isOnline() {

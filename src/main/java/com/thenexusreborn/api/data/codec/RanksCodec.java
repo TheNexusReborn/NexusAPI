@@ -6,10 +6,10 @@ import com.thenexusreborn.api.player.*;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class RanksCodec extends SqlCodec<Map<Rank, Long>> {
+public class RanksCodec extends SqlCodec<PlayerRanks> {
     @Override
     public String encode(Object object) {
-        Map<Rank, Long> ranks = (Map<Rank, Long>) object;
+        Map<Rank, Long> ranks = ((PlayerRanks) object).findAll();
         
         StringBuilder sb = new StringBuilder();
     
@@ -29,15 +29,16 @@ public class RanksCodec extends SqlCodec<Map<Rank, Long>> {
     }
     
     @Override
-    public Map<Rank, Long> decode(String encoded) {
+    public PlayerRanks decode(String encoded) {
+        PlayerRanks playerRanks = new PlayerRanks(null);
         Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
         if (encoded == null && encoded.equals("")) {
-            return ranks;
+            return playerRanks;
         }
     
         String[] rawRanks = encoded.split(",");
         if (rawRanks == null || rawRanks.length == 0) {
-            return ranks;
+            return playerRanks;
         }
     
         for (String rawRank : rawRanks) {
@@ -48,8 +49,8 @@ public class RanksCodec extends SqlCodec<Map<Rank, Long>> {
         
             Rank rank = Rank.parseRank(rankSplit[0]);
             long expire = Long.parseLong(rankSplit[1]);
-            ranks.put(rank, expire);
+            playerRanks.add(rank, expire);
         }
-        return ranks;
+        return playerRanks;
     }
 }
