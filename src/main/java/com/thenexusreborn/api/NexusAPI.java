@@ -274,7 +274,12 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
             CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), UUID.fromString(row.getString("uniqueId")), row.getString("name"));
-            cachedPlayer.getRanks().setAll(new RanksCodec().decode(row.getString("ranks")));
+            String ranks = row.getString("ranks");
+            if (ranks == null || ranks.equals("")) {
+                getLogger().severe("Found an invalid rank entry for player " + cachedPlayer.getUniqueId().toString());
+                continue;
+            }
+            cachedPlayer.getRanks().setAll(new RanksCodec().decode(ranks));
             playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
@@ -287,6 +292,9 @@ public abstract class NexusAPI {
             Stat.Info info = StatHelper.getInfo(name);
             Object value = StatHelper.parseValue(info.getType(), rawValue);
             CachedPlayer player = playerManager.getCachedPlayer(uuid);
+            if (player == null) {
+                continue;
+            }
             if (name.equalsIgnoreCase("server")) {
                 player.setServer((String) value);
             } else if (name.equalsIgnoreCase("online")) {
@@ -307,6 +315,9 @@ public abstract class NexusAPI {
             UUID uuid = UUID.fromString(row.getString("uuid"));
             boolean value = row.getBoolean("value");
             CachedPlayer player = playerManager.getCachedPlayers().get(uuid);
+            if (player == null) {
+                continue;
+            }
             if (name.equalsIgnoreCase("vanish")) {
                 player.setVanish(value);
             } else if (name.equalsIgnoreCase("incognito")) {

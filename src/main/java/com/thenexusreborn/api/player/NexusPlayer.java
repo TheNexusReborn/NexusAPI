@@ -39,9 +39,7 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public NexusPlayer(UUID uniqueId, String name) {
-        this.uniqueId = uniqueId;
-        this.name = name;
-        this.playerStats = new PlayerStats(uniqueId);
+        super(0, uniqueId, name);
     }
     
     public NexusScoreboard getScoreboard() {

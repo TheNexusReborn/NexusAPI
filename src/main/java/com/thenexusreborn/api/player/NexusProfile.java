@@ -15,20 +15,27 @@ public abstract class NexusProfile {
     @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     @ColumnInfo(type = "varchar(1000)", codec = RanksCodec.class)
-    protected PlayerRanks playerRanks;
+    protected PlayerRanks ranks;
     @ColumnIgnored
     protected PlayerStats playerStats;
     @ColumnIgnored
     protected PlayerToggles playerToggles;
     
     protected NexusProfile() {
+        this(null);
     }
     
     public NexusProfile(UUID uniqueId) {
+        this(0, uniqueId, "");
+    }
+    
+    public NexusProfile(long id, UUID uniqueId, String name) {
+        this.id = id;
+        this.name = name;
         this.uniqueId = uniqueId;
-        playerStats = new PlayerStats(uniqueId);
         this.playerToggles = new PlayerToggles();
         this.playerStats = new PlayerStats(uniqueId);
+        this.ranks = new PlayerRanks(uniqueId);
     }
     
     public long getFirstJoined() {
@@ -169,10 +176,10 @@ public abstract class NexusProfile {
     }
     
     public PlayerRanks getRanks() {
-        if (playerRanks.getUniqueId() == null) {
-            playerRanks.setUniqueId(this.uniqueId);
+        if (ranks.getUniqueId() == null) {
+            ranks.setUniqueId(this.uniqueId);
         }
-        return playerRanks;
+        return ranks;
     }
     
     public boolean isOnline() {

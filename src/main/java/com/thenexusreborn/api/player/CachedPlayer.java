@@ -8,29 +8,25 @@ import java.util.*;
 public class CachedPlayer extends NexusProfile {
     
     private CachedPlayer() {
+        this((UUID) null);
     }
     
     public CachedPlayer(UUID uniqueId) {
-        this.uniqueId = uniqueId;
+        this(uniqueId, "");
     }
     
     public CachedPlayer(UUID uniqueId, String name) {
-        this.uniqueId = uniqueId;
-        this.name = name;
+        this(0, uniqueId, name);
     }
     
     public CachedPlayer(long id, UUID uniqueId, String name) {
-        this.id = id;
-        this.uniqueId = uniqueId;
-        this.name = name;
+        super(id, uniqueId, name);
     }
     
     public CachedPlayer(NexusPlayer nexusPlayer) {
-        this.id = nexusPlayer.id;
-        this.uniqueId = nexusPlayer.uniqueId;
-        this.name = nexusPlayer.name;
+        this(nexusPlayer.id, nexusPlayer.uniqueId, nexusPlayer.name);
         this.ipHistory = nexusPlayer.ipHistory;
-        this.playerRanks = nexusPlayer.getRanks();
+        this.ranks = nexusPlayer.getRanks();
         this.playerStats = nexusPlayer.getStats();
         this.playerToggles = nexusPlayer.getToggles();
     }

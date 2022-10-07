@@ -32,7 +32,7 @@ public class RanksCodec extends SqlCodec<PlayerRanks> {
     public PlayerRanks decode(String encoded) {
         PlayerRanks playerRanks = new PlayerRanks(null);
         Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
-        if (encoded == null && encoded.equals("")) {
+        if (encoded == null || encoded.equals("")) {
             return playerRanks;
         }
     
