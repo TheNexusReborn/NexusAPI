@@ -150,4 +150,9 @@ public class NexusPlayer extends NexusProfile {
     public void resetCPS() {
         this.cps = 0;
     }
+    
+    @Override
+    public boolean isOnline() {
+        return playerProxy.isOnline();
+    }
 }
