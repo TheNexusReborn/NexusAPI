@@ -28,7 +28,7 @@ import java.util.logging.*;
 //@MavenLibrary(groupId = "io.netty", artifactId = "netty-all", version = "4.1.82.Final")
 public abstract class NexusAPI {
     private static NexusAPI instance;
-    public static final Phase PHASE = Phase.ALPHA;
+    public static final Phase PHASE = Phase.PRIVATE_ALPHA;
     
     public static void setApi(NexusAPI api) {
         instance = api;
@@ -162,8 +162,17 @@ public abstract class NexusAPI {
             Object value = StatHelper.parseValue(info.getType(), args[3]);
             NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
             StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
-            getApi().getLogger().info("Update Stat From Network " + statChange);
             profile.getStats().addChange(statChange);
+        }));
+        
+        networkCommandRegistry.register(new NetworkCommand("playercreate", (cmd, origin, args) -> {
+            UUID uuid = UUID.fromString(args[0]);
+            try {
+                NexusPlayer nexusPlayer = getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uuid).get(0);
+                getPlayerManager().getCachedPlayers().put(nexusPlayer.getUniqueId(), new CachedPlayer(nexusPlayer));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }));
         
         networkManager.init("localhost", 3408);
@@ -324,7 +333,9 @@ public abstract class NexusAPI {
         
         for (IPEntry entry : playerManager.getIpHistory()) {
             CachedPlayer player = playerManager.getCachedPlayer(entry.getUuid());
-            player.getIpHistory().add(entry);
+            if (player != null) {
+                player.getIpHistory().add(entry);
+            }
         }
         getLogger().info("Sorted IP History for player profiles.");
         

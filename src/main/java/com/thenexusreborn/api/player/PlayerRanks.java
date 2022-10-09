@@ -50,7 +50,7 @@ public class PlayerRanks {
     }
     
     public Map<Rank, Long> findAll() {
-        return new EnumMap<>(this.ranks);
+        return new HashMap<>(this.ranks);
     }
     
     public UUID getUniqueId() {
