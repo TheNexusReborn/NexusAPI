@@ -85,7 +85,7 @@ public abstract class NexusAPI {
     
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
-        LibraryLoader.loadAll(NexusAPI.class);
+        LibraryLoader.loadAll(NexusAPI.class, getLoader());
         
         try {
             for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {

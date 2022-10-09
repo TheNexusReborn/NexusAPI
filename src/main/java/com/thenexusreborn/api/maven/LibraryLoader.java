@@ -14,32 +14,30 @@ public final class LibraryLoader {
 //    private static final Supplier<URLClassLoaderAccess> URL_INJECTOR = Suppliers.memoize(() -> URLClassLoaderAccess.create(NexusAPI.getApi().getLoader()));
 //    
     
-    private static Supplier<URLClassLoaderAccess> URL_INJECTOR = () -> URLClassLoaderAccess.create(NexusAPI.getApi().getLoader());
-    
-    public static void loadAll(Object object) {
-        loadAll(object.getClass());
+    public static void loadAll(Object object, URLClassLoader classLoader) {
+        loadAll(object.getClass(), classLoader);
     }
     
-    public static void loadAll(Class<?> clazz) {
+    public static void loadAll(Class<?> clazz, URLClassLoader classLoader) {
         MavenLibrary[] libs = clazz.getDeclaredAnnotationsByType(MavenLibrary.class);
         if (libs == null) {
             return;
         }
         
         for (MavenLibrary lib : libs) {
-            load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().url());
+            load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().url(), classLoader);
         }
     }
     
-    public static void load(String groupId, String artifactId, String version) {
-        load(groupId, artifactId, version, "https://repo1.maven.org/maven2");
+    public static void load(String groupId, String artifactId, String version, URLClassLoader classLoader) {
+        load(groupId, artifactId, version, "https://repo1.maven.org/maven2", classLoader);
     }
     
-    public static void load(String groupId, String artifactId, String version, String repoUrl) {
-        load(new Dependency(groupId, artifactId, version, repoUrl));
+    public static void load(String groupId, String artifactId, String version, String repoUrl, URLClassLoader classLoader) {
+        load(new Dependency(groupId, artifactId, version, repoUrl), classLoader);
     }
     
-    public static void load(Dependency d) {
+    public static void load(Dependency d, URLClassLoader classLoader) {
         NexusAPI.getApi().getLogger().info(String.format("Loading dependency %s:%s:%s from %s", d.getGroupId(), d.getArtifactId(), d.getVersion(), d.getRepoUrl()));
         String name = d.getArtifactId() + "-" + d.getVersion();
         
@@ -66,7 +64,7 @@ public final class LibraryLoader {
         }
         
         try {
-            URL_INJECTOR.get().addURL(saveLocation.toURI().toURL());
+            URLClassLoaderAccess.create(classLoader).addURL(saveLocation.toURI().toURL());
         } catch (Exception e) {
             throw new RuntimeException("Unable to load dependency: " + saveLocation, e);
         }
