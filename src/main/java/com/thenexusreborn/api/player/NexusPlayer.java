@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.handler.PlayerObjectHandler;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.StatOperator;

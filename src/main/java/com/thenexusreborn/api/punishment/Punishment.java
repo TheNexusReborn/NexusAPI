@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.punishment;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.*;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.*;
 import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.CachedPlayer;
 

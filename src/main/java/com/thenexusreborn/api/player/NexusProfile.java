@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.player;
 
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.RanksCodec;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.stats.StatOperator;
 
 import java.util.*;

@@ -1,6 +1,6 @@
-package com.thenexusreborn.api.data.annotations;
+package com.thenexusreborn.api.storage.annotations;
 
-import com.thenexusreborn.api.data.objects.ObjectHandler;
+import com.thenexusreborn.api.storage.objects.ObjectHandler;
 
 import java.lang.annotation.*;
 

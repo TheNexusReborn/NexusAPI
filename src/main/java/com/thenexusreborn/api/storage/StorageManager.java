@@ -1,16 +1,16 @@
-package com.thenexusreborn.api.data;
+package com.thenexusreborn.api.storage;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.data.objects.*;
+import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.registry.DatabaseRegistry;
 
 import java.sql.*;
 import java.util.*;
 
-public class IOManager {
+public class StorageManager {
     private final DatabaseRegistry registry;
     
-    public IOManager(DatabaseRegistry registry) {
+    public StorageManager(DatabaseRegistry registry) {
         this.registry = registry;
     }
     

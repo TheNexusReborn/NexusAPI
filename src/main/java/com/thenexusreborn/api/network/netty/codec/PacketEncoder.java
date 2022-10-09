@@ -8,6 +8,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 public class PacketEncoder extends MessageToByteEncoder<NexusPacket> {
     @Override
     protected void encode(ChannelHandlerContext ctx, NexusPacket msg, ByteBuf out) {
+        System.out.println("Encoding " + msg.toString());
         out.writeInt(msg.getOrigin().length());
         out.writeCharSequence(msg.getOrigin(), NexusPacket.CHARSET);
         out.writeInt(msg.getAction().length());

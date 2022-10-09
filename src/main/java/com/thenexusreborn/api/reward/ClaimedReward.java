@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.reward;
 
-import com.thenexusreborn.api.data.annotations.Primary;
-import com.thenexusreborn.api.data.annotations.TableInfo;
+import com.thenexusreborn.api.storage.annotations.Primary;
+import com.thenexusreborn.api.storage.annotations.TableInfo;
 
 import java.util.Objects;
 import java.util.UUID;

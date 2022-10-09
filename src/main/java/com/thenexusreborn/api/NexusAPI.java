@@ -1,51 +1,34 @@
 package com.thenexusreborn.api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.thenexusreborn.api.data.IOManager;
-import com.thenexusreborn.api.data.codec.RanksCodec;
-import com.thenexusreborn.api.data.objects.Database;
-import com.thenexusreborn.api.data.objects.Row;
-import com.thenexusreborn.api.gamearchive.GameAction;
-import com.thenexusreborn.api.gamearchive.GameInfo;
-import com.thenexusreborn.api.network.NetworkContext;
-import com.thenexusreborn.api.network.NetworkManager;
+import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.maven.*;
+import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.Punishment;
-import com.thenexusreborn.api.punishment.PunishmentManager;
-import com.thenexusreborn.api.registry.DatabaseRegistry;
-import com.thenexusreborn.api.registry.NetworkCommandRegistry;
-import com.thenexusreborn.api.registry.PreferenceRegistry;
-import com.thenexusreborn.api.registry.StatRegistry;
+import com.thenexusreborn.api.punishment.*;
+import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
-import com.thenexusreborn.api.stats.Stat;
+import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
-import com.thenexusreborn.api.stats.StatChange;
-import com.thenexusreborn.api.stats.StatHelper;
-import com.thenexusreborn.api.stats.StatType;
+import com.thenexusreborn.api.storage.StorageManager;
+import com.thenexusreborn.api.storage.codec.RanksCodec;
+import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.thread.ThreadFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.io.*;
+import java.net.*;
+import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
+@MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
+@MavenLibrary(groupId = "com.google.code.gson", artifactId = "gson", version = "2.9.0")
+//@MavenLibrary(groupId = "io.netty", artifactId = "netty-all", version = "4.1.82.Final")
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.ALPHA;
-    
-    public static final Gson GSON = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
     
     public static void setApi(NexusAPI api) {
         instance = api;
@@ -56,7 +39,7 @@ public abstract class NexusAPI {
     }
     
     protected final Logger logger;
-    protected final IOManager ioManager;
+    protected final StorageManager ioManager;
     protected final PlayerManager playerManager;
     protected final ThreadFactory threadFactory;
     protected final PlayerFactory playerFactory;
@@ -72,15 +55,15 @@ public abstract class NexusAPI {
     protected Database primaryDatabase;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
-        this.environment = environment;
         this.logger = logger;
+        this.environment = environment;
         this.networkManager = new NetworkManager(context);
         this.playerManager = playerManager;
         this.threadFactory = threadFactory;
         this.playerFactory = playerFactory;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
-        this.ioManager = new IOManager(new DatabaseRegistry());
+        this.ioManager = new StorageManager(new DatabaseRegistry());
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -102,6 +85,7 @@ public abstract class NexusAPI {
     
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
+        LibraryLoader.loadAll(NexusAPI.class);
         
         try {
             for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {
@@ -382,7 +366,7 @@ public abstract class NexusAPI {
         return punishmentManager;
     }
     
-    public IOManager getIOManager() {
+    public StorageManager getIOManager() {
         return ioManager;
     }
     
@@ -408,5 +392,13 @@ public abstract class NexusAPI {
     
     public PreferenceRegistry getPreferenceRegistry() {
         return preferenceRegistry;
+    }
+    
+    public URLClassLoader getLoader() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        if (classLoader instanceof URLClassLoader) {
+            return (URLClassLoader) classLoader;
+        }
+        return null;
     }
 }

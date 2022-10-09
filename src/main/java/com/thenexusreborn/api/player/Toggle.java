@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.PreferenceInfoCodec;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.PreferenceInfoCodec;
 
 import java.util.*;
 

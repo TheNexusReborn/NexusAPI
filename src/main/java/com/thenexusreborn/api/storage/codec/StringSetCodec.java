@@ -1,6 +1,6 @@
-package com.thenexusreborn.api.data.codec;
+package com.thenexusreborn.api.storage.codec;
 
-import com.thenexusreborn.api.data.objects.SqlCodec;
+import com.thenexusreborn.api.storage.objects.SqlCodec;
 import com.thenexusreborn.api.helper.StringHelper;
 
 import java.util.*;

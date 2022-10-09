@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.StatInfoCodec;
-import com.thenexusreborn.api.data.handler.StatObjectHandler;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.StatInfoCodec;
+import com.thenexusreborn.api.storage.handler.StatObjectHandler;
 import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;

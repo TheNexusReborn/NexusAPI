@@ -1,4 +1,4 @@
-package com.thenexusreborn.api.data.objects;
+package com.thenexusreborn.api.storage.objects;
 
 public abstract class ObjectHandler {
     

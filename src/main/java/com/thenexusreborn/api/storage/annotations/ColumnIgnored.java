@@ -1,9 +1,9 @@
-package com.thenexusreborn.api.data.annotations;
+package com.thenexusreborn.api.storage.annotations;
 
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Primary { 
+public @interface ColumnIgnored {
     
 }

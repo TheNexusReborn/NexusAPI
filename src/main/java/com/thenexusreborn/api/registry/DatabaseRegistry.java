@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.registry;
 
-import com.thenexusreborn.api.data.objects.Database;
+import com.thenexusreborn.api.storage.objects.Database;
 
 public class DatabaseRegistry extends Registry<Database> {
     

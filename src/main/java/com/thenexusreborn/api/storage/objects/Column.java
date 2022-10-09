@@ -1,6 +1,6 @@
-package com.thenexusreborn.api.data.objects;
+package com.thenexusreborn.api.storage.objects;
 
-import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.storage.annotations.*;
 
 import java.lang.reflect.Field;
 import java.util.*;

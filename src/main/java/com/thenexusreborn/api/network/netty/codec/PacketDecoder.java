@@ -22,6 +22,7 @@ public class PacketDecoder extends ReplayingDecoder<NexusPacket> {
         }
         
         NexusPacket nexusPacket = new NexusPacket(origin, action, data);
+        System.out.println("Decoded Packet: " + nexusPacket);
         out.add(nexusPacket);
     }
 }

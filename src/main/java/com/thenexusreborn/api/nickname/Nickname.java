@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.nickname;
 
-import com.thenexusreborn.api.data.annotations.*;
+import com.thenexusreborn.api.storage.annotations.*;
 import com.thenexusreborn.api.player.Rank;
 import com.thenexusreborn.api.skins.Skin;
 
