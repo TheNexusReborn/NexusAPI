@@ -7,7 +7,7 @@ import com.thenexusreborn.api.storage.handler.StatObjectHandler;
 import java.util.*;
 
 @TableInfo(value = "stats", handler = StatObjectHandler.class)
-public class Stat {
+public class Stat implements Cloneable {
     @ColumnInfo(name = "name", type = "varchar(100)", codec = StatInfoCodec.class) 
     private Info info;
     
@@ -49,17 +49,7 @@ public class Stat {
         this.uuid = uuid;
         this.created = created;
         this.modified = modified;
-    
-        if (info.getType() == StatType.DOUBLE || info.getType() == StatType.INTEGER || info.getType() == StatType.LONG) {
-            Number number = (Number) value;
-            if (info.getType() == StatType.DOUBLE) {
-                this.value = number.doubleValue();
-            } else if (info.getType() == StatType.INTEGER) {
-                this.value = number.intValue();
-            } else if (info.getType() == StatType.LONG) {
-                this.value = number.longValue();
-            }
-        }
+        this.value = value;
     }
     
     public UUID getUuid() {
@@ -160,6 +150,11 @@ public class Stat {
     
     public Info getInfo() {
         return this.info;
+    }
+    
+    @Override
+    public Stat clone() {
+        return new Stat(this.info, 0, this.uuid, this.value, System.currentTimeMillis(), System.currentTimeMillis());
     }
     
     @TableInfo(value = "statinfo", handler = StatObjectHandler.class)

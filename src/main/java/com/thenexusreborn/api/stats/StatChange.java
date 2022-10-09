@@ -105,4 +105,17 @@ public class StatChange implements Comparable<StatChange> {
     public int hashCode() {
         return Objects.hash(id, uuid, info.getName(), info.getType(), value, operator, timestamp);
     }
+    
+    @Override
+    public String toString() {
+        return "StatChange{" +
+                "info=" + info +
+                ", id=" + id +
+                ", uuid=" + uuid +
+                ", value=" + value +
+                ", fake=" + fake +
+                ", operator=" + operator +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

@@ -100,7 +100,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isAlpha() {
-        return (boolean) getStats().getValue("prealpha");
+        return (boolean) getStats().getValue("alpha");
     }
     
     public void setAlpha(boolean alpha) {
@@ -108,7 +108,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isBeta() {
-        return (boolean) getStats().getValue("prealpha");
+        return (boolean) getStats().getValue("beta");
     }
     
     public void setBeta(boolean beta) {
@@ -116,6 +116,9 @@ public abstract class NexusProfile {
     }
     
     public PlayerStats getStats() {
+        if (playerStats.getUniqueId() == null) {
+            playerStats.setUniqueId(uniqueId);
+        }
         return playerStats;
     }
     

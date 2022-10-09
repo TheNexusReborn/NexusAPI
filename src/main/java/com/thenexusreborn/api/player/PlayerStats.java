@@ -9,7 +9,7 @@ public class PlayerStats {
     protected final Map<String, Stat> stats = new HashMap<>();
     protected final Set<StatChange> statChanges = new TreeSet<>();
     
-    protected final UUID uniqueId;
+    protected UUID uniqueId;
     
     public PlayerStats(UUID uniqueId) {
         this.uniqueId = uniqueId;
@@ -37,8 +37,31 @@ public class PlayerStats {
         Stat stat = get(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
-            return info.getDefaultValue();
+            
+            if (this.statChanges.size() > 0) {
+                for (StatChange statChange : this.statChanges) {
+                    if (statChange.getStatName().equalsIgnoreCase(info.getName())) {
+                        stat = new Stat(info, this.uniqueId, System.currentTimeMillis());
+                        break;
+                    }
+                }
+                
+                if (stat == null) {
+                    return info.getDefaultValue();
+                }
+            } else {
+                return info.getDefaultValue();
+            }
         }
+        
+        stat = stat.clone();
+    
+        for (StatChange statChange : this.findAllChanges()) {
+            if (statChange.getStatName().equalsIgnoreCase(stat.getName())) {
+                StatHelper.changeStat(stat, statChange.getOperator(), statChange.getValue());
+            }
+        }
+    
         return stat.getValue();
     }
     
@@ -57,7 +80,8 @@ public class PlayerStats {
             stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
             this.add(stat);
         }
-        StatChange statChange = StatHelper.changeStat(stat, operator, statValue);
+        StatChange statChange = new StatChange(stat.getInfo(), this.uniqueId, statValue, operator, System.currentTimeMillis());
+        this.addChange(statChange);
         NexusAPI.getApi().getPrimaryDatabase().push(statChange); //Temporary for now until a change to the game stuff
         return statChange;
     }
@@ -72,5 +96,13 @@ public class PlayerStats {
     
     public void clearChanges() {
         this.statChanges.clear();
+    }
+    
+    public UUID getUniqueId() {
+        return uniqueId;
+    }
+    
+    public void setUniqueId(UUID uniqueId) {
+        this.uniqueId = uniqueId;
     }
 }

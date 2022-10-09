@@ -3,7 +3,7 @@ package com.thenexusreborn.api;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.maven.*;
 import com.thenexusreborn.api.network.*;
-import com.thenexusreborn.api.network.cmd.NetworkCommand;
+import com.thenexusreborn.api.network.cmd.*;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
@@ -154,6 +154,17 @@ public abstract class NexusAPI {
                 }
             }
         })));
+    
+        networkCommandRegistry.register(new NetworkCommand("updatestat", (cmd, origin, args) -> {
+            UUID uuid = UUID.fromString(args[0]);
+            Stat.Info info = StatHelper.getInfo(args[1]);
+            StatOperator operator = StatOperator.valueOf(args[2]);
+            Object value = StatHelper.parseValue(info.getType(), args[3]);
+            NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
+            StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
+            getApi().getLogger().info("Update Stat From Network " + statChange);
+            profile.getStats().addChange(statChange);
+        }));
         
         networkManager.init("localhost", 3408);
         for (NetworkCommand netCmd : networkCommandRegistry.getObjects()) {
@@ -222,7 +233,6 @@ public abstract class NexusAPI {
         }
         
         getLogger().info("Pushed stat types to the database");
-        
         getLogger().info("Registered Stat types");
         
         preferenceRegistry = new PreferenceRegistry();

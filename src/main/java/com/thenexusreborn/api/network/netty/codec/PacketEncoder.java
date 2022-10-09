@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.network.netty.codec;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.network.netty.model.NexusPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,7 +9,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 public class PacketEncoder extends MessageToByteEncoder<NexusPacket> {
     @Override
     protected void encode(ChannelHandlerContext ctx, NexusPacket msg, ByteBuf out) {
-        System.out.println("Encoding " + msg.toString());
+        NexusAPI.getApi().getLogger().info("Encoding " + msg.toString());
         out.writeInt(msg.getOrigin().length());
         out.writeCharSequence(msg.getOrigin(), NexusPacket.CHARSET);
         out.writeInt(msg.getAction().length());
