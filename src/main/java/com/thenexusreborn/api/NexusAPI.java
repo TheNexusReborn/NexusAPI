@@ -42,7 +42,6 @@ public abstract class NexusAPI {
     protected final StorageManager ioManager;
     protected final PlayerManager playerManager;
     protected final ThreadFactory threadFactory;
-    protected final PlayerFactory playerFactory;
     protected final ServerManager serverManager;
     protected final Environment environment;
     protected final NetworkManager networkManager;
@@ -54,13 +53,12 @@ public abstract class NexusAPI {
     
     protected Database primaryDatabase;
     
-    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
+    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, ServerManager serverManager) {
         this.logger = logger;
         this.environment = environment;
         this.networkManager = new NetworkManager(context);
         this.playerManager = playerManager;
         this.threadFactory = threadFactory;
-        this.playerFactory = playerFactory;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.ioManager = new StorageManager(new DatabaseRegistry());
@@ -369,10 +367,6 @@ public abstract class NexusAPI {
     
     public Logger getLogger() {
         return logger;
-    }
-    
-    public PlayerFactory getPlayerFactory() {
-        return playerFactory;
     }
     
     public ServerManager getServerManager() {
