@@ -1,6 +1,7 @@
 package com.thenexusreborn.api;
 
 import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.maven.*;
 import com.thenexusreborn.api.network.*;
 import com.thenexusreborn.api.network.cmd.*;
@@ -46,6 +47,7 @@ public abstract class NexusAPI {
     protected final Environment environment;
     protected final NetworkManager networkManager;
     protected final PunishmentManager punishmentManager;
+    protected final LevelManager levelManager;
     protected Version version;
     
     protected StatRegistry statRegistry;
@@ -62,6 +64,7 @@ public abstract class NexusAPI {
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.ioManager = new StorageManager(new DatabaseRegistry());
+        this.levelManager = new LevelManager();
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -415,5 +418,9 @@ public abstract class NexusAPI {
             return (URLClassLoader) classLoader;
         }
         return null;
+    }
+    
+    public LevelManager getLevelManager() {
+        return levelManager;
     }
 }

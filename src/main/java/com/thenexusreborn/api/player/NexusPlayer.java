@@ -1,11 +1,10 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.storage.annotations.*;
-import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
-import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.StatOperator;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.util.UUID;
@@ -64,27 +63,6 @@ public class NexusPlayer extends NexusProfile {
     
     public PlayerProxy getPlayer() {
         return this.playerProxy;
-    }
-    
-    public int getLevel() {
-        double xp = (double) getStats().getValue("xp");
-        int playerLevel = 0;
-        for (int i = 1; i < LevelManager.levels.size(); i++) {
-            if (i == 1) {
-                if (xp > LevelManager.levels.get(i)) {
-                    playerLevel = i;
-                    continue;
-                } else {
-                    break;
-                }
-            }
-            
-            if (xp >= LevelManager.levels.get(i - 1) && xp < LevelManager.levels.get(i)) {
-                playerLevel = i - 1;
-            }
-        }
-        
-        return playerLevel;
     }
     
     public NexusPlayer getLastMessage() {
