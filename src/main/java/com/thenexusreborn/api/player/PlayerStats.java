@@ -33,7 +33,7 @@ public class PlayerStats {
         return stats;
     }
     
-    public Object getValue(String statName) {
+    public StatValue getValue(String statName) {
         Stat stat = get(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
@@ -47,10 +47,10 @@ public class PlayerStats {
                 }
                 
                 if (stat == null) {
-                    return info.getDefaultValue();
+                    return new StatValue(stat.getType(), info.getDefaultValue());
                 }
             } else {
-                return info.getDefaultValue();
+                return new StatValue(stat.getType(), info.getDefaultValue());
             }
         }
         

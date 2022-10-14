@@ -63,7 +63,7 @@ public final class StatHelper {
         Object newValue = null;
     
         if (stat.getType() == StatType.STRING_SET) {
-            Set<String> oldValue = (Set<String>) stat.getValue();
+            Set<String> oldValue = stat.getValue().getAsStringSet();
             if (oldValue == null) {
                 oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
             }
@@ -85,11 +85,11 @@ public final class StatHelper {
         } else if (operator == StatOperator.RESET) {
             newValue = getInfo(stat.getName()).getDefaultValue();
         } else {
-            Object oldValue = stat.getValue();
+            Object oldValue = stat.getValue().get();
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
             } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
-                double calculated = calculate(operator, (Number) stat.getValue(), (Number) value);
+                double calculated = calculate(operator, (Number) stat.getValue().get(), (Number) value);
                 if (stat.getType() == StatType.INTEGER) {
                     newValue = (int) calculated;
                 } else if (stat.getType() == StatType.DOUBLE) {
@@ -177,6 +177,10 @@ public final class StatHelper {
         
         if (raw == null || raw.equals("")) {
             return type.getDefaultValue();
+        }
+        
+        if (raw.equalsIgnoreCase("null")) {
+            return null;
         }
         
         try {

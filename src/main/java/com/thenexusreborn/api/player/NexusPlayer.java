@@ -74,7 +74,7 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public Tag getTag() {
-        String tag = (String) this.getStats().getValue("tag");
+        String tag = this.getStats().getValue("tag").getAsString();
         if (tag == null || tag.equalsIgnoreCase("null")) {
             return null;
         }

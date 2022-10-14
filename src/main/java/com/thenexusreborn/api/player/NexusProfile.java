@@ -39,7 +39,7 @@ public abstract class NexusProfile {
     }
     
     public long getFirstJoined() {
-        return (long) getStats().getValue("firstjoined");
+        return getStats().getValue("firstjoined").getAsLong();
     }
     
     public void setFirstJoined(long firstJoined) {
@@ -47,7 +47,7 @@ public abstract class NexusProfile {
     }
     
     public long getLastLogin() {
-        return (long) getStats().getValue("lastlogin");
+        return getStats().getValue("lastlogin").getAsLong();
     }
     
     public void setLastLogin(long lastLogin) {
@@ -84,7 +84,7 @@ public abstract class NexusProfile {
     }
     
     public long getLastLogout() {
-        return (long) getStats().getValue("lastlogout");
+        return getStats().getValue("lastlogout").getAsLong();
     }
     
     public void setLastLogout(long lastLogout) {
@@ -92,7 +92,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isPrealpha() {
-        return (boolean) getStats().getValue("prealpha");
+        return getStats().getValue("prealpha").getAsBoolean();
     }
     
     public void setPrealpha(boolean prealpha) {
@@ -100,7 +100,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isAlpha() {
-        return (boolean) getStats().getValue("alpha");
+        return getStats().getValue("alpha").getAsBoolean();
     }
     
     public void setAlpha(boolean alpha) {
@@ -108,7 +108,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isBeta() {
-        return (boolean) getStats().getValue("beta");
+        return getStats().getValue("beta").getAsBoolean();
     }
     
     public void setBeta(boolean beta) {
@@ -135,7 +135,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isPrivateAlpha() {
-        return (boolean) getStats().getValue("privatealpha");
+        return getStats().getValue("privatealpha").getAsBoolean();
     }
     
     public void setPrivateAlpha(boolean value) {
@@ -186,7 +186,7 @@ public abstract class NexusProfile {
     }
     
     public boolean isOnline() {
-        return (boolean) getStats().getValue("online");
+        return getStats().getValue("online").getAsBoolean();
     }
     
     public void setOnline(boolean online) {
@@ -218,7 +218,7 @@ public abstract class NexusProfile {
     }
     
     public String getServer() {
-        return (String) getStats().getValue("server");
+        return getStats().getValue("server").getAsString();
     }
     
     public void setServer(String server) {
