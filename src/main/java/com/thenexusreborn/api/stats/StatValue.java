@@ -2,7 +2,7 @@ package com.thenexusreborn.api.stats;
 
 import java.util.Set;
 
-public class StatValue {
+public class StatValue implements Cloneable {
     protected StatType type;
     protected Object value;
     
@@ -55,5 +55,10 @@ public class StatValue {
     
     public Set<String> getAsStringSet() {
         return (Set<String>) value;
+    }
+    
+    @Override
+    public StatValue clone() {
+        return new StatValue(this.type, this.value);
     }
 }

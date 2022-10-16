@@ -48,7 +48,7 @@ public class PlayerStats {
     
         for (StatChange statChange : this.findAllChanges()) {
             if (statChange.getStatName().equalsIgnoreCase(stat.getName())) {
-                StatHelper.changeStat(stat, statChange.getOperator(), statChange.getValue());
+                StatHelper.changeStat(stat, statChange.getOperator(), statChange.getValue().get());
             }
         }
     

@@ -50,7 +50,11 @@ public class Stat implements Cloneable {
         this.name = info.getName();
         this.created = created;
         this.modified = modified;
-        this.value = new StatValue(info.getType(), value);
+        if (value instanceof StatValue) {
+            this.value = (StatValue) value;
+        } else {
+            this.value = new StatValue(info.getType(), value);
+        }
     }
     
     public UUID getUuid() {
@@ -160,7 +164,7 @@ public class Stat implements Cloneable {
     
     @Override
     public Stat clone() {
-        return new Stat(this.getInfo(), 0, this.uuid, this.value, System.currentTimeMillis(), System.currentTimeMillis());
+        return new Stat(this.getInfo(), 0, this.uuid, this.value.get(), System.currentTimeMillis(), System.currentTimeMillis());
     }
     
     @TableInfo(value = "statinfo")

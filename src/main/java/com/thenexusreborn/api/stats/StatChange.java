@@ -62,7 +62,7 @@ public class StatChange implements Comparable<StatChange> {
         return getInfo().getName();
     }
     
-    public Object getValue() {
+    public StatValue getValue() {
         return value;
     }
     

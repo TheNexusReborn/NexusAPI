@@ -132,7 +132,7 @@ public final class StatHelper {
                     stat.setValue(stat.getType().getDefaultValue());
                 }
         
-                changeStat(stat, statChange.getOperator(), statChange.getValue());
+                changeStat(stat, statChange.getOperator(), statChange.getValue().get());
                 if (statChange.getId() > 0) {
                     NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
@@ -177,6 +177,10 @@ public final class StatHelper {
         
         if (raw == null || raw.equals("") || raw.equalsIgnoreCase("null")) {
             return type.getDefaultValue();
+        }
+        
+        if (raw.startsWith(type.name() + ":")) {
+            raw = raw.split(":")[1];
         }
         
         try {
