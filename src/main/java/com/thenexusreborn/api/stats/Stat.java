@@ -202,10 +202,16 @@ public class Stat implements Cloneable {
         }
     
         public Object getDefaultValue() {
+            if (defaultValue == null) {
+                this.defaultValue = new StatValue(type, type.getDefaultValue());
+            }
             return defaultValue.get();
         }
     
         public void setDefaultValue(Object defaultValue) {
+            if (this.defaultValue == null) {
+                this.defaultValue = new StatValue(type, type.getDefaultValue());
+            }
             this.defaultValue.set(defaultValue);
         }
     

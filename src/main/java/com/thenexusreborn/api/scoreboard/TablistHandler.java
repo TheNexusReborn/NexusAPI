@@ -39,9 +39,14 @@ public abstract class TablistHandler {
     }
     
     public void createPlayerTeam(NexusPlayer nexusPlayer) {
-        ITeam team = scoreboard.registerNewTeam(getPlayerTeamName(nexusPlayer));
-        team.addEntry(nexusPlayer.getName());
-        setDisplayOptions(nexusPlayer, team);
-        this.playerTeams.put(nexusPlayer.getUniqueId(), team);
+        System.out.println("Create Player Team: " + nexusPlayer.getName());
+        try {
+            ITeam team = scoreboard.registerNewTeam(getPlayerTeamName(nexusPlayer));
+            team.addEntry(nexusPlayer.getName());
+            setDisplayOptions(nexusPlayer, team);
+            this.playerTeams.put(nexusPlayer.getUniqueId(), team);
+        } catch (Exception e) {
+            System.out.println("Error while creating a player team: " + e.getMessage());
+        }
     }
 }
