@@ -175,12 +175,8 @@ public final class StatHelper {
             return null;
         }
         
-        if (raw == null || raw.equals("")) {
+        if (raw == null || raw.equals("") || raw.equalsIgnoreCase("null")) {
             return type.getDefaultValue();
-        }
-        
-        if (raw.equalsIgnoreCase("null")) {
-            return null;
         }
         
         try {

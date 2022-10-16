@@ -232,10 +232,10 @@ public abstract class NexusAPI {
         statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false);
         statRegistry.register("privatealpha", "Private Alpha", StatType.BOOLEAN, false);
         statRegistry.register("beta", "Beta", StatType.BOOLEAN, false);
-        statRegistry.register("tag", "Tag", StatType.STRING, "");
+        statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
-        statRegistry.register("server", "Server", StatType.STRING, "");
-        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, new HashSet<>());
+        statRegistry.register("server", "Server", StatType.STRING, "null");
+        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, "null");
         registerStats(statRegistry);
         
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
