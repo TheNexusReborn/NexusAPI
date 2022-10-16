@@ -7,6 +7,9 @@ public class StatValueCodec extends SqlCodec<StatValue> {
     @Override
     public String encode(Object object) {
         StatValue statValue = (StatValue) object;
+        if (statValue == null) {
+            return "";
+        }
         String encoded = statValue.getType() + ":";
         if (statValue.get() == null) {
             return encoded + "null";
@@ -17,6 +20,9 @@ public class StatValueCodec extends SqlCodec<StatValue> {
     
     @Override
     public StatValue decode(String encoded) {
+        if (encoded == null || encoded.equals("")) {
+            return null;
+        }
         String[] split = encoded.split(":");
         if (split.length != 2) {
             return null;

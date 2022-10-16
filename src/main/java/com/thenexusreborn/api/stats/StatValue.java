@@ -10,7 +10,11 @@ public class StatValue {
     
     public StatValue(StatType type, Object value) {
         this.type = type;
-        this.value = value;
+        if (value instanceof StatValue) {
+            this.value = ((StatValue) value).get();
+        } else {
+            this.value = value;
+        }
     }
     
     public StatType getType() {

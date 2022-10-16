@@ -37,20 +37,10 @@ public class PlayerStats {
         Stat stat = get(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
+            stat = new Stat(info, this.uniqueId, System.currentTimeMillis());
             
-            if (this.statChanges.size() > 0) {
-                for (StatChange statChange : this.statChanges) {
-                    if (statChange.getStatName().equalsIgnoreCase(info.getName())) {
-                        stat = new Stat(info, this.uniqueId, System.currentTimeMillis());
-                        break;
-                    }
-                }
-                
-                if (stat == null) {
-                    return new StatValue(stat.getType(), info.getDefaultValue());
-                }
-            } else {
-                return new StatValue(stat.getType(), info.getDefaultValue());
+            if (this.statChanges.size() == 0) {
+                return new StatValue(info.getType(), info.getDefaultValue());
             }
         }
         

@@ -113,6 +113,10 @@ public class Database {
                         }
                     }
                 }
+                
+                if (data == null) {
+                    continue;
+                }
     
                 column.getField().setAccessible(true);
                 column.getField().set(object, data);
@@ -515,7 +519,7 @@ public class Database {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();;
+                e.printStackTrace();
             }
         }
     }

@@ -13,7 +13,7 @@ public class Stat implements Cloneable {
     private UUID uuid;
     @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
     private StatValue value;
-    @ColumnInfo(type = "varchar(1000)")
+    @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
     private StatValue fakedValue;
     private long created;
     private long modified;
@@ -62,6 +62,9 @@ public class Stat implements Cloneable {
     }
     
     public StatValue getValue() {
+        if (this.value == null) {
+            this.value = new StatValue(getType(), getDefaultValue());
+        }
         return value;
     }
     
