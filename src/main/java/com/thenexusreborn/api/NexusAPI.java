@@ -51,7 +51,7 @@ public abstract class NexusAPI {
     protected Version version;
     
     protected StatRegistry statRegistry;
-    protected PreferenceRegistry preferenceRegistry;
+    protected ToggleRegistry toggleRegistry;
     
     protected Database primaryDatabase;
     
@@ -245,23 +245,23 @@ public abstract class NexusAPI {
         getLogger().info("Pushed stat types to the database");
         getLogger().info("Registered Stat types");
         
-        preferenceRegistry = new PreferenceRegistry();
-        preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
-        preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
-        preferenceRegistry.register("fly", "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
+        toggleRegistry = new ToggleRegistry();
+        toggleRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
+        toggleRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+        toggleRegistry.register("fly", "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
-        registerPreferences(preferenceRegistry);
+        registerToggles(toggleRegistry);
         
-        List<Toggle.Info> preferenceInfos = primaryDatabase.get(Toggle.Info.class);
-        for (Toggle.Info preferenceInfo : preferenceInfos) {
-            preferenceRegistry.register(preferenceInfo);
+        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
+        for (Toggle.Info toggleInfo : toggleInfos) {
+            toggleRegistry.register(toggleInfo);
         }
         
-        getLogger().info("Registered preference types");
-        for (Toggle.Info object : preferenceRegistry.getObjects()) {
+        getLogger().info("Registered toggle types");
+        for (Toggle.Info object : toggleRegistry.getObjects()) {
             getPrimaryDatabase().push(object);
         }
-        getLogger().info("Pushed preference types to the database");
+        getLogger().info("Pushed toggle types to the database");
         
         serverManager.setupCurrentServer();
         getLogger().info("Set up the current server");
@@ -313,8 +313,8 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
         
-        List<Row> preferencesRows = database.executeQuery("select `name`, `uuid`, `value` from preferences;");
-        for (Row row : preferencesRows) {
+        List<Row> togglesRows = database.executeQuery("select `name`, `uuid`, `value` from toggles;");
+        for (Row row : togglesRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
             boolean value = row.getBoolean("value");
@@ -330,7 +330,7 @@ public abstract class NexusAPI {
                 player.setFly(value);
             }
         }
-        getLogger().info("Loaded preference info for player profiles: Incognito and Vanish");
+        getLogger().info("Loaded toggle info for player profiles: Incognito, Vanish and Fly");
         
         for (IPEntry entry : playerManager.getIpHistory()) {
             CachedPlayer player = playerManager.getCachedPlayer(entry.getUuid());
@@ -349,7 +349,7 @@ public abstract class NexusAPI {
     
     public abstract void registerNetworkCommands(NetworkCommandRegistry registry);
     
-    public abstract void registerPreferences(PreferenceRegistry registry);
+    public abstract void registerToggles(ToggleRegistry registry);
     
     public Version getVersion() {
         return version;
@@ -408,8 +408,8 @@ public abstract class NexusAPI {
         return statRegistry;
     }
     
-    public PreferenceRegistry getPreferenceRegistry() {
-        return preferenceRegistry;
+    public ToggleRegistry getToggleRegistry() {
+        return toggleRegistry;
     }
     
     public URLClassLoader getLoader() {

@@ -58,8 +58,8 @@ public class PlayerObjectHandler extends ObjectHandler {
     public void afterSave() {
         NexusPlayer player = (NexusPlayer) object;
     
-        for (Toggle preference : player.getToggles().findAll()) {
-            database.push(preference);
+        for (Toggle toggle : player.getToggles().findAll()) {
+            database.push(toggle);
         }
     
         for (Stat stat : player.getStats().findAll()) {

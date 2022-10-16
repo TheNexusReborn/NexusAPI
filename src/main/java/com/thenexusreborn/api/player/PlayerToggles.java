@@ -12,14 +12,14 @@ public class PlayerToggles {
         return this.toggles.get(name.toLowerCase());
     }
     
-    public void add(Toggle preference) {
-        this.toggles.put(preference.getInfo().getName().toLowerCase(), preference);
+    public void add(Toggle toggle) {
+        this.toggles.put(toggle.getInfo().getName().toLowerCase(), toggle);
     }
     
     public void setValue(String name, boolean value) {
-        Toggle preference = get(name);
-        if (preference != null) {
-            preference.setValue(value);
+        Toggle toggle = get(name);
+        if (toggle != null) {
+            toggle.setValue(value);
         }
     }
     
@@ -28,7 +28,7 @@ public class PlayerToggles {
         if (toggle != null) {
             return toggle.getValue();
         } else {
-            Info info = NexusAPI.getApi().getPreferenceRegistry().get(name.toLowerCase());
+            Info info = NexusAPI.getApi().getToggleRegistry().get(name.toLowerCase());
             if (info != null) {
                 return info.getDefaultValue();
             } else {
@@ -37,10 +37,10 @@ public class PlayerToggles {
         }
     }
     
-    public void setAll(List<Toggle> preferences) {
+    public void setAll(List<Toggle> toggles) {
         this.toggles.clear();
-        for (Toggle preference : preferences) {
-            add(preference);
+        for (Toggle toggle : toggles) {
+            add(toggle);
         }
     }
     

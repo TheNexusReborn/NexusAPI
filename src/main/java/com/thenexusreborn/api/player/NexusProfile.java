@@ -228,4 +228,8 @@ public abstract class NexusProfile {
     public PlayerToggles getToggles() {
         return playerToggles;
     }
+    
+    public String getColoredName() {
+        return getRanks().get().getColor() + getName();
+    }
 }
