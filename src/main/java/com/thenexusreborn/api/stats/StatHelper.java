@@ -145,11 +145,11 @@ public final class StatHelper {
     
     public static String serializeStatValue(StatType type, Object value) {
         if (type == null) {
-            return "";
+            return "null";
         }
         
         if (value == null) {
-            return "";
+            return "null";
         }
         
         if (type == StatType.STRING_SET) {

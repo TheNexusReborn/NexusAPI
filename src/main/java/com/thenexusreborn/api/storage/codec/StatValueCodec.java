@@ -14,7 +14,7 @@ public class StatValueCodec extends SqlCodec<StatValue> {
         if (statValue.get() == null) {
             return encoded + "null";
         } else {
-            return encoded + statValue.get().toString();
+            return encoded + StatHelper.serializeStatValue(statValue.getType(), statValue.get());
         }
     }
     
