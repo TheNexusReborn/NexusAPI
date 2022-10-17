@@ -1,31 +1,35 @@
 package com.thenexusreborn.api;
 
-import com.thenexusreborn.api.data.IOManager;
-import com.thenexusreborn.api.data.codec.RanksCodec;
-import com.thenexusreborn.api.data.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.levels.LevelManager;
+import com.thenexusreborn.api.maven.*;
 import com.thenexusreborn.api.network.*;
-import com.thenexusreborn.api.network.cmd.NetworkCommand;
+import com.thenexusreborn.api.network.cmd.*;
+import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
 import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
+import com.thenexusreborn.api.storage.StorageManager;
+import com.thenexusreborn.api.storage.codec.RanksCodec;
+import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.thread.ThreadFactory;
-import com.thenexusreborn.api.tournament.Tournament;
-import com.thenexusreborn.api.util.*;
 
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.*;
 
+@MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
+@MavenLibrary(groupId = "com.google.code.gson", artifactId = "gson", version = "2.9.0")
+//@MavenLibrary(groupId = "io.netty", artifactId = "netty-all", version = "4.1.82.Final")
 public abstract class NexusAPI {
     private static NexusAPI instance;
-    public static final Phase PHASE = Phase.ALPHA;
+    public static final Phase PHASE = Phase.PRIVATE_ALPHA;
     
     public static void setApi(NexusAPI api) {
         instance = api;
@@ -36,32 +40,31 @@ public abstract class NexusAPI {
     }
     
     protected final Logger logger;
-    protected final IOManager ioManager;
+    protected final StorageManager ioManager;
     protected final PlayerManager playerManager;
     protected final ThreadFactory threadFactory;
-    protected final PlayerFactory playerFactory;
     protected final ServerManager serverManager;
     protected final Environment environment;
     protected final NetworkManager networkManager;
     protected final PunishmentManager punishmentManager;
-    protected Tournament tournament;
+    protected final LevelManager levelManager;
     protected Version version;
     
     protected StatRegistry statRegistry;
-    protected PreferenceRegistry preferenceRegistry;
+    protected ToggleRegistry toggleRegistry;
     
     protected Database primaryDatabase;
     
-    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, PlayerFactory playerFactory, ServerManager serverManager) {
-        this.environment = environment;
+    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, ServerManager serverManager) {
         this.logger = logger;
+        this.environment = environment;
         this.networkManager = new NetworkManager(context);
         this.playerManager = playerManager;
         this.threadFactory = threadFactory;
-        this.playerFactory = playerFactory;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
-        this.ioManager = new IOManager(new DatabaseRegistry());
+        this.ioManager = new StorageManager(new DatabaseRegistry());
+        this.levelManager = new LevelManager();
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -83,9 +86,10 @@ public abstract class NexusAPI {
     
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
+        LibraryLoader.loadAll(NexusAPI.class, getLoader());
         
         try {
-            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements();) {
+            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {
                 Driver driver = e.nextElement();
                 DriverManager.deregisterDriver(driver);
             }
@@ -102,27 +106,26 @@ public abstract class NexusAPI {
         networkCommandRegistry.register(new NetworkCommand("updaterank", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             String action = args[1];
-            Rank rank = Rank.valueOf(args[2]);
+            Rank rank = Rank.parseRank(args[2]);
             long expire = args.length > 3 ? Long.parseLong(args[3]) : -1;
             
             NexusPlayer nexusPlayer = getPlayerManager().getNexusPlayer(uuid);
             CachedPlayer cachedPlayer = getPlayerManager().getCachedPlayer(uuid);
             if (nexusPlayer != null) {
                 if (action.equals("add")) {
-                    nexusPlayer.addRank(rank, expire);
+                    nexusPlayer.getRanks().add(rank, expire);
                 } else if (action.equals("remove")) {
-                    nexusPlayer.removeRank(rank);
+                    nexusPlayer.getRanks().remove(rank);
                 } else if (action.equals("set")) {
-                    nexusPlayer.setRank(rank, expire);
+                    nexusPlayer.getRanks().set(rank, expire);
                 }
             } else if (cachedPlayer != null) {
                 if (action.equals("add")) {
-                    cachedPlayer.getRanks().put(rank, expire);
+                    cachedPlayer.getRanks().add(rank, expire);
                 } else if (action.equals("remove")) {
                     cachedPlayer.getRanks().remove(rank);
                 } else if (action.equals("set")) {
-                    cachedPlayer.getRanks().clear();
-                    cachedPlayer.getRanks().put(rank, expire);
+                    cachedPlayer.getRanks().set(rank, expire);
                 }
             }
         }));
@@ -152,6 +155,26 @@ public abstract class NexusAPI {
                 }
             }
         })));
+    
+        networkCommandRegistry.register(new NetworkCommand("updatestat", (cmd, origin, args) -> {
+            UUID uuid = UUID.fromString(args[0]);
+            Stat.Info info = StatHelper.getInfo(args[1]);
+            StatOperator operator = StatOperator.valueOf(args[2]);
+            Object value = StatHelper.parseValue(info.getType(), args[3]);
+            NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
+            StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
+            profile.getStats().addChange(statChange);
+        }));
+        
+        networkCommandRegistry.register(new NetworkCommand("playercreate", (cmd, origin, args) -> {
+            UUID uuid = UUID.fromString(args[0]);
+            try {
+                NexusPlayer nexusPlayer = getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uuid).get(0);
+                getPlayerManager().getCachedPlayers().put(nexusPlayer.getUniqueId(), new CachedPlayer(nexusPlayer));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }));
         
         networkManager.init("localhost", 3408);
         for (NetworkCommand netCmd : networkCommandRegistry.getObjects()) {
@@ -169,14 +192,14 @@ public abstract class NexusAPI {
                 database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
                 database.registerClass(StatChange.class);
-                database.registerClass(Preference.Info.class);
-                database.registerClass(Preference.class);
+                database.registerClass(Toggle.Info.class);
+                database.registerClass(Toggle.class);
                 database.registerClass(NexusPlayer.class);
                 database.registerClass(ServerInfo.class);
                 database.registerClass(GameInfo.class);
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
-                database.registerClass(Tournament.class);
+                database.registerClass(Nickname.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
@@ -188,11 +211,11 @@ public abstract class NexusAPI {
         
         this.ioManager.setup();
         getLogger().info("Successfully setup the database tables");
-    
+        
         statRegistry = StatHelper.getRegistry();
         
         List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
-    
+        
         for (Info statInfo : statInfos) {
             statRegistry.register(statInfo);
         }
@@ -207,37 +230,38 @@ public abstract class NexusAPI {
         statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L);
         statRegistry.register("prealpha", "PreAlpha", StatType.BOOLEAN, false);
         statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false);
+        statRegistry.register("privatealpha", "Private Alpha", StatType.BOOLEAN, false);
         statRegistry.register("beta", "Beta", StatType.BOOLEAN, false);
-        statRegistry.register("tag", "Tag", StatType.STRING, "");
+        statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
-        statRegistry.register("server", "Server", StatType.STRING, "");
-        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, new HashSet<>());
+        statRegistry.register("server", "Server", StatType.STRING, "null");
+        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, "null");
         registerStats(statRegistry);
-    
+        
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
             getPrimaryDatabase().push(statInfo);
         }
         
         getLogger().info("Pushed stat types to the database");
-        
         getLogger().info("Registered Stat types");
         
-        preferenceRegistry = new PreferenceRegistry();
-        preferenceRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
-        preferenceRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+        toggleRegistry = new ToggleRegistry();
+        toggleRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
+        toggleRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
+        toggleRegistry.register("fly", "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
-        registerPreferences(preferenceRegistry);
-    
-        List<Preference.Info> preferenceInfos = primaryDatabase.get(Preference.Info.class);
-        for (Preference.Info preferenceInfo : preferenceInfos) {
-            preferenceRegistry.register(preferenceInfo);
+        registerToggles(toggleRegistry);
+        
+        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
+        for (Toggle.Info toggleInfo : toggleInfos) {
+            toggleRegistry.register(toggleInfo);
         }
-    
-        getLogger().info("Registered preference types");
-        for (Preference.Info object : preferenceRegistry.getObjects()) {
+        
+        getLogger().info("Registered toggle types");
+        for (Toggle.Info object : toggleRegistry.getObjects()) {
             getPrimaryDatabase().push(object);
         }
-        getLogger().info("Pushed preference types to the database");
+        getLogger().info("Pushed toggle types to the database");
         
         serverManager.setupCurrentServer();
         getLogger().info("Set up the current server");
@@ -247,14 +271,6 @@ public abstract class NexusAPI {
         }
         getLogger().info("Cached punishments in memory");
         
-        List<Tournament> tournaments = getPrimaryDatabase().get(Tournament.class);
-        for (Tournament t : tournaments) {
-            if (t.isActive()) {
-                this.tournament = t;
-                getLogger().info("Loaded data for tournament: " + tournament.getName());
-            }
-        }
-        
         playerManager.getIpHistory().addAll(getPrimaryDatabase().get(IPEntry.class));
         getLogger().info("Loaded IP History");
         
@@ -262,12 +278,17 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
             CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), UUID.fromString(row.getString("uniqueId")), row.getString("name"));
-            cachedPlayer.setRanks(new RanksCodec().decode(row.getString("ranks")));
+            String ranks = row.getString("ranks");
+            if (ranks == null || ranks.equals("")) {
+                getLogger().severe("Found an invalid rank entry for player " + cachedPlayer.getUniqueId().toString());
+                continue;
+            }
+            cachedPlayer.getRanks().setAll(new RanksCodec().decode(ranks));
             playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
         
-        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name`='server' or `name`='online' or `name`='lastlogout';");
+        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','unlockedtags','privatealpha');");
         for (Row row : statsRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
@@ -275,33 +296,47 @@ public abstract class NexusAPI {
             Stat.Info info = StatHelper.getInfo(name);
             Object value = StatHelper.parseValue(info.getType(), rawValue);
             CachedPlayer player = playerManager.getCachedPlayer(uuid);
+            if (player == null) {
+                continue;
+            }
             if (name.equalsIgnoreCase("server")) {
                 player.setServer((String) value);
             } else if (name.equalsIgnoreCase("online")) {
                 player.setOnline((boolean) value);
             } else if (name.equalsIgnoreCase("lastlogout")) {
                 player.setLastLogout((long) value);
+            } else if (name.equalsIgnoreCase("unlockedtags")) {
+                player.setUnlockedTags((Set<String>) value);
+            } else if (name.equalsIgnoreCase("privatealpha")) {
+                player.setPrivateAlpha((boolean) value);
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
         
-        List<Row> preferencesRows = database.executeQuery("select `name`, `uuid`, `value` from preferences where `name`='vanish' or `name`='incognito'");
-        for (Row row : preferencesRows) {
+        List<Row> togglesRows = database.executeQuery("select `name`, `uuid`, `value` from toggles;");
+        for (Row row : togglesRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
             boolean value = row.getBoolean("value");
             CachedPlayer player = playerManager.getCachedPlayers().get(uuid);
+            if (player == null) {
+                continue;
+            }
             if (name.equalsIgnoreCase("vanish")) {
                 player.setVanish(value);
             } else if (name.equalsIgnoreCase("incognito")) {
                 player.setIncognito(value);
+            } else if (name.equalsIgnoreCase("fly")) {
+                player.setFly(value);
             }
         }
-        getLogger().info("Loaded preference info for player profiles: Incognito and Vanish");
+        getLogger().info("Loaded toggle info for player profiles: Incognito, Vanish and Fly");
         
         for (IPEntry entry : playerManager.getIpHistory()) {
             CachedPlayer player = playerManager.getCachedPlayer(entry.getUuid());
-            player.getIpHistory().add(entry);
+            if (player != null) {
+                player.getIpHistory().add(entry);
+            }
         }
         getLogger().info("Sorted IP History for player profiles.");
         
@@ -314,11 +349,7 @@ public abstract class NexusAPI {
     
     public abstract void registerNetworkCommands(NetworkCommandRegistry registry);
     
-    public abstract void registerPreferences(PreferenceRegistry registry);
-    
-    public void setTournament(Tournament tournament) {
-        this.tournament = tournament;
-    }
+    public abstract void registerToggles(ToggleRegistry registry);
     
     public Version getVersion() {
         return version;
@@ -341,10 +372,6 @@ public abstract class NexusAPI {
         return logger;
     }
     
-    public PlayerFactory getPlayerFactory() {
-        return playerFactory;
-    }
-    
     public ServerManager getServerManager() {
         return serverManager;
     }
@@ -357,11 +384,7 @@ public abstract class NexusAPI {
         return punishmentManager;
     }
     
-    public Tournament getTournament() {
-        return tournament;
-    }
-    
-    public IOManager getIOManager() {
+    public StorageManager getIOManager() {
         return ioManager;
     }
     
@@ -385,7 +408,19 @@ public abstract class NexusAPI {
         return statRegistry;
     }
     
-    public PreferenceRegistry getPreferenceRegistry() {
-        return preferenceRegistry;
+    public ToggleRegistry getToggleRegistry() {
+        return toggleRegistry;
+    }
+    
+    public URLClassLoader getLoader() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        if (classLoader instanceof URLClassLoader) {
+            return (URLClassLoader) classLoader;
+        }
+        return null;
+    }
+    
+    public LevelManager getLevelManager() {
+        return levelManager;
     }
 }

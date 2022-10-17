@@ -63,7 +63,7 @@ public final class StatHelper {
         Object newValue = null;
     
         if (stat.getType() == StatType.STRING_SET) {
-            Set<String> oldValue = (Set<String>) stat.getValue();
+            Set<String> oldValue = stat.getValue().getAsStringSet();
             if (oldValue == null) {
                 oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
             }
@@ -85,11 +85,11 @@ public final class StatHelper {
         } else if (operator == StatOperator.RESET) {
             newValue = getInfo(stat.getName()).getDefaultValue();
         } else {
-            Object oldValue = stat.getValue();
+            Object oldValue = stat.getValue().get();
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
             } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
-                double calculated = calculate(operator, (Number) stat.getValue(), (Number) value);
+                double calculated = calculate(operator, (Number) stat.getValue().get(), (Number) value);
                 if (stat.getType() == StatType.INTEGER) {
                     newValue = (int) calculated;
                 } else if (stat.getType() == StatType.DOUBLE) {
@@ -109,13 +109,17 @@ public final class StatHelper {
     public static void consolidateStats(NexusPlayer player) {
         try {
             List<StatChange> statChanges = NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString());
-            statChanges.addAll(player.getStatChanges());
+            statChanges.addAll(player.getStats().findAllChanges());
             for (StatChange statChange : new TreeSet<>(statChanges)) {
+                if (statChange.getId() == 0) {
+                    NexusAPI.getApi().getLogger().info("Stat Change for stat " + statChange.getStatName() + " had an ID of 0");
+                    continue;
+                }
                 Stat stat = player.getStats().get(statChange.getStatName());
                 if (stat == null) {
                     Info info = getInfo(statChange.getStatName());
                     stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
-                    player.addStat(stat);
+                    player.getStats().add(stat);
                 }
         
                 if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
@@ -128,12 +132,12 @@ public final class StatHelper {
                     stat.setValue(stat.getType().getDefaultValue());
                 }
         
-                changeStat(stat, statChange.getOperator(), statChange.getValue());
+                changeStat(stat, statChange.getOperator(), statChange.getValue().get());
                 if (statChange.getId() > 0) {
                     NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
             }
-            player.getStatChanges().clear();
+            player.getStats().clearChanges();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -141,14 +145,17 @@ public final class StatHelper {
     
     public static String serializeStatValue(StatType type, Object value) {
         if (type == null) {
-            return "";
+            return "null";
         }
         
         if (value == null) {
-            return "";
+            return "null";
         }
         
         if (type == StatType.STRING_SET) {
+            if (value instanceof String) {
+                return (String) value;
+            }
             StringBuilder sb = new StringBuilder();
             Iterator<String> iterator = ((Set<String>) value).iterator();
             while (iterator.hasNext()) {
@@ -171,8 +178,12 @@ public final class StatHelper {
             return null;
         }
         
-        if (raw == null || raw.equals("")) {
+        if (raw == null || raw.equals("") || raw.equalsIgnoreCase("null")) {
             return type.getDefaultValue();
+        }
+        
+        if (raw.startsWith(type.name() + ":")) {
+            raw = raw.split(":")[1];
         }
         
         try {

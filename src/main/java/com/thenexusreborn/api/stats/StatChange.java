@@ -1,42 +1,57 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.StatInfoCodec;
-import com.thenexusreborn.api.data.handler.StatObjectHandler;
 import com.thenexusreborn.api.stats.Stat.Info;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.*;
 
 import java.util.*;
 
-@TableInfo(value = "statchanges", handler = StatObjectHandler.class)
+@TableInfo(value = "statchanges")
 public class StatChange implements Comparable<StatChange> {
-    @ColumnInfo(type = "varchar(100)", codec = StatInfoCodec.class)
-    private Info info;
     
     @Primary
     private long id;
     private UUID uuid;
-    @ColumnInfo(type = "varchar(1000)")
-    private Object value;
+    private String name;
+    @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
+    private StatValue value;
+    private boolean fake;
     private StatOperator operator;
     private long timestamp;
+    
+    @ColumnIgnored 
+    private Info info;
     
     private StatChange() {}
     
     public StatChange(Info info, UUID uuid, Object value, StatOperator operator, long timestamp) {
-        this.info = info;
-        this.uuid = uuid;
-        this.value = value;
-        this.operator = operator;
-        this.timestamp = timestamp;
+        this(info, 0, uuid, value, operator, false, timestamp);
     }
     
     public StatChange(Info info, long id, UUID uuid, Object value, StatOperator operator, long timestamp) {
+        this(info, uuid, value, operator, false, timestamp);
+    }
+    
+    public StatChange(Info info, UUID uuid, Object value, StatOperator operator, boolean fake, long timestamp) {
+        this(info, 0, uuid, value, operator, fake, timestamp);
+    }
+    
+    public StatChange(Info info, long id, UUID uuid, Object value, StatOperator operator, boolean fake, long timestamp) {
         this.info = info;
         this.id = id;
         this.uuid = uuid;
-        this.value = value;
+        this.name = info.getName();
+        this.value = new StatValue(info.getType(), value);
         this.operator = operator;
         this.timestamp = timestamp;
+        this.fake = fake;
+    }
+    
+    public Info getInfo() {
+        if (this.info == null) {
+            this.info = StatHelper.getInfo(this.name);
+        } 
+        return this.info;
     }
     
     public UUID getUuid() {
@@ -44,10 +59,10 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public String getStatName() {
-        return info.getName();
+        return getInfo().getName();
     }
     
-    public Object getValue() {
+    public StatValue getValue() {
         return value;
     }
     
@@ -68,7 +83,11 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public StatType getType() {
-        return info.getType();
+        return getInfo().getType();
+    }
+    
+    public boolean isFake() {
+        return fake;
     }
     
     @Override
@@ -94,5 +113,18 @@ public class StatChange implements Comparable<StatChange> {
     @Override
     public int hashCode() {
         return Objects.hash(id, uuid, info.getName(), info.getType(), value, operator, timestamp);
+    }
+    
+    @Override
+    public String toString() {
+        return "StatChange{" +
+                "info=" + info +
+                ", id=" + id +
+                ", uuid=" + uuid +
+                ", value=" + value +
+                ", fake=" + fake +
+                ", operator=" + operator +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

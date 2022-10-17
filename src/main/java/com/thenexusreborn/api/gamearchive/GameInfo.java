@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.gamearchive;
 
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.StringArrayCodec;
-import com.thenexusreborn.api.data.handler.GamesObjectHandler;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.StringArrayCodec;
+import com.thenexusreborn.api.storage.handler.GamesObjectHandler;
 
 import java.util.*;
 

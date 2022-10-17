@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.scoreboard;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.NexusPlayer;
 import com.thenexusreborn.api.scoreboard.wrapper.ITeam;
 
@@ -39,9 +40,13 @@ public abstract class TablistHandler {
     }
     
     public void createPlayerTeam(NexusPlayer nexusPlayer) {
-        ITeam team = scoreboard.registerNewTeam(getPlayerTeamName(nexusPlayer));
-        team.addEntry(nexusPlayer.getName());
-        setDisplayOptions(nexusPlayer, team);
-        this.playerTeams.put(nexusPlayer.getUniqueId(), team);
+        try {
+            ITeam team = scoreboard.registerNewTeam(getPlayerTeamName(nexusPlayer));
+            team.addEntry(nexusPlayer.getName());
+            setDisplayOptions(nexusPlayer, team);
+            this.playerTeams.put(nexusPlayer.getUniqueId(), team);
+        } catch (Exception e) {
+            NexusAPI.getApi().getLogger().severe("Error while creating a player team: " + e.getMessage());
+        }
     }
 }

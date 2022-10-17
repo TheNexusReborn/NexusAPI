@@ -95,6 +95,30 @@ public abstract class PlayerManager {
             });
         }
     }
+
+    public NexusProfile getProfile(UUID uuid) {
+        if (this.players.containsKey(uuid)) {
+            return this.players.get(uuid);
+        } else {
+            return this.cachedPlayers.get(uuid);
+        }
+    }
+
+    public NexusProfile getProfile(String name) {
+        for (NexusPlayer player : new ArrayList<>(this.players.values())) {
+            if (player.getName().equalsIgnoreCase(name)) {
+                return player;
+            }
+        }
+
+        for (CachedPlayer player : new ArrayList<>(this.cachedPlayers.values())) {
+            if (player.getName().equalsIgnoreCase(name)) {
+                return player;
+            }
+        }
+
+        return null;
+    }
     
     @Deprecated
     public void getNexusPlayerAsync(String name, Consumer<NexusPlayer> action) {

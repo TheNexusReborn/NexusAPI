@@ -47,7 +47,7 @@ public final class StaffChat {
                 }
             }
     
-            displayName = nexusPlayer.getRank().getColor() + nexusPlayer.getName();
+            displayName = nexusPlayer.getRanks().get().getColor() + nexusPlayer.getName();
             if (event.equals("chat")) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 2; i < args.length; i++) {
@@ -56,7 +56,7 @@ public final class StaffChat {
         
                 String message = sb.toString().trim();
                 format = "{prefix} {displayName}&8: &f" + message;
-                displayName = nexusPlayer.getRank().getPrefix() + nexusPlayer.getRank().getColor() + " " + nexusPlayer.getName();
+                displayName = nexusPlayer.getRanks().get().getPrefix() + nexusPlayer.getRanks().get().getColor() + " " + nexusPlayer.getName();
             } else if (event.equals("join")) {
                 format = "{prefix} {displayName} &7&l-> &6{origin}";
             } else if (event.equals("disconnect")) {
@@ -120,7 +120,7 @@ public final class StaffChat {
     
         for (NexusPlayer player : new ArrayList<>(NexusAPI.getApi().getPlayerManager().getPlayers().values())) {
             if (player.isOnline()) {
-                if (player.getRank().ordinal() <= Rank.HELPER.ordinal()) {
+                if (player.getRanks().get().ordinal() <= Rank.HELPER.ordinal()) {
                     player.sendMessage(format);
                 }
             }

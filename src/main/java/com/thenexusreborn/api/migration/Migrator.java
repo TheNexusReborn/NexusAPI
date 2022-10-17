@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.migration;
 
-import com.thenexusreborn.api.util.Version;
+import com.thenexusreborn.api.server.Version;
 
 import java.util.Objects;
 

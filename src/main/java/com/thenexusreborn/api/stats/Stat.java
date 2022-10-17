@@ -1,23 +1,25 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.data.annotations.*;
-import com.thenexusreborn.api.data.codec.StatInfoCodec;
-import com.thenexusreborn.api.data.handler.StatObjectHandler;
+import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.codec.StatValueCodec;
 
 import java.util.*;
 
-@TableInfo(value = "stats", handler = StatObjectHandler.class)
-public class Stat {
-    @ColumnInfo(name = "name", type = "varchar(100)", codec = StatInfoCodec.class) 
-    private Info info;
-    
+@TableInfo(value = "stats")
+public class Stat implements Cloneable {
     @Primary 
     private long id;
+    private String name;
     private UUID uuid;
-    @ColumnInfo(type = "varchar(1000)")
-    private Object value;
+    @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
+    private StatValue value;
+    @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
+    private StatValue fakedValue;
     private long created;
     private long modified;
+    
+    @ColumnIgnored
+    private Info info;
     
     private Stat() {}
     
@@ -45,18 +47,13 @@ public class Stat {
         this.info = info;
         this.id = id;
         this.uuid = uuid;
+        this.name = info.getName();
         this.created = created;
         this.modified = modified;
-    
-        if (info.getType() == StatType.DOUBLE || info.getType() == StatType.INTEGER || info.getType() == StatType.LONG) {
-            Number number = (Number) value;
-            if (info.getType() == StatType.DOUBLE) {
-                this.value = number.doubleValue();
-            } else if (info.getType() == StatType.INTEGER) {
-                this.value = number.intValue();
-            } else if (info.getType() == StatType.LONG) {
-                this.value = number.longValue();
-            }
+        if (value instanceof StatValue) {
+            this.value = (StatValue) value;
+        } else {
+            this.value = new StatValue(info.getType(), value);
         }
     }
     
@@ -65,25 +62,26 @@ public class Stat {
     }
     
     public String getName() {
-        if (info == null) {
-            return null;
-        }
-        return info.getName();
+        return getInfo().getName();
     }
     
-    public Object getValue() {
+    public StatValue getValue() {
+        if (this.value == null) {
+            this.value = new StatValue(getType(), getDefaultValue());
+        }
         return value;
     }
     
     public StatType getType() {
-        if (info == null) {
-            return null;
-        }
-        return info.getType();
+        return getInfo().getType();
     }
     
     public void setValue(Object value) {
-        this.value = value;
+        if (this.value == null) {
+            this.value = new StatValue(getInfo().getType(), value);
+        } else {
+            this.value.set(value);
+        }
         this.modified = System.currentTimeMillis();
     }
     
@@ -108,14 +106,23 @@ public class Stat {
     }
     
     public Object getDefaultValue() {
-        if (info == null) {
-            return null;
-        }
-        return info.getDefaultValue();
+        return getInfo().getDefaultValue();
     }
     
     public String getDisplayName() {
-        return info.getDisplayName();
+        return getInfo().getDisplayName();
+    }
+    
+    public StatValue getFakedValue() {
+        return fakedValue;
+    }
+    
+    public void setFakedValue(Object fakedValue) {
+        if (this.fakedValue == null) {
+            this.fakedValue = new StatValue(getInfo().getType(), fakedValue);
+        } else {
+            this.fakedValue.set(fakedValue);
+        }
     }
     
     @Override
@@ -127,38 +134,47 @@ public class Stat {
             return false;
         }
         Stat stat = (Stat) o;
-        return Objects.equals(info, stat.info) && Objects.equals(uuid, stat.uuid);
+        return Objects.equals(getInfo(), stat.getInfo()) && Objects.equals(uuid, stat.uuid);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(info, uuid);
+        return Objects.hash(getInfo(), uuid);
     }
     
     @Override
     public String toString() {
         return "Stat{" +
-                "info=" + info +
+                "info=" + getInfo() +
                 ", id=" + id +
                 ", uuid=" + uuid +
                 ", value=" + value +
+                ", fakedValue=" + fakedValue +
                 ", created=" + created +
                 ", modified=" + modified +
                 '}';
     }
     
     public Info getInfo() {
+        if (this.info == null) {
+            this.info = StatHelper.getInfo(this.name);
+        }
         return this.info;
     }
     
-    @TableInfo(value = "statinfo", handler = StatObjectHandler.class)
+    @Override
+    public Stat clone() {
+        return new Stat(this.getInfo(), 0, this.uuid, this.value.get(), System.currentTimeMillis(), System.currentTimeMillis());
+    }
+    
+    @TableInfo(value = "statinfo")
     public static class Info {
         @Primary 
         private long id;
         private String name, displayName;
         private StatType type;
-        @ColumnInfo(type = "varchar(1000)")
-        private Object defaultValue;
+        @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
+        private StatValue defaultValue;
         
         private Info() {}
     
@@ -170,7 +186,7 @@ public class Stat {
             this.name = name;
             this.displayName = displayName;
             this.type = type;
-            this.defaultValue = defaultValue;
+            this.defaultValue = new StatValue(type, defaultValue);
         }
     
         public String getName() {
@@ -190,11 +206,17 @@ public class Stat {
         }
     
         public Object getDefaultValue() {
-            return defaultValue;
+            if (defaultValue == null) {
+                this.defaultValue = new StatValue(type, type.getDefaultValue());
+            }
+            return defaultValue.get();
         }
     
         public void setDefaultValue(Object defaultValue) {
-            this.defaultValue = defaultValue;
+            if (this.defaultValue == null) {
+                this.defaultValue = new StatValue(type, type.getDefaultValue());
+            }
+            this.defaultValue.set(defaultValue);
         }
     
         public String getDisplayName() {
