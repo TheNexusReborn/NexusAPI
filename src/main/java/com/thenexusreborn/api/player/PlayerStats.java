@@ -72,7 +72,9 @@ public class PlayerStats {
         }
         StatChange statChange = new StatChange(stat.getInfo(), this.uniqueId, statValue, operator, System.currentTimeMillis());
         this.addChange(statChange);
-        NexusAPI.getApi().getPrimaryDatabase().push(statChange); //Temporary for now until a change to the game stuff
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            NexusAPI.getApi().getPrimaryDatabase().push(statChange); //Temporary for now until a change to the game stuff
+        });
         return statChange;
     }
     
