@@ -30,7 +30,7 @@ public class Table implements Comparable<Table> {
                 handler = tableInfo.handler();
             }
         } else {
-            name = modelClass.getSimpleName();
+            name = modelClass.getSimpleName().toLowerCase();
         }
     
         Column primaryColumn = null;
