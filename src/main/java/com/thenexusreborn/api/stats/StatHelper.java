@@ -153,6 +153,9 @@ public final class StatHelper {
         }
         
         if (type == StatType.STRING_SET) {
+            if (value instanceof String) {
+                return (String) value;
+            }
             StringBuilder sb = new StringBuilder();
             Iterator<String> iterator = ((Set<String>) value).iterator();
             while (iterator.hasNext()) {
