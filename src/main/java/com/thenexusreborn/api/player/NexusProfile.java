@@ -123,7 +123,7 @@ public abstract class NexusProfile {
     }
     
     public Set<String> getUnlockedTags() {
-        return (Set<String>) getStats().getValue("unlockedtags");
+        return getStats().getValue("unlockedtags").getAsStringSet();
     }
     
     public boolean isTagUnlocked(String tag) {
