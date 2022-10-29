@@ -2,10 +2,9 @@ package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.stats.StatOperator;
-import com.thenexusreborn.api.storage.annotations.*;
+import com.thenexusreborn.api.storage.annotations.ColumnIgnored;
+import com.thenexusreborn.api.storage.annotations.TableInfo;
 import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
-import com.thenexusreborn.api.tags.Tag;
 
 import java.util.UUID;
 
@@ -71,22 +70,6 @@ public class NexusPlayer extends NexusProfile {
     
     public void setLastMessage(NexusPlayer nexusPlayer) {
         this.lastMessage = nexusPlayer.getUniqueId();
-    }
-    
-    public Tag getTag() {
-        String tag = this.getStats().getValue("tag").getAsString();
-        if (tag == null || tag.equalsIgnoreCase("null")) {
-            return null;
-        }
-        return new Tag(tag);
-    }
-    
-    public void setTag(Tag tag) {
-        if (tag != null) {
-            getStats().change("tag", tag.getName(), StatOperator.SET);
-        } else {
-            getStats().change("tag", "null", StatOperator.SET);
-        }
     }
     
     public void setLastMessage(UUID lastMessage) {

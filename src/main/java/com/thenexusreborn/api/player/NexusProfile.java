@@ -1,10 +1,15 @@
 package com.thenexusreborn.api.player;
 
-import com.thenexusreborn.api.storage.annotations.*;
-import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.stats.StatOperator;
+import com.thenexusreborn.api.storage.annotations.ColumnIgnored;
+import com.thenexusreborn.api.storage.annotations.ColumnInfo;
+import com.thenexusreborn.api.storage.annotations.Primary;
+import com.thenexusreborn.api.storage.codec.RanksCodec;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 public abstract class NexusProfile {
     
@@ -17,9 +22,11 @@ public abstract class NexusProfile {
     @ColumnInfo(type = "varchar(1000)", codec = RanksCodec.class)
     protected PlayerRanks ranks;
     @ColumnIgnored
-    protected PlayerStats playerStats;
+    protected PlayerStats stats;
     @ColumnIgnored
-    protected PlayerToggles playerToggles;
+    protected PlayerToggles toggles;
+    @ColumnIgnored
+    protected PlayerTags tags;
     
     protected NexusProfile() {
         this(null);
@@ -33,9 +40,10 @@ public abstract class NexusProfile {
         this.id = id;
         this.name = name;
         this.uniqueId = uniqueId;
-        this.playerToggles = new PlayerToggles();
-        this.playerStats = new PlayerStats(uniqueId);
+        this.toggles = new PlayerToggles();
+        this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
+        this.tags = new PlayerTags();
     }
     
     public long getFirstJoined() {
@@ -53,11 +61,7 @@ public abstract class NexusProfile {
     public void setLastLogin(long lastLogin) {
         getStats().change("lastlogin", lastLogin, StatOperator.SET);
     }
-    
-    public void setUnlockedTags(Set<String> unlockedTags) {
-        getStats().change("unlockedtags", unlockedTags, StatOperator.SET);
-    }
-    
+
     public String getDisplayName() {
         if (getRanks().get() != Rank.MEMBER) {
             return getRanks().get().getPrefix() + " &f" + getName();
@@ -116,20 +120,12 @@ public abstract class NexusProfile {
     }
     
     public PlayerStats getStats() {
-        if (playerStats.getUniqueId() == null) {
-            playerStats.setUniqueId(uniqueId);
+        if (stats.getUniqueId() == null) {
+            stats.setUniqueId(uniqueId);
         }
-        return playerStats;
+        return stats;
     }
-    
-    public Set<String> getUnlockedTags() {
-        return getStats().getValue("unlockedtags").getAsStringSet();
-    }
-    
-    public boolean isTagUnlocked(String tag) {
-        return getUnlockedTags().contains(tag.toLowerCase());
-    }
-    
+
     public void addCredits(int credits) {
         getStats().change("credits", credits, StatOperator.ADD);
     }
@@ -141,15 +137,7 @@ public abstract class NexusProfile {
     public void setPrivateAlpha(boolean value) {
         getStats().change("privatealpha", value, StatOperator.SET);
     }
-    
-    public void unlockTag(String tag) {
-        getUnlockedTags().add(tag.toLowerCase());
-    }
-    
-    public void lockTag(String tag) {
-        getUnlockedTags().remove(tag.toLowerCase());
-    }
-    
+
     public long getId() {
         return id;
     }
@@ -226,7 +214,7 @@ public abstract class NexusProfile {
     }
     
     public PlayerToggles getToggles() {
-        return playerToggles;
+        return toggles;
     }
     
     public String getColoredName() {
@@ -235,5 +223,9 @@ public abstract class NexusProfile {
     
     public void removeCredits(int credits) {
         getStats().change("credits", credits, StatOperator.SUBTRACT);
+    }
+
+    public PlayerTags getTags() {
+        return tags;
     }
 }
