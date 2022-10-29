@@ -232,4 +232,8 @@ public abstract class NexusProfile {
     public String getColoredName() {
         return getRanks().get().getColor() + getName();
     }
+    
+    public void removeCredits(int credits) {
+        getStats().change("credits", credits, StatOperator.SUBTRACT);
+    }
 }
