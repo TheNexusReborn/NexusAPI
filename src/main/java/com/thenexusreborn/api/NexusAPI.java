@@ -242,7 +242,6 @@ public abstract class NexusAPI {
         statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
         statRegistry.register("server", "Server", StatType.STRING, "null");
-        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, "null");
         registerStats(statRegistry);
         
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
