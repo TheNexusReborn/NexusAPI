@@ -1,7 +1,5 @@
 package com.thenexusreborn.api.player;
 
-import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.util.*;
