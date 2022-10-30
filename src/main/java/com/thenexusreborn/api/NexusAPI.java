@@ -160,6 +160,9 @@ public abstract class NexusAPI {
         })));
     
         networkCommandRegistry.register(new NetworkCommand("updatestat", (cmd, origin, args) -> {
+            if (getServerManager().getCurrentServer().getName().equalsIgnoreCase(origin)) {
+                return;
+            }
             UUID uuid = UUID.fromString(args[0]);
             Stat.Info info = StatHelper.getInfo(args[1]);
             StatOperator operator = StatOperator.valueOf(args[2]);
