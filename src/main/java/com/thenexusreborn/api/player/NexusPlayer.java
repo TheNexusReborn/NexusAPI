@@ -61,6 +61,9 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public PlayerProxy getPlayer() {
+        if (this.playerProxy == null) {
+            this.playerProxy = PlayerProxy.of(this.uniqueId);
+        }
         return this.playerProxy;
     }
     
@@ -114,6 +117,9 @@ public class NexusPlayer extends NexusProfile {
     
     @Override
     public boolean isOnline() {
-        return playerProxy.isOnline();
+        if (getPlayer() != null) {
+            return getPlayer().isOnline();
+        }
+        return false;
     }
 }
