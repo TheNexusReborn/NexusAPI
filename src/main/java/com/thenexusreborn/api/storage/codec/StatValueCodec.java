@@ -24,8 +24,8 @@ public class StatValueCodec extends SqlCodec<StatValue> {
             return null;
         }
         String[] split = encoded.split(":");
-        if (split.length != 2) {
-            return null;
+        if (split.length == 1) {
+            return new StatValue(StatType.valueOf(split[0]), null);
         }
     
         StatType type = StatType.valueOf(split[0].toUpperCase());
