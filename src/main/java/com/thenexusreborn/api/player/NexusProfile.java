@@ -43,7 +43,7 @@ public abstract class NexusProfile {
         this.toggles = new PlayerToggles();
         this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
-        this.tags = new PlayerTags();
+        this.tags = new PlayerTags(uniqueId);
     }
     
     public long getFirstJoined() {
@@ -226,6 +226,9 @@ public abstract class NexusProfile {
     }
 
     public PlayerTags getTags() {
+        if (tags.getUuid() == null) {
+            tags.setUuid(this.uniqueId);
+        }
         return tags;
     }
 }

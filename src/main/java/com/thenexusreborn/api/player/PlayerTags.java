@@ -1,12 +1,27 @@
 package com.thenexusreborn.api.player;
 
+import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.util.*;
 
 public class PlayerTags {
     private final Map<String, Tag> tags = new HashMap<>();
+    private UUID uuid;
     private String active;
+
+    public PlayerTags(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
 
     public Tag get(String name) {
         return tags.get(name);
@@ -21,6 +36,9 @@ public class PlayerTags {
     }
 
     public void setActive(String active) {
+        if (active == null || active.equalsIgnoreCase("null")) {
+            this.active = null;
+        }
         if (this.tags.containsKey(active)) {
             this.active = active;
         }

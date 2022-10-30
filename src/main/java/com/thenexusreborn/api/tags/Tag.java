@@ -15,12 +15,17 @@ public class Tag {
     private Tag() {}
     
     public Tag(UUID uuid, String name, long timestamp) {
+        this.uuid = uuid;
         this.name = name;
         this.timestamp = timestamp;
     }
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public UUID getUuid() {
