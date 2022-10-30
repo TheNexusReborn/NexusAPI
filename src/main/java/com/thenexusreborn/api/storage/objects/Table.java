@@ -24,6 +24,7 @@ public class Table implements Comparable<Table> {
         }
     
         name = determineTableName(modelClass);
+        handler = determineObjectHandler(modelClass);
 
         if (name == null) {
             name = modelClass.getSimpleName().toLowerCase();
@@ -62,6 +63,23 @@ public class Table implements Comparable<Table> {
         if (primaryColumn == null) {
             NexusAPI.logMessage(Level.SEVERE, "Could not find a primary column. This column must be a long, and must be set to auto-increment and as the primary key. Or use the @Primary annotation", "Model Class: " + modelClass.getName());
         }
+    }
+
+    private static Class<? extends ObjectHandler> determineObjectHandler(Class<?> clazz) {
+        if (clazz.equals(Object.class)) {
+            return null;
+        }
+
+        TableInfo tableInfo = clazz.getAnnotation(TableInfo.class);
+        if (tableInfo == null) {
+            return determineObjectHandler(clazz.getSuperclass());
+        }
+
+        if (tableInfo.handler() == null || tableInfo.handler().equals(ObjectHandler.class)) {
+            return determineObjectHandler(clazz.getSuperclass());
+        }
+
+        return tableInfo.handler();
     }
 
     private static String determineTableName(Class<?> clazz) {
