@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class Table implements Comparable<Table> {
-    private final String name;
+    private String name;
     private final Class<?> modelClass;
     private final Set<Column> columns = new TreeSet<>();
     private Class<? extends ObjectHandler> handler;
@@ -18,18 +18,15 @@ public class Table implements Comparable<Table> {
         this.modelClass = modelClass;
     
         try {
-            Constructor<?> defaultConstructor = modelClass.getDeclaredConstructor();
+            modelClass.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Could not find default constructor for class " + modelClass.getName());
         }
     
-        TableInfo tableInfo = modelClass.getAnnotation(TableInfo.class);
-        if (tableInfo != null) {
-            name = tableInfo.value();
-            if (!tableInfo.handler().equals(ObjectHandler.class)) {
-                handler = tableInfo.handler();
-            }
-        } else {
+        name = determineTableName(modelClass);
+        handler = determineObjectHandler(modelClass);
+
+        if (name == null) {
             name = modelClass.getSimpleName().toLowerCase();
         }
     
@@ -67,7 +64,41 @@ public class Table implements Comparable<Table> {
             NexusAPI.logMessage(Level.SEVERE, "Could not find a primary column. This column must be a long, and must be set to auto-increment and as the primary key. Or use the @Primary annotation", "Model Class: " + modelClass.getName());
         }
     }
-    
+
+    private static Class<? extends ObjectHandler> determineObjectHandler(Class<?> clazz) {
+        if (clazz.equals(Object.class)) {
+            return null;
+        }
+
+        TableInfo tableInfo = clazz.getAnnotation(TableInfo.class);
+        if (tableInfo == null) {
+            return determineObjectHandler(clazz.getSuperclass());
+        }
+
+        if (tableInfo.handler() == null || tableInfo.handler().equals(ObjectHandler.class)) {
+            return determineObjectHandler(clazz.getSuperclass());
+        }
+
+        return tableInfo.handler();
+    }
+
+    private static String determineTableName(Class<?> clazz) {
+        if (clazz.equals(Object.class)) {
+            return null;
+        }
+
+        TableInfo tableInfo = clazz.getAnnotation(TableInfo.class);
+        if (tableInfo == null) {
+            return determineTableName(clazz.getSuperclass());
+        }
+
+        if (tableInfo.value() == null || tableInfo.value().equals("")) {
+            return determineTableName(clazz.getSuperclass());
+        }
+
+        return tableInfo.value();
+    }
+
     public Class<? extends ObjectHandler> getHandler() {
         return handler;
     }

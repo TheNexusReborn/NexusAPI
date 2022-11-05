@@ -27,8 +27,8 @@ public class Column implements Comparable<Column> {
             notNull = columnInfo.notNull();
             codec = (Class<? extends SqlCodec<?>>) columnInfo.codec();
         }
-    
-        if (primary != null) {
+
+        if (primary != null || ((field.getType().equals(long.class) || field.getType().equals(Long.class)) && field.getName().equalsIgnoreCase("id"))) {
             if (field.getType().equals(long.class) || field.getType().equals(Long.class)) {
                 autoIncrement = true;
                 primaryKey = true;

@@ -27,8 +27,8 @@ public class CachedPlayer extends NexusProfile {
         this(nexusPlayer.id, nexusPlayer.uniqueId, nexusPlayer.name);
         this.ipHistory = nexusPlayer.ipHistory;
         this.ranks = nexusPlayer.getRanks();
-        this.playerStats = nexusPlayer.getStats();
-        this.playerToggles = nexusPlayer.getToggles();
+        this.stats = nexusPlayer.getStats();
+        this.toggles = nexusPlayer.getToggles();
     }
     
     public NexusPlayer loadFully() {

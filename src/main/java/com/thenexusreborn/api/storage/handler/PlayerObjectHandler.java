@@ -4,6 +4,7 @@ import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.tags.Tag;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -52,6 +53,15 @@ public class PlayerObjectHandler extends ObjectHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        try {
+            List<Tag> tags = database.get(Tag.class, "uuid", player.getUniqueId());
+            player.getTags().addAll(tags);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        player.getTags().setActive(player.getStats().getValue("tag").getAsString());
     }
     
     @Override

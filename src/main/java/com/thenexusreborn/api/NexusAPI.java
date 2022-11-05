@@ -16,6 +16,7 @@ import com.thenexusreborn.api.storage.StorageManager;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.tags.Tag;
+import com.thenexusreborn.api.tags.TagRegistry;
 import com.thenexusreborn.api.thread.ThreadFactory;
 
 import java.io.*;
@@ -26,7 +27,7 @@ import java.util.logging.*;
 
 @MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
 @MavenLibrary(groupId = "com.google.code.gson", artifactId = "gson", version = "2.9.0")
-//@MavenLibrary(groupId = "io.netty", artifactId = "netty-all", version = "4.1.82.Final")
+@MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
@@ -52,6 +53,7 @@ public abstract class NexusAPI {
     
     protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
+    protected TagRegistry tagRegistry;
     
     protected Database primaryDatabase;
     
@@ -137,11 +139,11 @@ public abstract class NexusAPI {
             NexusPlayer player = playerManager.getNexusPlayer(uuid);
             if (action.equalsIgnoreCase("reset")) {
                 if (player != null) {
-                    player.setTag(null);
+                    player.getTags().setActive(null);
                 }
             } else if (action.equalsIgnoreCase("set")) {
                 if (player != null) {
-                    player.setTag(new Tag(tag));
+                    player.getTags().setActive(tag);
                 }
             } else {
                 if (player == null) {
@@ -149,14 +151,18 @@ public abstract class NexusAPI {
                 }
                 
                 if (action.equalsIgnoreCase("unlock")) {
-                    player.unlockTag(tag);
+                    long timestamp = Long.parseLong(args[3]);
+                    player.getTags().add(new Tag(player.getUniqueId(), tag, timestamp));
                 } else if (action.equalsIgnoreCase("remove")) {
-                    player.lockTag(tag);
+                    player.getTags().remove(tag);
                 }
             }
         })));
     
         networkCommandRegistry.register(new NetworkCommand("updatestat", (cmd, origin, args) -> {
+            if (getServerManager().getCurrentServer().getName().equalsIgnoreCase(origin)) {
+                return;
+            }
             UUID uuid = UUID.fromString(args[0]);
             Stat.Info info = StatHelper.getInfo(args[1]);
             StatOperator operator = StatOperator.valueOf(args[2]);
@@ -200,6 +206,7 @@ public abstract class NexusAPI {
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
                 database.registerClass(Nickname.class);
+                database.registerClass(Tag.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
@@ -235,7 +242,6 @@ public abstract class NexusAPI {
         statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
         statRegistry.register("server", "Server", StatType.STRING, "null");
-        statRegistry.register("unlockedtags", "Unlocked Tags", StatType.STRING_SET, "null");
         registerStats(statRegistry);
         
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
@@ -262,7 +268,15 @@ public abstract class NexusAPI {
             getPrimaryDatabase().push(object);
         }
         getLogger().info("Pushed toggle types to the database");
-        
+
+        getLogger().info("Registering and Setting up Tags");
+        this.tagRegistry = new TagRegistry();
+        String[] defaultTags = {"thicc", "son", "e-girl", "god", "e-dater", "lord", "epic", "bacca", "benja", "milk man", "champion"};
+        for (String dt : defaultTags) {
+            this.tagRegistry.register(dt);
+        }
+        getLogger().info("Registered " + this.tagRegistry.getObjects().size() + " default tags.");
+
         serverManager.setupCurrentServer();
         getLogger().info("Set up the current server");
         
@@ -288,7 +302,7 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
         
-        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','unlockedtags','privatealpha');");
+        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','privatealpha');");
         for (Row row : statsRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
@@ -305,8 +319,6 @@ public abstract class NexusAPI {
                 player.setOnline((boolean) value);
             } else if (name.equalsIgnoreCase("lastlogout")) {
                 player.setLastLogout((long) value);
-            } else if (name.equalsIgnoreCase("unlockedtags")) {
-                player.setUnlockedTags((Set<String>) value);
             } else if (name.equalsIgnoreCase("privatealpha")) {
                 player.setPrivateAlpha((boolean) value);
             }
@@ -331,7 +343,23 @@ public abstract class NexusAPI {
             }
         }
         getLogger().info("Loaded toggle info for player profiles: Incognito, Vanish and Fly");
-        
+
+        List<Tag> allTags = database.get(Tag.class);
+        Map<UUID, List<Tag>> sortedTags = new HashMap<>();
+        for (Tag tag : allTags) {
+            if (sortedTags.containsKey(tag.getUuid())) {
+                sortedTags.get(tag.getUuid()).add(tag);
+            } else {
+                sortedTags.put(tag.getUuid(), new ArrayList<>(Collections.singletonList(tag)));
+            }
+        }
+
+        sortedTags.forEach((uuid, tags) -> {
+            NexusProfile profile = playerManager.getProfile(uuid);
+            profile.getTags().addAll(tags);
+        });
+        getLogger().info("Loaded all tag settings for players.");
+
         for (IPEntry entry : playerManager.getIpHistory()) {
             CachedPlayer player = playerManager.getCachedPlayer(entry.getUuid());
             if (player != null) {

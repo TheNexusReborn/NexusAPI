@@ -14,6 +14,10 @@ public class PlayerRanks {
         if (PlayerManager.NEXUS_TEAM.contains(uniqueId)) {
             return Rank.NEXUS;
         }
+        
+        if (this.ranks == null && this.ranks.isEmpty()) {
+            return Rank.MEMBER;
+        }
     
         for (Map.Entry<Rank, Long> entry : new EnumMap<>(ranks).entrySet()) {
             if (entry.getValue() == -1) {

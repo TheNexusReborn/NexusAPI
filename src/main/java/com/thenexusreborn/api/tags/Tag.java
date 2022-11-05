@@ -1,25 +1,45 @@
 package com.thenexusreborn.api.tags;
 
+import com.thenexusreborn.api.storage.annotations.TableInfo;
+
 import java.util.*;
 
+@TableInfo("unlockedtags")
 public class Tag {
     
-    public static final Set<String> presetTags;
+    private long id;
+    private UUID uuid;
+    private String name;
+    private long timestamp;
+
+    private Tag() {}
     
-    static {
-        presetTags = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("thicc", "son", "e-girl", "god", "e-dater", "lord", "epic", "bacca", "benja", "milk man", "champion")));
-    }
-    
-    private final String name;
-    
-    public Tag(String name) {
+    public Tag(UUID uuid, String name, long timestamp) {
+        this.uuid = uuid;
         this.name = name;
+        this.timestamp = timestamp;
     }
-    
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
     public String getName() {
         return name;
     }
-    
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     public String getDisplayName() {
         if (this.name != null) {
             return "&d&l" + this.name.toUpperCase();
