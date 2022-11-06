@@ -15,7 +15,7 @@ public class PlayerRanks {
             return Rank.NEXUS;
         }
         
-        if (this.ranks == null && this.ranks.isEmpty()) {
+        if (this.ranks == null || this.ranks.isEmpty()) {
             return Rank.MEMBER;
         }
     
