@@ -55,6 +55,8 @@ public abstract class NexusAPI {
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
     
+    protected Map<UUID, PrivateAlphaUser> privateAlphaUsers = new HashMap<>();
+    
     protected Database primaryDatabase;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, ServerManager serverManager) {
@@ -172,6 +174,13 @@ public abstract class NexusAPI {
             profile.getStats().addChange(statChange);
         }));
         
+        networkCommandRegistry.register(new NetworkCommand("updateprivatealpha", (cmd, origin, args) -> {
+            long id = Long.parseLong(args[0]);
+            UUID uuid = UUID.fromString(args[1]);
+            long timestamp = Long.parseLong(args[2]);
+            this.privateAlphaUsers.put(uuid, new PrivateAlphaUser(id, uuid, timestamp));
+        }));
+        
         networkCommandRegistry.register(new NetworkCommand("playercreate", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             try {
@@ -207,6 +216,7 @@ public abstract class NexusAPI {
                 database.registerClass(Punishment.class);
                 database.registerClass(Nickname.class);
                 database.registerClass(Tag.class);
+                database.registerClass(PrivateAlphaUser.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
@@ -367,7 +377,12 @@ public abstract class NexusAPI {
             }
         }
         getLogger().info("Sorted IP History for player profiles.");
-        
+    
+        List<PrivateAlphaUser> privateAlphaUsers = getPrimaryDatabase().get(PrivateAlphaUser.class);
+        for (PrivateAlphaUser pau : privateAlphaUsers) {
+            this.privateAlphaUsers.put(pau.getUuid(), pau);
+        }
+    
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
