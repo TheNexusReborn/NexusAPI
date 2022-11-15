@@ -8,19 +8,26 @@ import java.util.UUID;
 public class PrivateAlphaUser {
     private long id;
     private UUID uuid;
+    private String name;
     private long timestamp;
     
     private PrivateAlphaUser() {}
     
-    public PrivateAlphaUser(long id, UUID uuid, long timestamp) {
+    public PrivateAlphaUser(long id, UUID uuid, String name, long timestamp) {
         this.id = id;
+        this.uuid = uuid;
+        this.name = name;
+        this.timestamp = timestamp;
+    }
+    
+    @Deprecated
+    public PrivateAlphaUser(UUID uuid, long timestamp) {
         this.uuid = uuid;
         this.timestamp = timestamp;
     }
     
-    public PrivateAlphaUser(UUID uuid, long timestamp) {
-        this.uuid = uuid;
-        this.timestamp = timestamp;
+    public PrivateAlphaUser(UUID uuid, String name, long timestamp) {
+        this(0, uuid, name, timestamp);
     }
     
     public long getId() {
@@ -41,5 +48,9 @@ public class PrivateAlphaUser {
     
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+    
+    public String getName() {
+        return name;
     }
 }

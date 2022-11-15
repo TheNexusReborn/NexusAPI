@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.logging.*;
 
 @MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
-@MavenLibrary(groupId = "com.google.code.gson", artifactId = "gson", version = "2.9.0")
 @MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
 public abstract class NexusAPI {
     private static NexusAPI instance;
@@ -175,10 +174,17 @@ public abstract class NexusAPI {
         }));
         
         networkCommandRegistry.register(new NetworkCommand("updateprivatealpha", (cmd, origin, args) -> {
-            long id = Long.parseLong(args[0]);
-            UUID uuid = UUID.fromString(args[1]);
-            long timestamp = Long.parseLong(args[2]);
-            this.privateAlphaUsers.put(uuid, new PrivateAlphaUser(id, uuid, timestamp));
+            String action = args[0];
+            if (action.equalsIgnoreCase("add")) {
+                long id = Long.parseLong(args[1]);
+                UUID uuid = UUID.fromString(args[2]);
+                String name = args[3];
+                long timestamp = Long.parseLong(args[4]);
+                this.privateAlphaUsers.put(uuid, new PrivateAlphaUser(id, uuid, name, timestamp));
+            } else if (action.equalsIgnoreCase("remove")) {
+                UUID uuid = UUID.fromString(args[1]);
+                this.privateAlphaUsers.remove(uuid);
+            }
         }));
         
         networkCommandRegistry.register(new NetworkCommand("playercreate", (cmd, origin, args) -> {
@@ -247,7 +253,6 @@ public abstract class NexusAPI {
         statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L);
         statRegistry.register("prealpha", "PreAlpha", StatType.BOOLEAN, false);
         statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false);
-        statRegistry.register("privatealpha", "Private Alpha", StatType.BOOLEAN, false);
         statRegistry.register("beta", "Beta", StatType.BOOLEAN, false);
         statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
@@ -329,8 +334,6 @@ public abstract class NexusAPI {
                 player.setOnline((boolean) value);
             } else if (name.equalsIgnoreCase("lastlogout")) {
                 player.setLastLogout((long) value);
-            } else if (name.equalsIgnoreCase("privatealpha")) {
-                player.setPrivateAlpha((boolean) value);
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
@@ -465,5 +468,9 @@ public abstract class NexusAPI {
     
     public LevelManager getLevelManager() {
         return levelManager;
+    }
+    
+    public Map<UUID, PrivateAlphaUser> getPrivateAlphaUsers() {
+        return privateAlphaUsers;
     }
 }
