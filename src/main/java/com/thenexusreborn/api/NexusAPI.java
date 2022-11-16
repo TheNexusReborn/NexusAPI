@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.logging.*;
 
 @MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
-@MavenLibrary(groupId = "com.google.code.gson", artifactId = "gson", version = "2.9.0")
 @MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
 public abstract class NexusAPI {
     private static NexusAPI instance;
@@ -54,6 +53,8 @@ public abstract class NexusAPI {
     protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
+    
+    protected Map<UUID, PrivateAlphaUser> privateAlphaUsers = new HashMap<>();
     
     protected Database primaryDatabase;
     
@@ -172,6 +173,20 @@ public abstract class NexusAPI {
             profile.getStats().addChange(statChange);
         }));
         
+        networkCommandRegistry.register(new NetworkCommand("updateprivatealpha", (cmd, origin, args) -> {
+            String action = args[0];
+            if (action.equalsIgnoreCase("add")) {
+                long id = Long.parseLong(args[1]);
+                UUID uuid = UUID.fromString(args[2]);
+                String name = args[3];
+                long timestamp = Long.parseLong(args[4]);
+                this.privateAlphaUsers.put(uuid, new PrivateAlphaUser(id, uuid, name, timestamp));
+            } else if (action.equalsIgnoreCase("remove")) {
+                UUID uuid = UUID.fromString(args[1]);
+                this.privateAlphaUsers.remove(uuid);
+            }
+        }));
+        
         networkCommandRegistry.register(new NetworkCommand("playercreate", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             try {
@@ -207,6 +222,7 @@ public abstract class NexusAPI {
                 database.registerClass(Punishment.class);
                 database.registerClass(Nickname.class);
                 database.registerClass(Tag.class);
+                database.registerClass(PrivateAlphaUser.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
@@ -237,7 +253,6 @@ public abstract class NexusAPI {
         statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L);
         statRegistry.register("prealpha", "PreAlpha", StatType.BOOLEAN, false);
         statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false);
-        statRegistry.register("privatealpha", "Private Alpha", StatType.BOOLEAN, false);
         statRegistry.register("beta", "Beta", StatType.BOOLEAN, false);
         statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
@@ -319,8 +334,6 @@ public abstract class NexusAPI {
                 player.setOnline((boolean) value);
             } else if (name.equalsIgnoreCase("lastlogout")) {
                 player.setLastLogout((long) value);
-            } else if (name.equalsIgnoreCase("privatealpha")) {
-                player.setPrivateAlpha((boolean) value);
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
@@ -367,7 +380,12 @@ public abstract class NexusAPI {
             }
         }
         getLogger().info("Sorted IP History for player profiles.");
-        
+    
+        List<PrivateAlphaUser> privateAlphaUsers = getPrimaryDatabase().get(PrivateAlphaUser.class);
+        for (PrivateAlphaUser pau : privateAlphaUsers) {
+            this.privateAlphaUsers.put(pau.getUuid(), pau);
+        }
+    
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
@@ -450,5 +468,9 @@ public abstract class NexusAPI {
     
     public LevelManager getLevelManager() {
         return levelManager;
+    }
+    
+    public Map<UUID, PrivateAlphaUser> getPrivateAlphaUsers() {
+        return privateAlphaUsers;
     }
 }

@@ -130,14 +130,6 @@ public abstract class NexusProfile {
         getStats().change("credits", credits, StatOperator.ADD);
     }
     
-    public boolean isPrivateAlpha() {
-        return getStats().getValue("privatealpha").getAsBoolean();
-    }
-    
-    public void setPrivateAlpha(boolean value) {
-        getStats().change("privatealpha", value, StatOperator.SET);
-    }
-
     public long getId() {
         return id;
     }
