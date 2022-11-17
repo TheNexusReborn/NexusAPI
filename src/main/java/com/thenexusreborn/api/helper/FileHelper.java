@@ -66,14 +66,14 @@ public final class FileHelper {
     
     public static void copyFolder(Path src, Path dest) {
         try {
-            Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(src, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                         throws IOException {
                     Files.createDirectories(dest.resolve(src.relativize(dir)));
                     return FileVisitResult.CONTINUE;
                 }
-        
+    
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                         throws IOException {
@@ -97,12 +97,12 @@ public final class FileHelper {
     
     public static void deleteDirectory(Path directory) {
         try {
-            Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(directory, new SimpleFileVisitor<>() {
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }
-        
+    
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                     Files.delete(dir);
                     return FileVisitResult.CONTINUE;

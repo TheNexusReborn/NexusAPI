@@ -7,6 +7,7 @@ import com.thenexusreborn.api.registry.DatabaseRegistry;
 import java.sql.*;
 import java.util.*;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class StorageManager {
     private final DatabaseRegistry registry;
     

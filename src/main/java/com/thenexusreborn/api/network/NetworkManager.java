@@ -46,10 +46,10 @@ public class NetworkManager {
             nettyApp.send(packet);
         }
         
-        NetworkCommand command = getCommand(packet.getAction());
+        NetworkCommand command = getCommand(packet.action());
         if (command != null) {
             if (command.getExecutor() != null) {
-                command.getExecutor().handle(command, packet.getOrigin(), packet.getData());
+                command.getExecutor().handle(command, packet.origin(), packet.data());
             } else {
                 NexusAPI.getApi().getLogger().warning("Command " + command.getName() + " does not have an executor.");
             }

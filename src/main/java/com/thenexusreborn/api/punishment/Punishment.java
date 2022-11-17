@@ -11,11 +11,13 @@ import java.util.UUID;
 @SuppressWarnings("DuplicatedCode")
 @TableInfo("punishments")
 public class Punishment implements Comparable<Punishment> {
-    public static final String KICK_FORMAT = "&d&lThe Nexus Reborn &7- {type}\n \n" +
-            "&fStaff: &a{actor}\n" +
-            "&fReason: &b{reason}\n" +
-            "&fExpires: &c{expire}\n" +
-            "&fPunishment ID: &e{id}";
+    public static final String KICK_FORMAT = """
+            &d&lThe Nexus Reborn &7- {type}
+            
+            &fStaff: &a{actor}
+            &fReason: &b{reason}
+            &fExpires: &c{expire}
+            &fPunishment ID: &e{id}""";
     
     @Primary
     private long id = -1;

@@ -29,7 +29,7 @@ public class SkinManager {
             HttpRequest request = new HttpPostRequest(String.format(MINESKIN_URL, imageUrl));
             HttpResponse response = request.connect();
     
-            JsonObject object = GSON.fromJson(response.getResponse(), JsonObject.class);
+            JsonObject object = GSON.fromJson(response.response(), JsonObject.class);
             
             if (object.has("error")) {
                 return null;
@@ -52,11 +52,11 @@ public class SkinManager {
             HttpRequest request = new HttpGetRequest(String.format(MOJANG_NAME_URL, playerName));
             HttpResponse response = request.connect();
             
-            if (response.getResponse() == null || response.getResponse().isEmpty()) {
+            if (response.response() == null || response.response().isEmpty()) {
                 throw new IllegalArgumentException("Couldn't find the user " + playerName + ".");
             }
             
-            JsonObject object = GSON.fromJson(response.getResponse(), JsonObject.class);
+            JsonObject object = GSON.fromJson(response.response(), JsonObject.class);
             return getFromMojang(StringHelper.toUUID(object.get("id").getAsString()));
         } catch (IOException e) {
             return null;
@@ -68,7 +68,7 @@ public class SkinManager {
             HttpRequest request = new HttpGetRequest(String.format(MOJANG_URL, playerId.toString()));
             HttpResponse response = request.connect();
             
-            JsonObject object = GSON.fromJson(response.getResponse(), JsonObject.class);
+            JsonObject object = GSON.fromJson(response.response(), JsonObject.class);
             
             if (object.has("errorMessage")) {
                 throw new IllegalArgumentException("Couldn't find the user " + playerId + ".");
@@ -77,7 +77,7 @@ public class SkinManager {
             JsonObject properties = object.getAsJsonArray("properties").get(0).getAsJsonObject();
     
             Skin skin = new Skin(playerId.toString(), properties.get("value").getAsString(), properties.get("signature").getAsString());
-            this.skins.put(skin.getIdentifier(), skin);
+            this.skins.put(skin.identifier(), skin);
             return skin;
         } catch (IOException e) {
             return null;

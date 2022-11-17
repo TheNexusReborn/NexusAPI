@@ -8,8 +8,7 @@ import java.util.function.Consumer;
 
 public abstract class PlayerManager {
     
-    public static final Set<UUID> NEXUS_TEAM = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(UUID.fromString("3f7891ce-5a73-4d52-a2ba-299839053fdc"),
-            UUID.fromString("fc6a3e38-c1c0-40a6-b7b9-152ffdadc053"), UUID.fromString("84c55f0c-2f09-4cf6-9924-57f536eb2228"))));
+    public static final Set<UUID> NEXUS_TEAM = Set.of(UUID.fromString("3f7891ce-5a73-4d52-a2ba-299839053fdc"), UUID.fromString("fc6a3e38-c1c0-40a6-b7b9-152ffdadc053"), UUID.fromString("84c55f0c-2f09-4cf6-9924-57f536eb2228"));
     
     protected final Map<UUID, NexusPlayer> players = new HashMap<>();
     protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>();

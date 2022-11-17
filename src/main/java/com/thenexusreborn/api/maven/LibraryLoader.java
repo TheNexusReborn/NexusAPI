@@ -6,7 +6,6 @@ import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public final class LibraryLoader {
     
@@ -38,8 +37,8 @@ public final class LibraryLoader {
     }
     
     public static void load(Dependency d, URLClassLoader classLoader) {
-        NexusAPI.getApi().getLogger().info(String.format("Loading dependency %s:%s:%s from %s", d.getGroupId(), d.getArtifactId(), d.getVersion(), d.getRepoUrl()));
-        String name = d.getArtifactId() + "-" + d.getVersion();
+        NexusAPI.getApi().getLogger().info(String.format("Loading dependency %s:%s:%s from %s", d.groupId(), d.artifactId(), d.version(), d.repoUrl()));
+        String name = d.artifactId() + "-" + d.version();
         
         File saveLocation = new File(getLibFolder(), name + ".jar");
         if (!saveLocation.exists()) {
@@ -82,75 +81,57 @@ public final class LibraryLoader {
         return libs;
     }
     
-    public static final class Dependency {
-        private final String groupId;
-        private final String artifactId;
-        private final String version;
-        private final String repoUrl;
-        
-        public Dependency(String groupId, String artifactId, String version, String repoUrl) {
-            this.groupId = Objects.requireNonNull(groupId, "groupId");
-            this.artifactId = Objects.requireNonNull(artifactId, "artifactId");
-            this.version = Objects.requireNonNull(version, "version");
-            this.repoUrl = Objects.requireNonNull(repoUrl, "repoUrl");
-        }
-        
-        public String getGroupId() {
-            return this.groupId;
-        }
-        
-        public String getArtifactId() {
-            return this.artifactId;
-        }
-        
-        public String getVersion() {
-            return this.version;
-        }
-        
-        public String getRepoUrl() {
-            return this.repoUrl;
-        }
-        
-        public URL getUrl() throws MalformedURLException {
-            String repo = this.repoUrl;
-            if (!repo.endsWith("/")) {
-                repo += "/";
+    public record Dependency(String groupId, String artifactId, String version, String repoUrl) {
+            public Dependency(String groupId, String artifactId, String version, String repoUrl) {
+                this.groupId = Objects.requireNonNull(groupId, "groupId");
+                this.artifactId = Objects.requireNonNull(artifactId, "artifactId");
+                this.version = Objects.requireNonNull(version, "version");
+                this.repoUrl = Objects.requireNonNull(repoUrl, "repoUrl");
             }
-            repo += "%s/%s/%s/%s-%s.jar";
             
-            String url = String.format(repo, this.groupId.replace(".", "/"), this.artifactId, this.version, this.artifactId, this.version);
-            return new URL(url);
+            public URL getUrl() throws MalformedURLException {
+                String repo = this.repoUrl;
+                if (!repo.endsWith("/")) {
+                    repo += "/";
+                }
+                repo += "%s/%s/%s/%s-%s.jar";
+                
+                String url = String.format(repo, this.groupId.replace(".", "/"), this.artifactId, this.version, this.artifactId, this.version);
+                return new URL(url);
+            }
+            
+            @Override
+            public boolean equals(Object o) {
+                if (o == this) {
+                    return true;
+                }
+                if (!(o instanceof final Dependency other)) {
+                    return false;
+                }
+                return this.groupId().equals(other.groupId()) &&
+                        this.artifactId().equals(other.artifactId()) &&
+                        this.version().equals(other.version()) &&
+                        this.repoUrl().equals(other.repoUrl());
+            }
+            
+            @Override
+            public int hashCode() {
+                final int PRIME = 59;
+                int result = 1;
+                result = result * PRIME + this.groupId().hashCode();
+                result = result * PRIME + this.artifactId().hashCode();
+                result = result * PRIME + this.version().hashCode();
+                result = result * PRIME + this.repoUrl().hashCode();
+                return result;
+            }
+            
+            @Override
+            public String toString() {
+                return "LibraryLoader.Dependency(" +
+                        "groupId=" + this.groupId() + ", " +
+                        "artifactId=" + this.artifactId() + ", " +
+                        "version=" + this.version() + ", " +
+                        "repoUrl=" + this.repoUrl() + ")";
+            }
         }
-        
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) return true;
-            if (!(o instanceof Dependency)) return false;
-            final Dependency other = (Dependency) o;
-            return this.getGroupId().equals(other.getGroupId()) &&
-                    this.getArtifactId().equals(other.getArtifactId()) &&
-                    this.getVersion().equals(other.getVersion()) &&
-                    this.getRepoUrl().equals(other.getRepoUrl());
-        }
-        
-        @Override
-        public int hashCode() {
-            final int PRIME = 59;
-            int result = 1;
-            result = result * PRIME + this.getGroupId().hashCode();
-            result = result * PRIME + this.getArtifactId().hashCode();
-            result = result * PRIME + this.getVersion().hashCode();
-            result = result * PRIME + this.getRepoUrl().hashCode();
-            return result;
-        }
-        
-        @Override
-        public String toString() {
-            return "LibraryLoader.Dependency(" +
-                    "groupId=" + this.getGroupId() + ", " +
-                    "artifactId=" + this.getArtifactId() + ", " +
-                    "version=" + this.getVersion() + ", " +
-                    "repoUrl=" + this.getRepoUrl() + ")";
-        }
-    }
 }

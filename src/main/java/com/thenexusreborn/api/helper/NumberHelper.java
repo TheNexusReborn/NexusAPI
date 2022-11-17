@@ -29,9 +29,7 @@ public final class NumberHelper {
         StringBuilder res = new StringBuilder();
         for (Map.Entry<String, Integer> entry : romanNumerals.entrySet()) {
             int matches = number / entry.getValue();
-            for (int i = 0; i < matches; i++) {
-                res.append(entry.getKey());
-            }
+            res.append(String.valueOf(entry.getKey()).repeat(Math.max(0, matches)));
             number = number % entry.getValue();
         }
         return res.toString();

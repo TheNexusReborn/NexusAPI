@@ -1,8 +1,6 @@
 package com.thenexusreborn.api.player;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Objects;
 
 public enum Rank {
     NEXUS("&4", true, 10), 
@@ -64,11 +62,7 @@ public enum Rank {
         if (bold) {
             prefix += "&l";
         }
-        if (prefixOverride != null) {
-            prefix += prefixOverride;
-        } else {
-            prefix += name();
-        }
+        prefix += Objects.requireNonNullElseGet(prefixOverride, this::name);
         return prefix;
     }
     

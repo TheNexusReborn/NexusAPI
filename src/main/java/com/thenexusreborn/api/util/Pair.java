@@ -1,29 +1,14 @@
 package com.thenexusreborn.api.util;
 
-/**
- * A class representing a pair of objects
- */
-public class Pair<K, V> {
+public record Pair<K, V>(K firstValue, V secondValue) {
     
-    private final K firstValue;
-    private final V secondValue;
-    
-    public Pair(K firstValue, V secondValue) {
-        this.firstValue = firstValue;
-        this.secondValue = secondValue;
-    }
-    
-    /**
-     * @return First object
-     */
-    public K getFirstValue() {
+    @Override
+    public K firstValue() {
         return firstValue;
     }
-
-    /**
-     * @return Second object
-     */
-    public V getSecondValue() {
+    
+    @Override
+    public V secondValue() {
         return secondValue;
     }
 }

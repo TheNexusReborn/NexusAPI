@@ -269,8 +269,7 @@ public class Database {
                     }
                 }
             
-                if (value instanceof String) {
-                    String str = (String) value;
+                if (value instanceof String str) {
                     str = str.replace("\\", "\\\\");
                     str = str.replace("'", "\\'");
                     value = str;
