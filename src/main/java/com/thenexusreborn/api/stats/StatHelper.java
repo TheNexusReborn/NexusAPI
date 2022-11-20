@@ -187,23 +187,24 @@ public final class StatHelper {
         }
         
         try {
-            if (type == StatType.INTEGER) {
-                return Integer.parseInt(raw);
-            } else if (type == StatType.DOUBLE) {
-                return Double.parseDouble(raw);
-            } else if (type == StatType.LONG) {
-                return Long.parseLong(raw);
-            } else if (type == StatType.BOOLEAN) {
-                return Boolean.parseBoolean(raw);
-            } else if (type == StatType.STRING) {
-                return raw;
-            } else if (type == StatType.STRING_SET) {
-                Set<String> value = (Set<String>) type.getDefaultValue();
-                String[] split = raw.split(",");
-                if (split != null) {
-                    value.addAll(Arrays.asList(split));
-                }
-                return value;
+            switch (type) {
+                case INTEGER:
+                    return Integer.parseInt(raw);
+                case DOUBLE:
+                    return Double.parseDouble(raw);
+                case LONG:
+                    return Long.parseLong(raw);
+                case BOOLEAN:
+                    return Boolean.parseBoolean(raw);
+                case STRING:
+                    return raw;
+                case STRING_SET:
+                    Set<String> value = (Set<String>) type.getDefaultValue();
+                    String[] split = raw.split(",");
+                    if (split != null) {
+                        value.addAll(Arrays.asList(split));
+                    }
+                    return value;
             }
         } catch (Exception e) {
             e.printStackTrace();

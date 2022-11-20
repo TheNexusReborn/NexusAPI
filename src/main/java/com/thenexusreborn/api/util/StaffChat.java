@@ -48,23 +48,23 @@ public final class StaffChat {
             }
     
             displayName = nexusPlayer.getRanks().get().getColor() + nexusPlayer.getName();
-            if (event.equals("chat")) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 2; i < args.length; i++) {
-                    sb.append(args[i]).append(" ");
+            switch (event) {
+                case "chat" -> {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 2; i < args.length; i++) {
+                        sb.append(args[i]).append(" ");
+                    }
+                    String message = sb.toString().trim();
+                    format = "{prefix} {displayName}&8: &f" + message;
+                    displayName = nexusPlayer.getRanks().get().getPrefix() + nexusPlayer.getRanks().get().getColor() + " " + nexusPlayer.getName();
                 }
-        
-                String message = sb.toString().trim();
-                format = "{prefix} {displayName}&8: &f" + message;
-                displayName = nexusPlayer.getRanks().get().getPrefix() + nexusPlayer.getRanks().get().getColor() + " " + nexusPlayer.getName();
-            } else if (event.equals("join")) {
-                format = "{prefix} {displayName} &7&l-> &6{origin}";
-            } else if (event.equals("disconnect")) {
-                format = "{prefix} {displayName} &7disconnected";
-            } else if (event.equals("anticheat")) {
-                String hack = args[2];
-                int violation = Integer.parseInt(args[3]);
-                format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
+                case "join" -> format = "{prefix} {displayName} &7&l-> &6{origin}";
+                case "disconnect" -> format = "{prefix} {displayName} &7disconnected";
+                case "anticheat" -> {
+                    String hack = args[2];
+                    int violation = Integer.parseInt(args[3]);
+                    format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
+                }
             }
         } catch (Exception e) {
             if (event.contains("punishment")) {

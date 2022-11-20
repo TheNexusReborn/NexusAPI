@@ -115,20 +115,16 @@ public abstract class NexusAPI {
             NexusPlayer nexusPlayer = getPlayerManager().getNexusPlayer(uuid);
             CachedPlayer cachedPlayer = getPlayerManager().getCachedPlayer(uuid);
             if (nexusPlayer != null) {
-                if (action.equals("add")) {
-                    nexusPlayer.getRanks().add(rank, expire);
-                } else if (action.equals("remove")) {
-                    nexusPlayer.getRanks().remove(rank);
-                } else if (action.equals("set")) {
-                    nexusPlayer.getRanks().set(rank, expire);
+                switch (action) {
+                    case "add" -> nexusPlayer.getRanks().add(rank, expire);
+                    case "remove" -> nexusPlayer.getRanks().remove(rank);
+                    case "set" -> nexusPlayer.getRanks().set(rank, expire);
                 }
             } else if (cachedPlayer != null) {
-                if (action.equals("add")) {
-                    cachedPlayer.getRanks().add(rank, expire);
-                } else if (action.equals("remove")) {
-                    cachedPlayer.getRanks().remove(rank);
-                } else if (action.equals("set")) {
-                    cachedPlayer.getRanks().set(rank, expire);
+                switch (action) {
+                    case "add" -> cachedPlayer.getRanks().add(rank, expire);
+                    case "remove" -> cachedPlayer.getRanks().remove(rank);
+                    case "set" -> cachedPlayer.getRanks().set(rank, expire);
                 }
             }
         }));
