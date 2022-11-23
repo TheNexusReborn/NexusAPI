@@ -2,13 +2,15 @@ package com.thenexusreborn.api.scoreboard;
 
 import com.thenexusreborn.api.scoreboard.wrapper.*;
 
-import java.util.List;
+import java.util.*;
 
 public abstract class ScoreboardView {
     
     protected final NexusScoreboard scoreboard;
     protected final String name;
     protected final String displayName;
+    protected final Set<ITeam> teams = new HashSet<>();
+    protected IObjective objective;
     
     public ScoreboardView(NexusScoreboard scoreboard, String name, String displayName) {
         this.scoreboard = scoreboard;
@@ -16,12 +18,16 @@ public abstract class ScoreboardView {
         this.displayName = displayName;
     }
     
-    protected IObjective objective;
-    
     public abstract void registerTeams();
-    public abstract void update();
+    
+    public void update() {
+        for (ITeam team : getTeams()) {
+            if (team.getValueUpdater() != null) {
+                team.getValueUpdater().update(scoreboard.getPlayer(), team);
+            }
+        }
+    }
     public abstract void registerObjective();
-    public abstract List<String> getTeams();
     
     protected void addEntry(IObjective objective, ITeam team, String text, int score) {
         team.addEntry(text);
@@ -32,9 +38,11 @@ public abstract class ScoreboardView {
         return objective;
     }
     
-    public abstract ITeam createTeam(String teamName, String entry, int score);
+    public Set<ITeam> getTeams() {
+        return teams;
+    }
     
-    public abstract ITeam createTeam(String teamName, String entry, String prefix, int score);
+    public abstract ITeam createTeam(TeamBuilder teamBuilder);
     
-    public abstract ITeam createTeam(String teamName, String entry, String prefix, String suffix, int score);
+    public abstract void unregisterTeams();
 }

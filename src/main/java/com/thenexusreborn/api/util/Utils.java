@@ -1,10 +1,15 @@
 package com.thenexusreborn.api.util;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public final class Utils {
     
     private static final String alphabet = "abcdefghigklmnopqrstuvwzyz", numbers = "0123456789";
+    
+    public static String formatNumber(Number number) {
+        return new DecimalFormat("#.#").format(number);
+    }
     
     public static String generateCode(int amount, boolean caps, boolean useAlphabet, boolean useNumbers) {
         if (!useAlphabet && !useNumbers) {

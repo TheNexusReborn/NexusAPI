@@ -34,15 +34,7 @@ public abstract class NexusScoreboard {
     public void setView(ScoreboardView view) {
         if (this.view != null) {
             this.view.getObjective().unregister();
-            for (String team : this.view.getTeams()) {
-                try {
-                    ITeam registeredTeam = this.scoreboard.getTeam(team);
-                    for (String entry : registeredTeam.getEntries()) {
-                        scoreboard.resetScores(entry);
-                    }
-                    registeredTeam.unregister();
-                } catch (IllegalArgumentException e) {}
-            }
+            this.view.unregisterTeams();
         }
 
         if (view != null) {
