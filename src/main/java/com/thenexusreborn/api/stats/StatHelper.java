@@ -62,25 +62,7 @@ public final class StatHelper {
     public static StatChange changeStat(Stat stat, StatOperator operator, Object value) {
         Object newValue = null;
     
-        if (stat.getType() == StatType.STRING_SET) {
-            Set<String> oldValue = stat.getValue().getAsStringSet();
-            if (oldValue == null) {
-                oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
-            }
-            if (operator == StatOperator.ADD) {
-                oldValue.add((String) value);
-            } else if (operator == StatOperator.SUBTRACT) {
-                oldValue.remove((String) value);
-            } else if (operator == StatOperator.RESET) {
-                oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
-            } else if (operator == StatOperator.SET) {
-                oldValue.clear();
-                Set<String> nv = (Set<String>) value;
-                oldValue.addAll(nv);
-            }
-            
-            newValue = oldValue;
-        } else if (operator == StatOperator.SET) {
+        if (operator == StatOperator.SET) {
             newValue = value;
         } else if (operator == StatOperator.RESET) {
             newValue = getInfo(stat.getName()).getDefaultValue();
@@ -89,7 +71,7 @@ public final class StatHelper {
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
             } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
-                double calculated = calculate(operator, (Number) stat.getValue().get(), (Number) value);
+                double calculated = calculate(operator, (Number) oldValue, (Number) value);
                 if (stat.getType() == StatType.INTEGER) {
                     newValue = (int) calculated;
                 } else if (stat.getType() == StatType.DOUBLE) {
