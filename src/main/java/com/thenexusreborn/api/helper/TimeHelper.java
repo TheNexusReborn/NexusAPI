@@ -8,17 +8,17 @@ import java.util.*;
 
 public final class TimeHelper {
     public static long parseTime(String rawTime) {
-        Map.Entry<Long, String> years = extractRawTime(rawTime, Unit.YEARS);
-        Map.Entry<Long, String> months = extractRawTime(years.getValue(), Unit.MONTHS);
-        Map.Entry<Long, String> weeks = extractRawTime(months.getValue(), Unit.WEEKS);
-        Map.Entry<Long, String> days = extractRawTime(weeks.getValue(), Unit.DAYS);
-        Map.Entry<Long, String> hours = extractRawTime(days.getValue(), Unit.HOURS);
-        Map.Entry<Long, String> minutes = extractRawTime(hours.getValue(), Unit.MINUTES);
-        Map.Entry<Long, String> seconds = extractRawTime(minutes.getValue(), Unit.SECONDS);
+        Map.Entry<Long, String> years = extractRawTime(rawTime, TimeUnit.YEARS);
+        Map.Entry<Long, String> months = extractRawTime(years.getValue(), TimeUnit.MONTHS);
+        Map.Entry<Long, String> weeks = extractRawTime(months.getValue(), TimeUnit.WEEKS);
+        Map.Entry<Long, String> days = extractRawTime(weeks.getValue(), TimeUnit.DAYS);
+        Map.Entry<Long, String> hours = extractRawTime(days.getValue(), TimeUnit.HOURS);
+        Map.Entry<Long, String> minutes = extractRawTime(hours.getValue(), TimeUnit.MINUTES);
+        Map.Entry<Long, String> seconds = extractRawTime(minutes.getValue(), TimeUnit.SECONDS);
         return years.getKey() + months.getKey() + weeks.getKey() + days.getKey() + hours.getKey() + minutes.getKey() + seconds.getKey();
     }
     
-    private static Map.Entry<Long, String> extractRawTime(String rawTime, Unit unit) {
+    private static Map.Entry<Long, String> extractRawTime(String rawTime, TimeUnit unit) {
         rawTime = rawTime.toLowerCase();
         String[] rawArray;
         for (String alias : unit.getAliases()) {
