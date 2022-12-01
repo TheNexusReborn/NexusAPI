@@ -434,7 +434,7 @@ public abstract class NexusAPI {
         Logger logger = NexusAPI.getApi().getLogger();
         logger.log(level, "----------- Nexus Log -----------");
         logger.log(level, mainMessage);
-        if (debug != null && debug.length > 0) {
+        if (debug != null) {
             for (String s : debug) {
                 logger.log(level, s);
             }

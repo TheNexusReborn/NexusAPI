@@ -19,7 +19,7 @@ public class PacketEncoder extends MessageToByteEncoder<NexusPacket> {
             out.writeInt(msg.data().length);
         }
         
-        if (msg.data() != null && msg.data().length > 0) {
+        if (msg.data() != null) {
             for (String data : msg.data()) {
                 out.writeInt(data.length());
                 out.writeCharSequence(data, NexusPacket.CHARSET);

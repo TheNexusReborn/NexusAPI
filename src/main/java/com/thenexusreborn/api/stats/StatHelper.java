@@ -170,23 +170,29 @@ public final class StatHelper {
         
         try {
             switch (type) {
-                case INTEGER:
+                case INTEGER -> {
                     return Integer.parseInt(raw);
-                case DOUBLE:
+                }
+                case DOUBLE -> {
                     return Double.parseDouble(raw);
-                case LONG:
+                }
+                case LONG -> {
                     return Long.parseLong(raw);
-                case BOOLEAN:
+                }
+                case BOOLEAN -> {
                     return Boolean.parseBoolean(raw);
-                case STRING:
+                }
+                case STRING -> {
                     return raw;
-                case STRING_SET:
+                }
+                case STRING_SET -> {
                     Set<String> value = (Set<String>) type.getDefaultValue();
                     String[] split = raw.split(",");
                     if (split != null) {
                         value.addAll(Arrays.asList(split));
                     }
                     return value;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
