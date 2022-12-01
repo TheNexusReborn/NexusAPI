@@ -219,6 +219,7 @@ public abstract class NexusAPI {
                 database.registerClass(Nickname.class);
                 database.registerClass(Tag.class);
                 database.registerClass(PrivateAlphaUser.class);
+                database.registerClass(Session.class);
                 this.primaryDatabase = database;
                 getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
