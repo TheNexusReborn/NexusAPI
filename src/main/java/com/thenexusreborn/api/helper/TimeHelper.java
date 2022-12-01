@@ -42,8 +42,7 @@ public final class TimeHelper {
                     rawLength = Integer.parseInt(sb.toString());
                 }
                 rawTime = rawTime.replace(rawLength + alias, "");
-
-                return new AbstractMap.SimpleEntry<>(unit.convertTime(rawLength), rawTime);
+                return new AbstractMap.SimpleEntry<>(unit.toMilliseconds(rawLength), rawTime);
             }
         }
 
