@@ -3,12 +3,6 @@ package com.thenexusreborn.api.util;
 import java.text.DecimalFormat;
 import java.util.*;
 
-/**
- * 0 or # to represent the didgit and then use any alias in the TimeUnit (nexus) class to signify the type. This is with the % operator in front 
- * and behind the format. Anything else is ignored
- * For the 0 or # ones, please follow the rules for the Java Decimal Format class
- * Example: %00seconds%s with given input in milliseconds 5000 will display 05s
- */
 public class TimeFormat {
     
     private static final Comparator<TimeUnit> UNIT_COMPARATOR = (o1, o2) -> {
