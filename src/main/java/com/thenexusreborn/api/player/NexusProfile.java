@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.player;
 
-import com.thenexusreborn.api.stats.StatOperator;
+import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.annotations.ColumnIgnored;
 import com.thenexusreborn.api.storage.annotations.ColumnInfo;
 import com.thenexusreborn.api.storage.annotations.Primary;
@@ -63,10 +63,10 @@ public abstract class NexusProfile {
     }
 
     public String getDisplayName() {
-        if (getRanks().get() != Rank.MEMBER) {
-            return getRanks().get().getPrefix() + " &f" + getName();
+        if (getRank() != Rank.MEMBER) {
+            return getRank().getPrefix() + " &f" + getName();
         } else {
-            return getRanks().get().getPrefix() + getName();
+            return getRank().getPrefix() + getName();
         }
     }
     
@@ -125,6 +125,30 @@ public abstract class NexusProfile {
         }
         return stats;
     }
+    
+    public StatValue getStatValue(String statName) {
+        return getStats().getValue(statName);
+    }
+    
+    public void changeStat(String statName, Object value, StatOperator operator) {
+        getStats().change(statName, value, operator);
+    }
+    
+    public void addStatChange(StatChange change) {
+        getStats().addChange(change);
+    }
+    
+    public Stat getStat(String statName) {
+        return getStats().get(statName);
+    }
+    
+    public void clearStatChanges() {
+        getStats().clearChanges();
+    }
+    
+    public void addStat(Stat stat) {
+        getStats().add(stat);
+    }
 
     public void addCredits(int credits) {
         getStats().change("credits", credits, StatOperator.ADD);
@@ -165,36 +189,32 @@ public abstract class NexusProfile {
         return ranks;
     }
     
+    public Rank getRank() {
+        return getRanks().get();
+    }
+    
+    public void addRank(Rank rank, long expire) {
+        getRanks().add(rank, expire);
+    }
+    
+    public void setRank(Rank rank, long expire) {
+        getRanks().set(rank, expire);
+    }
+    
+    public void removeRank(Rank rank) {
+        getRanks().remove(rank);
+    }
+    
+    public boolean hasRank(Rank rank) {
+        return getRanks().contains(rank);
+    }
+    
     public boolean isOnline() {
         return getStats().getValue("online").getAsBoolean();
     }
     
     public void setOnline(boolean online) {
         getStats().change("online", online, StatOperator.SET);
-    }
-    
-    public boolean isVanish() {
-        return getToggles().getValue("vanish");
-    }
-
-    public void setVanish(boolean vanish) {
-        getToggles().setValue("vanish", vanish);
-    }
-
-    public boolean isIncognito() {
-        return getToggles().getValue("incognito");
-    }
-
-    public void setIncognito(boolean incognito) {
-        getToggles().setValue("incognito", incognito);
-    }
-    
-    public boolean isFly() {
-        return getToggles().getValue("fly");
-    }
-    
-    public void setFly(boolean fly) {
-        getToggles().setValue("fly", fly);
     }
     
     public String getServer() {
@@ -209,8 +229,20 @@ public abstract class NexusProfile {
         return toggles;
     }
     
+    public Toggle getToggle(String toggleName) {
+        return getToggles().get(toggleName);
+    }
+    
+    public boolean getToggleValue(String toggleName) {
+        return getToggles().getValue(toggleName);
+    }
+    
+    public void setToggleValue(String toggleName, boolean value) {
+        getToggles().setValue(toggleName, value);
+    }
+    
     public String getColoredName() {
-        return getRanks().get().getColor() + getName();
+        return getRank().getColor() + getName();
     }
     
     public void removeCredits(int credits) {
@@ -222,5 +254,9 @@ public abstract class NexusProfile {
             tags.setUuid(this.uniqueId);
         }
         return tags;
+    }
+    
+    public void addToggle(Toggle toggle) {
+        getToggles().add(toggle);
     }
 }

@@ -112,19 +112,13 @@ public abstract class NexusAPI {
             Rank rank = Rank.parseRank(args[2]);
             long expire = args.length > 3 ? Long.parseLong(args[3]) : -1;
             
-            NexusPlayer nexusPlayer = getPlayerManager().getNexusPlayer(uuid);
-            CachedPlayer cachedPlayer = getPlayerManager().getCachedPlayer(uuid);
-            if (nexusPlayer != null) {
+            NexusProfile profile = getPlayerManager().getProfile(uuid);
+            
+            if (profile != null) {
                 switch (action) {
-                    case "add" -> nexusPlayer.getRanks().add(rank, expire);
-                    case "remove" -> nexusPlayer.getRanks().remove(rank);
-                    case "set" -> nexusPlayer.getRanks().set(rank, expire);
-                }
-            } else if (cachedPlayer != null) {
-                switch (action) {
-                    case "add" -> cachedPlayer.getRanks().add(rank, expire);
-                    case "remove" -> cachedPlayer.getRanks().remove(rank);
-                    case "set" -> cachedPlayer.getRanks().set(rank, expire);
+                    case "add" -> profile.addRank(rank, expire);
+                    case "remove" -> profile.removeRank(rank);
+                    case "set" -> profile.setRank(rank, expire);
                 }
             }
         }));
@@ -166,7 +160,7 @@ public abstract class NexusAPI {
             Object value = StatHelper.parseValue(info.getType(), args[3]);
             NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
             StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
-            profile.getStats().addChange(statChange);
+            profile.addStatChange(statChange);
         }));
         
         networkCommandRegistry.register(new NetworkCommand("updateprivatealpha", (cmd, origin, args) -> {
@@ -264,9 +258,9 @@ public abstract class NexusAPI {
         getLogger().info("Registered Stat types");
         
         toggleRegistry = new ToggleRegistry();
-        toggleRegistry.register("vanish", "Vanish", "A staff only thing where you can be completely invisible", false);
-        toggleRegistry.register("incognito", "Incognito", "A media+ thing where you can be hidden from others", false);
-        toggleRegistry.register("fly", "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
+        toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
+        toggleRegistry.register("incognito", Rank.MEDIA, "Incognito", "A media+ thing where you can be hidden from others", false);
+        toggleRegistry.register("fly", Rank.DIAMOND, "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
         registerToggles(toggleRegistry);
         
@@ -344,13 +338,8 @@ public abstract class NexusAPI {
             if (player == null) {
                 continue;
             }
-            if (name.equalsIgnoreCase("vanish")) {
-                player.setVanish(value);
-            } else if (name.equalsIgnoreCase("incognito")) {
-                player.setIncognito(value);
-            } else if (name.equalsIgnoreCase("fly")) {
-                player.setFly(value);
-            }
+            
+            player.setToggleValue(name.toLowerCase(), value);
         }
         getLogger().info("Loaded toggle info for player profiles: Incognito, Vanish and Fly");
 

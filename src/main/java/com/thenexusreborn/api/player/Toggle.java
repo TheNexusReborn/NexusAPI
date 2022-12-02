@@ -83,14 +83,16 @@ public class Toggle {
     public static class Info {
         @Primary private long id;
         private String name, displayName, description;
+        private Rank minRank;
         private boolean defaultValue;
         @ColumnIgnored
         private Handler handler;
         
         private Info() {}
         
-        public Info(String name, String displayName, String description, boolean defaultValue) {
+        public Info(String name, Rank minRank, String displayName, String description, boolean defaultValue) {
             this.name = name;
+            this.minRank = minRank;
             this.displayName = displayName;
             this.description = description;
             this.defaultValue = defaultValue;
@@ -99,7 +101,11 @@ public class Toggle {
         public String getName() {
             return name;
         }
-        
+    
+        public Rank getMinRank() {
+            return minRank;
+        }
+    
         public String getDisplayName() {
             return displayName;
         }

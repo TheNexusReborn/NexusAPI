@@ -97,11 +97,11 @@ public final class StatHelper {
                     NexusAPI.getApi().getLogger().info("Stat Change for stat " + statChange.getStatName() + " had an ID of 0");
                     continue;
                 }
-                Stat stat = player.getStats().get(statChange.getStatName());
+                Stat stat = player.getStat(statChange.getStatName());
                 if (stat == null) {
                     Info info = getInfo(statChange.getStatName());
                     stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
-                    player.getStats().add(stat);
+                    player.addStat(stat);
                 }
         
                 if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
@@ -119,7 +119,7 @@ public final class StatHelper {
                     NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
             }
-            player.getStats().clearChanges();
+            player.clearStatChanges();
         } catch (SQLException e) {
             e.printStackTrace();
         }
