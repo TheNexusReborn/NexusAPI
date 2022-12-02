@@ -73,7 +73,7 @@ public final class FileHelper {
                     Files.createDirectories(dest.resolve(src.relativize(dir)));
                     return FileVisitResult.CONTINUE;
                 }
-    
+                
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                         throws IOException {
@@ -102,14 +102,30 @@ public final class FileHelper {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }
-    
+
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                     Files.delete(dir);
                     return FileVisitResult.CONTINUE;
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            String osName = System.getProperty("os.name").toLowerCase();
+            String[] cmd;
+            if (osName.contains("windows")) {
+                cmd = new String[]{"powershell.exe", "Remove-Item", "-Path", "'" + directory.toAbsolutePath() + "'", "-r", "-fo"};
+            } else if (osName.contains("ubuntu") || osName.contains("linux")) {
+                cmd = new String[]{"rm", "-rf", directory.toAbsolutePath().toString()};
+            } else {
+                cmd = null;
+            }
+    
+            try {
+                Process process = new ProcessBuilder().command(cmd).start();
+                process.waitFor();
+                process.getOutputStream().close();
+            } catch (IOException | InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
