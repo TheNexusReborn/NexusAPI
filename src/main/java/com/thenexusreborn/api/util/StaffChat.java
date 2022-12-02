@@ -31,9 +31,10 @@ public final class StaffChat {
     
     private static final NetworkManager NETWORK = NexusAPI.getApi().getNetworkManager();
     
+    public static final String PREFIX = "&2&l[&aSTAFF&2&l]";
+    
     public static void handleIncoming(NetworkCommand cmd, String origin, String[] args) {
         String event = args[0];
-        String prefix = "&2&l[&aSTAFF&2&l]";
         String format = "";
         String displayName = "";
         Rank rank = null;
@@ -116,7 +117,7 @@ public final class StaffChat {
             }
         }
         
-        format = format.replace("{prefix}", prefix).replace("{displayName}", displayName).replace("{origin}", origin);
+        format = format.replace("{prefix}", PREFIX).replace("{displayName}", displayName).replace("{origin}", origin);
     
         for (NexusPlayer player : new ArrayList<>(NexusAPI.getApi().getPlayerManager().getPlayers().values())) {
             if (player.isOnline()) {
