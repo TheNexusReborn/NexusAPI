@@ -68,8 +68,21 @@
             </resource>
         </resources>
     </build>
+    
+    <repositories>
+        <repository>
+            <id>starmediadev</id>
+            <url>https://repo.starmediadev.com/snapshots/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.starmediadev</groupId>
+            <artifactId>StarLib</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
