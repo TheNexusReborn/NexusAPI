@@ -37,7 +37,7 @@ public class RanksCodec extends SqlCodec<PlayerRanks> {
         }
     
         String[] rawRanks = encoded.split(",");
-        if (rawRanks == null || rawRanks.length == 0) {
+        if (rawRanks == null) {
             return playerRanks;
         }
     

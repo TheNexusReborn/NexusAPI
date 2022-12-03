@@ -30,7 +30,7 @@ public class PlayerObjectHandler extends ObjectHandler {
             List<Stat> stats = new ArrayList<>(database.get(Stat.class, "uuid", player.getUniqueId()));
             
             for (Stat stat : stats) {
-                player.getStats().add(stat);
+                player.addStat(stat);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -39,7 +39,7 @@ public class PlayerObjectHandler extends ObjectHandler {
         try {
             List<StatChange> statChanges = database.get(StatChange.class, "uuid", player.getUniqueId());
             for (StatChange statChange : statChanges) {
-                player.getStats().addChange(statChange);
+                player.addStatChange(statChange);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -61,7 +61,7 @@ public class PlayerObjectHandler extends ObjectHandler {
             e.printStackTrace();
         }
 
-        player.getTags().setActive(player.getStats().getValue("tag").getAsString());
+        player.getTags().setActive(player.getStatValue("tag").getAsString());
     }
     
     @Override

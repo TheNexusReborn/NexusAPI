@@ -53,7 +53,7 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public String getTablistName() {
-        if (getRanks().get() == Rank.MEMBER) {
+        if (getRank() == Rank.MEMBER) {
             return Rank.MEMBER.getColor() + getName();
         } else {
             return "&f" + getName();

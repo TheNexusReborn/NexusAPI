@@ -62,25 +62,7 @@ public final class StatHelper {
     public static StatChange changeStat(Stat stat, StatOperator operator, Object value) {
         Object newValue = null;
     
-        if (stat.getType() == StatType.STRING_SET) {
-            Set<String> oldValue = stat.getValue().getAsStringSet();
-            if (oldValue == null) {
-                oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
-            }
-            if (operator == StatOperator.ADD) {
-                oldValue.add((String) value);
-            } else if (operator == StatOperator.SUBTRACT) {
-                oldValue.remove((String) value);
-            } else if (operator == StatOperator.RESET) {
-                oldValue = (Set<String>) StatType.STRING_SET.getDefaultValue();
-            } else if (operator == StatOperator.SET) {
-                oldValue.clear();
-                Set<String> nv = (Set<String>) value;
-                oldValue.addAll(nv);
-            }
-            
-            newValue = oldValue;
-        } else if (operator == StatOperator.SET) {
+        if (operator == StatOperator.SET) {
             newValue = value;
         } else if (operator == StatOperator.RESET) {
             newValue = getInfo(stat.getName()).getDefaultValue();
@@ -89,7 +71,7 @@ public final class StatHelper {
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
             } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
-                double calculated = calculate(operator, (Number) stat.getValue().get(), (Number) value);
+                double calculated = calculate(operator, (Number) oldValue, (Number) value);
                 if (stat.getType() == StatType.INTEGER) {
                     newValue = (int) calculated;
                 } else if (stat.getType() == StatType.DOUBLE) {
@@ -115,11 +97,11 @@ public final class StatHelper {
                     NexusAPI.getApi().getLogger().info("Stat Change for stat " + statChange.getStatName() + " had an ID of 0");
                     continue;
                 }
-                Stat stat = player.getStats().get(statChange.getStatName());
+                Stat stat = player.getStat(statChange.getStatName());
                 if (stat == null) {
                     Info info = getInfo(statChange.getStatName());
                     stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
-                    player.getStats().add(stat);
+                    player.addStat(stat);
                 }
         
                 if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
@@ -137,7 +119,7 @@ public final class StatHelper {
                     NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
             }
-            player.getStats().clearChanges();
+            player.clearStatChanges();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -188,23 +170,29 @@ public final class StatHelper {
         
         try {
             switch (type) {
-                case INTEGER:
+                case INTEGER -> {
                     return Integer.parseInt(raw);
-                case DOUBLE:
+                }
+                case DOUBLE -> {
                     return Double.parseDouble(raw);
-                case LONG:
+                }
+                case LONG -> {
                     return Long.parseLong(raw);
-                case BOOLEAN:
+                }
+                case BOOLEAN -> {
                     return Boolean.parseBoolean(raw);
-                case STRING:
+                }
+                case STRING -> {
                     return raw;
-                case STRING_SET:
+                }
+                case STRING_SET -> {
                     Set<String> value = (Set<String>) type.getDefaultValue();
                     String[] split = raw.split(",");
                     if (split != null) {
                         value.addAll(Arrays.asList(split));
                     }
                     return value;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

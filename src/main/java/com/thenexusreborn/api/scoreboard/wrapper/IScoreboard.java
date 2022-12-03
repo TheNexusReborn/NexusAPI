@@ -1,7 +1,5 @@
 package com.thenexusreborn.api.scoreboard.wrapper;
 
-import com.thenexusreborn.api.scoreboard.wrapper.ITeam;
-
 import java.util.Set;
 
 public interface IScoreboard {

@@ -31,9 +31,10 @@ public final class StaffChat {
     
     private static final NetworkManager NETWORK = NexusAPI.getApi().getNetworkManager();
     
+    public static final String PREFIX = "&2&l[&aSTAFF&2&l]";
+    
     public static void handleIncoming(NetworkCommand cmd, String origin, String[] args) {
         String event = args[0];
-        String prefix = "&2&l[&aSTAFF&2&l]";
         String format = "";
         String displayName = "";
         Rank rank = null;
@@ -47,7 +48,7 @@ public final class StaffChat {
                 }
             }
     
-            displayName = nexusPlayer.getRanks().get().getColor() + nexusPlayer.getName();
+            displayName = nexusPlayer.getRank().getColor() + nexusPlayer.getName();
             switch (event) {
                 case "chat" -> {
                     StringBuilder sb = new StringBuilder();
@@ -56,7 +57,7 @@ public final class StaffChat {
                     }
                     String message = sb.toString().trim();
                     format = "{prefix} {displayName}&8: &f" + message;
-                    displayName = nexusPlayer.getRanks().get().getPrefix() + nexusPlayer.getRanks().get().getColor() + " " + nexusPlayer.getName();
+                    displayName = nexusPlayer.getRank().getPrefix() + nexusPlayer.getRank().getColor() + " " + nexusPlayer.getName();
                 }
                 case "join" -> format = "{prefix} {displayName} &7&l-> &6{origin}";
                 case "disconnect" -> format = "{prefix} {displayName} &7disconnected";
@@ -116,11 +117,11 @@ public final class StaffChat {
             }
         }
         
-        format = format.replace("{prefix}", prefix).replace("{displayName}", displayName).replace("{origin}", origin);
+        format = format.replace("{prefix}", PREFIX).replace("{displayName}", displayName).replace("{origin}", origin);
     
         for (NexusPlayer player : new ArrayList<>(NexusAPI.getApi().getPlayerManager().getPlayers().values())) {
             if (player.isOnline()) {
-                if (player.getRanks().get().ordinal() <= Rank.HELPER.ordinal()) {
+                if (player.getRank().ordinal() <= Rank.HELPER.ordinal()) {
                     player.sendMessage(format);
                 }
             }
