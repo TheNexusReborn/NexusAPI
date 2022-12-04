@@ -1,10 +1,12 @@
 package com.thenexusreborn.api.punishment;
 
+import com.starmediadev.starlib.TimeFormat;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.annotations.*;
 import com.thenexusreborn.api.storage.codec.*;
 import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.CachedPlayer;
+import com.thenexusreborn.api.util.Constants;
 
 import java.util.UUID;
 
@@ -179,19 +181,18 @@ public class Punishment implements Comparable<Punishment> {
     }
     
     public String formatTimeLeft() {
-        String expires = "";
         long timeRemaining = getTimeRemaining();
         if (type == PunishmentType.KICK || type == PunishmentType.WARN) {
-            return expires;
+            return "";
         }
         if (timeRemaining == -1) {
-            expires = "Permanent";
+            return "Permanent";
         } else if (timeRemaining == -2) {
-            expires = "Expired";
+            return "Expired";
         } else if (getTimeRemaining() >= 1) {
-            expires = TimeHelper.formatTime(timeRemaining);
+            return Constants.PUNISHMENT_TIME_FORMAT.format(timeRemaining);
         }
-        return expires;
+        return "";
     }
     
     public String formatKick() {
