@@ -21,6 +21,7 @@
         <netty.version>4.1.85.Final</netty.version>
         <javaxml.api.version>2.3.1</javaxml.api.version>
         <javaxml.impl.version>4.0.0</javaxml.impl.version>
+        <starlib.version>1.1.1-SNAPSHOT</starlib.version>
     </properties>
 
     <build>
@@ -80,7 +81,7 @@
         <dependency>
             <groupId>com.starmediadev</groupId>
             <artifactId>StarLib</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${starlib.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -92,7 +93,6 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <!--suppress MavenPackageUpdate -->
             <version>${gson.version}</version>
             <scope>provided</scope>
         </dependency>
