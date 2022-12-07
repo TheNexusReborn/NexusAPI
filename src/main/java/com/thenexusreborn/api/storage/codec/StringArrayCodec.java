@@ -2,7 +2,7 @@ package com.thenexusreborn.api.storage.codec;
 
 import com.thenexusreborn.api.storage.objects.SqlCodec;
 
-public class StringArrayCodec extends SqlCodec<String[]> {
+public class StringArrayCodec implements SqlCodec<String[]> {
     @Override
     public String encode(Object object) {
         String[] value = (String[]) object;

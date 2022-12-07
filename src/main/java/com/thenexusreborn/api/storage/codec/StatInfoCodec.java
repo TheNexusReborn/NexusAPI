@@ -5,7 +5,7 @@ import com.thenexusreborn.api.storage.objects.SqlCodec;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 
-public class StatInfoCodec extends SqlCodec<Stat.Info> {
+public class StatInfoCodec implements SqlCodec<Info> {
     @Override
     public String encode(Object object) {
         return ((Stat.Info) object).getName();

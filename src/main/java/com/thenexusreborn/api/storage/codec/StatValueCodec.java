@@ -3,7 +3,7 @@ package com.thenexusreborn.api.storage.codec;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.objects.SqlCodec;
 
-public class StatValueCodec extends SqlCodec<StatValue> {
+public class StatValueCodec implements SqlCodec<StatValue> {
     @Override
     public String encode(Object object) {
         StatValue statValue = (StatValue) object;

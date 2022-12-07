@@ -6,7 +6,7 @@ import com.thenexusreborn.api.player.*;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class RanksCodec extends SqlCodec<PlayerRanks> {
+public class RanksCodec implements SqlCodec<PlayerRanks> {
     @Override
     public String encode(Object object) {
         Map<Rank, Long> ranks = ((PlayerRanks) object).findAll();
