@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.player;
 
+import com.thenexusreborn.api.frameworks.value.Value;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.annotations.ColumnIgnored;
 import com.thenexusreborn.api.storage.annotations.ColumnInfo;
@@ -126,7 +127,7 @@ public abstract class NexusProfile {
         return stats;
     }
     
-    public StatValue getStatValue(String statName) {
+    public Value getStatValue(String statName) {
         return getStats().getValue(statName);
     }
     

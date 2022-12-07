@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.frameworks.value.Value;
 import com.thenexusreborn.api.stats.*;
 
 import java.util.*;
@@ -33,14 +34,14 @@ public class PlayerStats {
         return stats;
     }
     
-    public StatValue getValue(String statName) {
+    public Value getValue(String statName) {
         Stat stat = get(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
             stat = new Stat(info, this.uniqueId, System.currentTimeMillis());
             
-            if (this.statChanges.size() == 0) {
-                return new StatValue(info.getType(), info.getDefaultValue());
+            if (this.statChanges.isEmpty()) {
+                return new Value(info.getType().getValueType(), info.getDefaultValue());
             }
         }
         
@@ -59,13 +60,13 @@ public class PlayerStats {
         return this.stats.get(StatHelper.formatStatName(name));
     }
     
-    public StatChange change(String statName, Object statValue, StatOperator operator) {
+    public void change(String statName, Object statValue, StatOperator operator) {
         Stat stat = get(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
             if (info == null) {
                 NexusAPI.getApi().getLogger().warning("Could not find a stat with the name " + statName);
-                return null;
+                return;
             }
             stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
             this.add(stat);
@@ -75,7 +76,6 @@ public class PlayerStats {
         NexusAPI.getApi().getThreadFactory().runAsync(() -> {
             NexusAPI.getApi().getPrimaryDatabase().push(statChange); //Temporary for now until a change to the game stuff
         });
-        return statChange;
     }
     
     public List<Stat> findAll() {
