@@ -1,7 +1,5 @@
 package com.thenexusreborn.api.stats;
 
-import java.util.*;
-
 import static com.thenexusreborn.api.stats.StatOperator.*;
 
 public enum StatType {
@@ -9,8 +7,7 @@ public enum StatType {
     DOUBLE(0.0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET, INVERT),
     LONG(0, ADD, SUBTRACT, MULTIPLY, DIVIDE, RESET, SET, INVERT), 
     STRING("", RESET, SET), 
-    BOOLEAN(false, RESET, INVERT, SET), 
-    STRING_SET(new HashSet<>(), ADD, SUBTRACT, RESET, SET);
+    BOOLEAN(false, RESET, INVERT, SET);
     
     private final Object defaultValue;
     private final StatOperator[] allowedOperators;

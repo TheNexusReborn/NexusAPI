@@ -8,6 +8,7 @@ import com.thenexusreborn.api.stats.Stat.Info;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 public final class StatHelper {
     private StatHelper() {}
@@ -70,7 +71,7 @@ public final class StatHelper {
             Object oldValue = stat.getValue().get();
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
-            } else if (stat.getType() == StatType.INTEGER || stat.getType() == StatType.DOUBLE || stat.getType() == StatType.LONG) {
+            } else if (Stream.of(StatType.INTEGER, StatType.DOUBLE, StatType.LONG).anyMatch(statType -> stat.getType() == statType)) {
                 double calculated = calculate(operator, (Number) oldValue, (Number) value);
                 if (stat.getType() == StatType.INTEGER) {
                     newValue = (int) calculated;
@@ -134,23 +135,6 @@ public final class StatHelper {
             return "null";
         }
         
-        if (type == StatType.STRING_SET) {
-            if (value instanceof String) {
-                return (String) value;
-            }
-            StringBuilder sb = new StringBuilder();
-            Iterator<String> iterator = ((Set<String>) value).iterator();
-            while (iterator.hasNext()) {
-                String e = iterator.next();
-                sb.append(e);
-                if (iterator.hasNext()) {
-                    sb.append(",");
-                }
-            }
-            
-            return sb.toString();
-        }
-        
         return value.toString();
     }
     
@@ -184,14 +168,6 @@ public final class StatHelper {
                 }
                 case STRING -> {
                     return raw;
-                }
-                case STRING_SET -> {
-                    Set<String> value = (Set<String>) type.getDefaultValue();
-                    String[] split = raw.split(",");
-                    if (split != null) {
-                        value.addAll(Arrays.asList(split));
-                    }
-                    return value;
                 }
             }
         } catch (Exception e) {
