@@ -57,6 +57,6 @@ public class Value {
     }
     
     public enum Type {
-        INTEGER, STRING, LONG, BOOLEAN, ENUM
+        INTEGER, DOUBLE, STRING, LONG, BOOLEAN, ENUM
     }
 }

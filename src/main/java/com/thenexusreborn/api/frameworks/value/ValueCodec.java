@@ -48,6 +48,7 @@ public class ValueCodec implements SqlCodec<Value> {
             case STRING -> rawValue;
             case LONG -> Long.parseLong(rawValue);
             case BOOLEAN -> Boolean.parseBoolean(rawValue);
+            case DOUBLE -> Double.parseDouble(rawValue);
             case ENUM -> {
                    try {
                        Class<?> enumClazz = Class.forName(split[1]);
