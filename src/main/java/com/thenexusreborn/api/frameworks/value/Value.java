@@ -32,6 +32,30 @@ public class Value {
         this.object = object;
     }
     
+    public int getAsInt() {
+        return (int) object;
+    }
+    
+    public double getAsDouble() {
+        return (double) object;
+    }
+    
+    public long getAsLong() {
+        return (long) object;
+    }
+    
+    public String getAsString() {
+        return (String) object;
+    }
+    
+    public boolean getAsBoolean() {
+        return (boolean) object;
+    }
+    
+    public <T extends Enum<?>> T getAsEnum(Class<T> clazz) {
+        return (T) object;
+    }
+    
     public enum Type {
         INTEGER, STRING, LONG, BOOLEAN, ENUM
     }
