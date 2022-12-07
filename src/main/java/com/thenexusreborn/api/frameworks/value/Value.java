@@ -24,11 +24,11 @@ public class Value {
         return type;
     }
     
-    public Object getObject() {
+    public Object get() {
         return object;
     }
     
-    public void setObject(Object object) {
+    public void set(Object object) {
         this.object = object;
     }
     

@@ -14,12 +14,12 @@ public class ValueCodec implements SqlCodec<Value> {
         }
         
         String encoded = value.getType().name() + ":";
-        if (value.getObject() == null) {
+        if (value.get() == null) {
             return encoded + "null";
         }
         
         if (value.getType() == Type.ENUM) {
-            Enum<?> enumObject = (Enum<?>) value.getObject();
+            Enum<?> enumObject = (Enum<?>) value.get();
             return encoded + enumObject.getClass().getName() + ":" + enumObject.name();
         }
         
