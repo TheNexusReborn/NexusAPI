@@ -2,7 +2,6 @@ package com.thenexusreborn.api.stats;
 
 import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.storage.annotations.*;
-import com.thenexusreborn.api.storage.codec.StatValueCodec;
 
 import java.util.*;
 
@@ -174,8 +173,8 @@ public class Stat implements Cloneable {
         private long id;
         private String name, displayName;
         private StatType type;
-        @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
-        private StatValue defaultValue;
+        @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+        private Value defaultValue;
         
         private Info() {}
     
@@ -187,7 +186,7 @@ public class Stat implements Cloneable {
             this.name = name;
             this.displayName = displayName;
             this.type = type;
-            this.defaultValue = new StatValue(type, defaultValue);
+            this.defaultValue = new Value(type.getValueType(), defaultValue);
         }
     
         public String getName() {
@@ -206,18 +205,19 @@ public class Stat implements Cloneable {
             this.type = type;
         }
     
-        public Object getDefaultValue() {
-            if (defaultValue == null) {
-                this.defaultValue = new StatValue(type, type.getDefaultValue());
+        public Value getDefaultValue() {
+            if (this.defaultValue == null) {
+                this.defaultValue = new Value(getType().getValueType(), getDefaultValue());
             }
-            return defaultValue.get();
+            return defaultValue;
         }
     
-        public void setDefaultValue(Object defaultValue) {
+        public void setDefaultValue(Object value) {
             if (this.defaultValue == null) {
-                this.defaultValue = new StatValue(type, type.getDefaultValue());
+                this.defaultValue = new Value(getType().getValueType(), value);
+            } else {
+                this.defaultValue.set(value);
             }
-            this.defaultValue.set(defaultValue);
         }
     
         public String getDisplayName() {

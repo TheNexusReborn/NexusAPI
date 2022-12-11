@@ -10,7 +10,7 @@ package com.thenexusreborn.api.frameworks.value;
  *  You must also provide enough space in the column to store the Type and the actual value
  * </p>
  */
-public class Value {
+public class Value implements Cloneable {
     
     private Type type;
     private Object object;
@@ -58,5 +58,14 @@ public class Value {
     
     public enum Type {
         INTEGER, DOUBLE, STRING, LONG, BOOLEAN, ENUM
+    }
+    
+    @Override
+    public Value clone() {
+        try {
+            return (Value) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
     }
 }

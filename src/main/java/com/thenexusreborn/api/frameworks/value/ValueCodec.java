@@ -23,7 +23,7 @@ public class ValueCodec implements SqlCodec<Value> {
             return encoded + enumObject.getClass().getName() + ":" + enumObject.name();
         }
         
-        return encoded + value;
+        return encoded + value.get().toString();
     }
     
     @Override
