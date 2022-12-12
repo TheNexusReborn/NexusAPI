@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.stats;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.storage.annotations.*;
@@ -88,6 +89,11 @@ public class StatChange implements Comparable<StatChange> {
     
     public boolean isFake() {
         return fake;
+    }
+    
+    public StatChange push() {
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().push(this));
+        return this;
     }
     
     @Override

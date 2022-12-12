@@ -52,7 +52,7 @@ public abstract class NexusProfile {
     }
     
     public void setFirstJoined(long firstJoined) {
-        getStats().change("firstjoined", firstJoined, StatOperator.SET);
+        getStats().change("firstjoined", firstJoined, StatOperator.SET).push();
     }
     
     public long getLastLogin() {
@@ -60,7 +60,7 @@ public abstract class NexusProfile {
     }
     
     public void setLastLogin(long lastLogin) {
-        getStats().change("lastlogin", lastLogin, StatOperator.SET);
+        getStats().change("lastlogin", lastLogin, StatOperator.SET).push();
     }
 
     public String getDisplayName() {
@@ -93,7 +93,7 @@ public abstract class NexusProfile {
     }
     
     public void setLastLogout(long lastLogout) {
-        getStats().change("lastlogout", lastLogout, StatOperator.SET);
+        getStats().change("lastlogout", lastLogout, StatOperator.SET).push();
     }
     
     public boolean isPrealpha() {
@@ -101,7 +101,7 @@ public abstract class NexusProfile {
     }
     
     public void setPrealpha(boolean prealpha) {
-        getStats().change("prealpha", prealpha, StatOperator.SET);
+        getStats().change("prealpha", prealpha, StatOperator.SET).push();
     }
     
     public boolean isAlpha() {
@@ -109,7 +109,7 @@ public abstract class NexusProfile {
     }
     
     public void setAlpha(boolean alpha) {
-        getStats().change("alpha", alpha, StatOperator.SET);
+        getStats().change("alpha", alpha, StatOperator.SET).push();
     }
     
     public boolean isBeta() {
@@ -117,7 +117,7 @@ public abstract class NexusProfile {
     }
     
     public void setBeta(boolean beta) {
-        getStats().change("beta", beta, StatOperator.SET);
+        getStats().change("beta", beta, StatOperator.SET).push();
     }
     
     public PlayerStats getStats() {
@@ -131,8 +131,8 @@ public abstract class NexusProfile {
         return getStats().getValue(statName);
     }
     
-    public void changeStat(String statName, Object value, StatOperator operator) {
-        getStats().change(statName, value, operator);
+    public StatChange changeStat(String statName, Object value, StatOperator operator) {
+        return getStats().change(statName, value, operator);
     }
     
     public void addStatChange(StatChange change) {
@@ -152,7 +152,7 @@ public abstract class NexusProfile {
     }
 
     public void addCredits(int credits) {
-        getStats().change("credits", credits, StatOperator.ADD);
+        getStats().change("credits", credits, StatOperator.ADD).push();
     }
     
     public long getId() {
@@ -215,7 +215,7 @@ public abstract class NexusProfile {
     }
     
     public void setOnline(boolean online) {
-        getStats().change("online", online, StatOperator.SET);
+        getStats().change("online", online, StatOperator.SET).push();
     }
     
     public String getServer() {
@@ -223,7 +223,7 @@ public abstract class NexusProfile {
     }
     
     public void setServer(String server) {
-        getStats().change("server", server, StatOperator.SET);
+        getStats().change("server", server, StatOperator.SET).push();
     }
     
     public PlayerToggles getToggles() {
@@ -247,7 +247,7 @@ public abstract class NexusProfile {
     }
     
     public void removeCredits(int credits) {
-        getStats().change("credits", credits, StatOperator.SUBTRACT);
+        getStats().change("credits", credits, StatOperator.SUBTRACT).push();
     }
 
     public PlayerTags getTags() {

@@ -41,7 +41,7 @@ public class PlayerStats {
             stat = new Stat(info, this.uniqueId, System.currentTimeMillis());
             
             if (this.statChanges.isEmpty()) {
-                return new Value(info.getType().getValueType(), info.getDefaultValue());
+                return new Value(info.getType().getValueType(), info.getDefaultValue().get());
             }
         }
         
@@ -60,22 +60,20 @@ public class PlayerStats {
         return this.stats.get(StatHelper.formatStatName(name));
     }
     
-    public void change(String statName, Object statValue, StatOperator operator) {
+    public StatChange change(String statName, Object statValue, StatOperator operator) {
         Stat stat = get(statName);
         if (stat == null) {
             Stat.Info info = StatHelper.getInfo(statName);
             if (info == null) {
                 NexusAPI.getApi().getLogger().warning("Could not find a stat with the name " + statName);
-                return;
+                return null;
             }
             stat = new Stat(info, this.uniqueId, info.getDefaultValue(), System.currentTimeMillis());
             this.add(stat);
         }
         StatChange statChange = new StatChange(stat.getInfo(), this.uniqueId, statValue, operator, System.currentTimeMillis());
         this.addChange(statChange);
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
-            NexusAPI.getApi().getPrimaryDatabase().push(statChange); //Temporary for now until a change to the game stuff
-        });
+        return statChange;
     }
     
     public List<Stat> findAll() {

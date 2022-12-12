@@ -66,7 +66,7 @@ public final class StatHelper {
         if (operator == StatOperator.SET) {
             newValue = value;
         } else if (operator == StatOperator.RESET) {
-            newValue = getInfo(stat.getName()).getDefaultValue();
+            newValue = getInfo(stat.getName()).getDefaultValue().get();
         } else {
             Object oldValue = stat.getValue().get();
             if (stat.getType() == StatType.BOOLEAN) {

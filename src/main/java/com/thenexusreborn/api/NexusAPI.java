@@ -1,6 +1,6 @@
 package com.thenexusreborn.api;
 
-import com.thenexusreborn.api.frameworks.value.ValueCodec;
+import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.maven.*;
@@ -315,17 +315,17 @@ public abstract class NexusAPI {
             UUID uuid = UUID.fromString(row.getString("uuid"));
             String rawValue = row.getString("value");
             Stat.Info info = StatHelper.getInfo(name);
-            Object value = new ValueCodec().decode(rawValue);
+            Value value = new ValueCodec().decode(rawValue);
             CachedPlayer player = playerManager.getCachedPlayer(uuid);
             if (player == null) {
                 continue;
             }
             if (name.equalsIgnoreCase("server")) {
-                player.setServer((String) value);
+                player.setServer(value.getAsString());
             } else if (name.equalsIgnoreCase("online")) {
-                player.setOnline((boolean) value);
+                player.setOnline(value.getAsBoolean());
             } else if (name.equalsIgnoreCase("lastlogout")) {
-                player.setLastLogout((long) value);
+                player.setLastLogout(value.getAsLong());
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");

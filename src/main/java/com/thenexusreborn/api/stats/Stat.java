@@ -125,6 +125,10 @@ public class Stat implements Cloneable {
         }
     }
     
+//    public StatChange change(StatOperator operator, Object value) {
+//        return null;
+//    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -207,7 +211,7 @@ public class Stat implements Cloneable {
     
         public Value getDefaultValue() {
             if (this.defaultValue == null) {
-                this.defaultValue = new Value(getType().getValueType(), getDefaultValue());
+                this.defaultValue = new Value(getType().getValueType(), null);
             }
             return defaultValue;
         }
