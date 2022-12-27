@@ -11,6 +11,10 @@ public abstract class Registry<T> {
         }
     }
     
+    public void registerAll(Collection<T> objects) {
+        objects.forEach(this::register);
+    }
+    
     public Set<T> getObjects() {
         return objects;
     }

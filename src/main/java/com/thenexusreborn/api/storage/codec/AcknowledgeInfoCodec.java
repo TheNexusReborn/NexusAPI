@@ -3,7 +3,7 @@ package com.thenexusreborn.api.storage.codec;
 import com.thenexusreborn.api.storage.objects.SqlCodec;
 import com.thenexusreborn.api.punishment.AcknowledgeInfo;
 
-public class AcknowledgeInfoCodec extends SqlCodec<AcknowledgeInfo> {
+public class AcknowledgeInfoCodec implements SqlCodec<AcknowledgeInfo> {
     @Override
     public String encode(Object object) {
         AcknowledgeInfo acknowledgeInfo = (AcknowledgeInfo) object;

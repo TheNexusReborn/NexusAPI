@@ -1,5 +1,6 @@
 package com.thenexusreborn.api;
 
+import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.maven.*;
@@ -123,7 +124,7 @@ public abstract class NexusAPI {
             }
         }));
         
-        networkCommandRegistry.register(new NetworkCommand("updatetag", ((cmd, origin, args) -> {
+        networkCommandRegistry.register(new NetworkCommand("updatetag", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             String action = args[1];
             String tag = args.length > 2 ? args[2] : "";
@@ -148,7 +149,7 @@ public abstract class NexusAPI {
                     player.getTags().remove(tag);
                 }
             }
-        })));
+        }));
     
         networkCommandRegistry.register(new NetworkCommand("updatestat", (cmd, origin, args) -> {
             if (getServerManager().getCurrentServer().getName().equalsIgnoreCase(origin)) {
@@ -157,7 +158,7 @@ public abstract class NexusAPI {
             UUID uuid = UUID.fromString(args[0]);
             Stat.Info info = StatHelper.getInfo(args[1]);
             StatOperator operator = StatOperator.valueOf(args[2]);
-            Object value = StatHelper.parseValue(info.getType(), args[3]);
+            Object value = new ValueCodec().decode(args[3]);
             NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
             StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
             profile.addStatChange(statChange);
@@ -314,17 +315,17 @@ public abstract class NexusAPI {
             UUID uuid = UUID.fromString(row.getString("uuid"));
             String rawValue = row.getString("value");
             Stat.Info info = StatHelper.getInfo(name);
-            Object value = StatHelper.parseValue(info.getType(), rawValue);
+            Value value = new ValueCodec().decode(rawValue);
             CachedPlayer player = playerManager.getCachedPlayer(uuid);
             if (player == null) {
                 continue;
             }
             if (name.equalsIgnoreCase("server")) {
-                player.setServer((String) value);
+                player.setServer(value.getAsString());
             } else if (name.equalsIgnoreCase("online")) {
-                player.setOnline((boolean) value);
+                player.setOnline(value.getAsBoolean());
             } else if (name.equalsIgnoreCase("lastlogout")) {
-                player.setLastLogout((long) value);
+                player.setLastLogout(value.getAsLong());
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");

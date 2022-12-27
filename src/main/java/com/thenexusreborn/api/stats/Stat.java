@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.stats;
 
+import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.storage.annotations.*;
-import com.thenexusreborn.api.storage.codec.StatValueCodec;
 
 import java.util.*;
 
@@ -11,10 +11,10 @@ public class Stat implements Cloneable {
     private long id;
     private String name;
     private UUID uuid;
-    @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
-    private StatValue value;
-    @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
-    private StatValue fakedValue;
+    @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+    private Value value;
+    @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+    private Value fakedValue;
     private long created;
     private long modified;
     
@@ -50,10 +50,10 @@ public class Stat implements Cloneable {
         this.name = info.getName();
         this.created = created;
         this.modified = modified;
-        if (value instanceof StatValue) {
-            this.value = (StatValue) value;
+        if (value instanceof Value) {
+            this.value = (Value) value;
         } else {
-            this.value = new StatValue(info.getType(), value);
+            this.value = new Value(info.getType().getValueType(), value);
         }
     }
     
@@ -65,9 +65,9 @@ public class Stat implements Cloneable {
         return getInfo().getName();
     }
     
-    public StatValue getValue() {
+    public Value getValue() {
         if (this.value == null) {
-            this.value = new StatValue(getType(), getDefaultValue());
+            this.value = new Value(getType().getValueType(), getDefaultValue());
         }
         return value;
     }
@@ -78,7 +78,7 @@ public class Stat implements Cloneable {
     
     public void setValue(Object value) {
         if (this.value == null) {
-            this.value = new StatValue(getInfo().getType(), value);
+            this.value = new Value(getInfo().getType().getValueType(), value);
         } else {
             this.value.set(value);
         }
@@ -113,17 +113,21 @@ public class Stat implements Cloneable {
         return getInfo().getDisplayName();
     }
     
-    public StatValue getFakedValue() {
+    public Value getFakedValue() {
         return fakedValue;
     }
     
     public void setFakedValue(Object fakedValue) {
         if (this.fakedValue == null) {
-            this.fakedValue = new StatValue(getInfo().getType(), fakedValue);
+            this.fakedValue = new Value(getInfo().getType().getValueType(), fakedValue);
         } else {
             this.fakedValue.set(fakedValue);
         }
     }
+    
+//    public StatChange change(StatOperator operator, Object value) {
+//        return null;
+//    }
     
     @Override
     public boolean equals(Object o) {
@@ -173,8 +177,8 @@ public class Stat implements Cloneable {
         private long id;
         private String name, displayName;
         private StatType type;
-        @ColumnInfo(type = "varchar(1000)", codec = StatValueCodec.class)
-        private StatValue defaultValue;
+        @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+        private Value defaultValue;
         
         private Info() {}
     
@@ -186,7 +190,7 @@ public class Stat implements Cloneable {
             this.name = name;
             this.displayName = displayName;
             this.type = type;
-            this.defaultValue = new StatValue(type, defaultValue);
+            this.defaultValue = new Value(type.getValueType(), defaultValue);
         }
     
         public String getName() {
@@ -205,18 +209,19 @@ public class Stat implements Cloneable {
             this.type = type;
         }
     
-        public Object getDefaultValue() {
-            if (defaultValue == null) {
-                this.defaultValue = new StatValue(type, type.getDefaultValue());
+        public Value getDefaultValue() {
+            if (this.defaultValue == null) {
+                this.defaultValue = new Value(getType().getValueType(), null);
             }
-            return defaultValue.get();
+            return defaultValue;
         }
     
-        public void setDefaultValue(Object defaultValue) {
+        public void setDefaultValue(Object value) {
             if (this.defaultValue == null) {
-                this.defaultValue = new StatValue(type, type.getDefaultValue());
+                this.defaultValue = new Value(getType().getValueType(), value);
+            } else {
+                this.defaultValue.set(value);
             }
-            this.defaultValue.set(defaultValue);
         }
     
         public String getDisplayName() {

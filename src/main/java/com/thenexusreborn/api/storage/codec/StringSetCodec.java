@@ -5,7 +5,7 @@ import com.thenexusreborn.api.helper.StringHelper;
 
 import java.util.*;
 
-public class StringSetCodec extends SqlCodec<Set<String>> {
+public class StringSetCodec implements SqlCodec<Set<String>> {
     @Override
     public String encode(Object object) {
         return StringHelper.join((Set<String>) object, ",");

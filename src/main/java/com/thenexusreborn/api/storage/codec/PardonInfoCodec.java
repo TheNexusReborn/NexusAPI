@@ -3,7 +3,7 @@ package com.thenexusreborn.api.storage.codec;
 import com.thenexusreborn.api.storage.objects.SqlCodec;
 import com.thenexusreborn.api.punishment.PardonInfo;
 
-public class PardonInfoCodec extends SqlCodec<PardonInfo> {
+public class PardonInfoCodec implements SqlCodec<PardonInfo> {
     @Override
     public String encode(Object object) {
         PardonInfo pardonInfo = (PardonInfo) object;
