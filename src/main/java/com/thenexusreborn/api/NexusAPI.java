@@ -259,17 +259,17 @@ public abstract class NexusAPI {
         getLogger().info("Registered Stat types");
         
         toggleRegistry = new ToggleRegistry();
+    
+        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
+        for (Toggle.Info toggleInfo : toggleInfos) {
+            toggleRegistry.register(toggleInfo);
+        }
+    
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
         toggleRegistry.register("incognito", Rank.MEDIA, "Incognito", "A media+ thing where you can be hidden from others", false);
         toggleRegistry.register("fly", Rank.DIAMOND, "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
         registerToggles(toggleRegistry);
-        
-        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
-        for (Toggle.Info toggleInfo : toggleInfos) {
-            toggleRegistry.register(toggleInfo);
-        }
-        
         getLogger().info("Registered toggle types");
         for (Toggle.Info object : toggleRegistry.getObjects()) {
             getPrimaryDatabase().push(object);
