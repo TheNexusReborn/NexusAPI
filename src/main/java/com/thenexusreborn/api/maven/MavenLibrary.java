@@ -13,5 +13,5 @@ public @interface MavenLibrary {
     
     String version();
     
-    Repository repo() default @Repository(url = "https://repo1.maven.org/maven2");
+    Repository repo() default @Repository("https://repo1.maven.org/maven2");
 }

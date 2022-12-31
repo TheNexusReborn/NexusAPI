@@ -24,7 +24,7 @@ public final class LibraryLoader {
         }
         
         for (MavenLibrary lib : libs) {
-            load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().url(), classLoader);
+            load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value(), classLoader);
         }
     }
     

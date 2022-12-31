@@ -28,6 +28,8 @@ import java.util.logging.*;
 
 @MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
 @MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
+@MavenLibrary(repo = @Repository("https://repo.starmediadev.com/snapshots/"), groupId = "com.starmediadev", artifactId = "StarLib", version = "1.2-SNAPSHOT")
+@MavenLibrary(repo = @Repository("https://repo.starmediadev.com/snapshots/"), groupId = "com.starmediadev", artifactId = "StarSQL", version = "1.0-SNAPSHOT")
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
