@@ -1,7 +1,9 @@
 package com.thenexusreborn.api.player;
 
+import com.starmediadev.starsql.annotations.Primary;
+import com.starmediadev.starsql.annotations.column.*;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.storage.annotations.*;
 import com.thenexusreborn.api.storage.codec.ToggleInfoCodec;
 
 import java.util.*;

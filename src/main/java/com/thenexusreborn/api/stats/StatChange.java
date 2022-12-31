@@ -1,9 +1,11 @@
 package com.thenexusreborn.api.stats;
 
+import com.starmediadev.starsql.annotations.Primary;
+import com.starmediadev.starsql.annotations.column.*;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.stats.Stat.Info;
-import com.thenexusreborn.api.storage.annotations.*;
 
 import java.util.*;
 
@@ -92,7 +94,7 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public StatChange push() {
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().push(this));
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().pushSilent(this));
         return this;
     }
     

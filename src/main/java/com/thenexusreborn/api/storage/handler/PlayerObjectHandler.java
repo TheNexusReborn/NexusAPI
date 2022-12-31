@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.storage.handler;
 
+import com.starmediadev.starsql.objects.*;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
@@ -69,19 +69,19 @@ public class PlayerObjectHandler extends ObjectHandler {
         NexusPlayer player = (NexusPlayer) object;
     
         for (Toggle toggle : player.getToggles().findAll()) {
-            database.push(toggle);
+            database.pushSilent(toggle);
         }
     
         for (Stat stat : player.getStats().findAll()) {
-            database.push(stat);
+            database.pushSilent(stat);
         }
     
         for (StatChange statChange : player.getStats().findAllChanges()) {
-            database.push(statChange);
+            database.pushSilent(statChange);
         }
     
         for (IPEntry ipEntry : player.getIpHistory()) {
-            database.push(ipEntry);
+            database.pushSilent(ipEntry);
             NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);
         }
     }

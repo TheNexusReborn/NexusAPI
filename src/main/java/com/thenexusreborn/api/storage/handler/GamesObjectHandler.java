@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.storage.handler;
 
-import com.thenexusreborn.api.storage.objects.*;
+import com.starmediadev.starsql.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
 
 import java.sql.SQLException;
@@ -27,7 +27,7 @@ public class GamesObjectHandler extends ObjectHandler {
         GameInfo gameInfo = (GameInfo) object;
         for (GameAction action : gameInfo.getActions()) {
             action.setGameId(gameInfo.getId());
-            database.push(action);
+            database.pushSilent(action);
         }
     }
 }

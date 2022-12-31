@@ -1,6 +1,8 @@
 package com.thenexusreborn.api.nickname;
 
-import com.thenexusreborn.api.storage.annotations.*;
+import com.starmediadev.starsql.annotations.Primary;
+import com.starmediadev.starsql.annotations.column.ColumnIgnored;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 import com.thenexusreborn.api.player.Rank;
 import com.thenexusreborn.api.skins.Skin;
 

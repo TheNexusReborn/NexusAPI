@@ -1,6 +1,8 @@
 package com.thenexusreborn.api.gamearchive;
 
-import com.thenexusreborn.api.storage.annotations.*;
+import com.starmediadev.starsql.annotations.Primary;
+import com.starmediadev.starsql.annotations.column.*;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 import com.thenexusreborn.api.storage.codec.StringArrayCodec;
 import com.thenexusreborn.api.storage.handler.GamesObjectHandler;
 

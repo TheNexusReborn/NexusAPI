@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.tags;
 
-import com.thenexusreborn.api.storage.annotations.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 
 import java.util.*;
 

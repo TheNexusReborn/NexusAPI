@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.frameworks.value;
 
+import com.starmediadev.starsql.objects.SqlCodec;
 import com.thenexusreborn.api.frameworks.value.Value.Type;
-import com.thenexusreborn.api.storage.objects.SqlCodec;
 
 import java.lang.reflect.Method;
 

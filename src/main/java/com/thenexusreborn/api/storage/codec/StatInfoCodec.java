@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.storage.codec;
 
+import com.starmediadev.starsql.objects.SqlCodec;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.storage.objects.SqlCodec;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 

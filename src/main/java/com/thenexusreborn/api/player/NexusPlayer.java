@@ -1,9 +1,9 @@
 package com.thenexusreborn.api.player;
 
+import com.starmediadev.starsql.annotations.column.ColumnIgnored;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.storage.annotations.ColumnIgnored;
-import com.thenexusreborn.api.storage.annotations.TableInfo;
 import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
 
 import java.util.UUID;

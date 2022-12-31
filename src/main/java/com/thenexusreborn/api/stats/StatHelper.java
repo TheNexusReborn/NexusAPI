@@ -117,7 +117,7 @@ public final class StatHelper {
                 
                 changeStat(stat, statChange.getOperator(), statChange.getValue().get());
                 if (statChange.getId() > 0) {
-                    NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
+                    NexusAPI.getApi().getPrimaryDatabase().deleteSilent(StatChange.class, statChange.getId());
                 }
             }
             player.clearStatChanges();

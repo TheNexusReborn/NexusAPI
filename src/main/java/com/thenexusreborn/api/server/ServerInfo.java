@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.server;
 
-import com.thenexusreborn.api.storage.annotations.Primary;
+import com.starmediadev.starsql.annotations.Primary;
 
 import java.util.Objects;
 

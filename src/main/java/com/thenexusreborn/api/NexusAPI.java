@@ -1,5 +1,6 @@
 package com.thenexusreborn.api;
 
+import com.starmediadev.starsql.objects.*;
 import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.levels.LevelManager;
@@ -13,9 +14,7 @@ import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
-import com.thenexusreborn.api.storage.StorageManager;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
-import com.thenexusreborn.api.storage.objects.*;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
 import com.thenexusreborn.api.thread.ThreadFactory;
@@ -28,8 +27,6 @@ import java.util.logging.*;
 
 @MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
 @MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
-@MavenLibrary(repo = @Repository("https://repo.starmediadev.com/snapshots/"), groupId = "com.starmediadev", artifactId = "StarLib", version = "1.2-SNAPSHOT")
-@MavenLibrary(repo = @Repository("https://repo.starmediadev.com/snapshots/"), groupId = "com.starmediadev", artifactId = "StarSQL", version = "1.0-SNAPSHOT")
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
@@ -43,7 +40,6 @@ public abstract class NexusAPI {
     }
     
     protected final Logger logger;
-    protected final StorageManager ioManager;
     protected final PlayerManager playerManager;
     protected final ThreadFactory threadFactory;
     protected final ServerManager serverManager;
@@ -56,6 +52,7 @@ public abstract class NexusAPI {
     protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
+    protected DatabaseRegistry databaseRegistry;
     
     protected Map<UUID, PrivateAlphaUser> privateAlphaUsers = new HashMap<>();
     
@@ -69,7 +66,6 @@ public abstract class NexusAPI {
         this.threadFactory = threadFactory;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
-        this.ioManager = new StorageManager(new DatabaseRegistry());
         this.levelManager = new LevelManager();
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
@@ -92,7 +88,6 @@ public abstract class NexusAPI {
     
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
-        LibraryLoader.loadAll(NexusAPI.class, getLoader());
         
         try {
             for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {
@@ -196,7 +191,7 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded the Networking System");
         
-        DatabaseRegistry databaseRegistry = ioManager.getRegistry();
+        databaseRegistry = new DatabaseRegistry();
         registerDatabases(databaseRegistry);
         getLogger().info("Registered the databases");
         
@@ -226,7 +221,7 @@ public abstract class NexusAPI {
             throw new SQLException("Could not find the primary database.");
         }
         
-        this.ioManager.setup();
+        databaseRegistry.setup();
         getLogger().info("Successfully setup the database tables");
         
         statRegistry = StatHelper.getRegistry();
@@ -254,7 +249,7 @@ public abstract class NexusAPI {
         registerStats(statRegistry);
         
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
-            getPrimaryDatabase().push(statInfo);
+            getPrimaryDatabase().pushSilent(statInfo);
         }
         
         getLogger().info("Pushed stat types to the database");
@@ -274,7 +269,7 @@ public abstract class NexusAPI {
         registerToggles(toggleRegistry);
         getLogger().info("Registered toggle types");
         for (Toggle.Info object : toggleRegistry.getObjects()) {
-            getPrimaryDatabase().push(object);
+            getPrimaryDatabase().pushSilent(object);
         }
         getLogger().info("Pushed toggle types to the database");
 
@@ -417,10 +412,6 @@ public abstract class NexusAPI {
     
     public PunishmentManager getPunishmentManager() {
         return punishmentManager;
-    }
-    
-    public StorageManager getIOManager() {
-        return ioManager;
     }
     
     public static void logMessage(Level level, String mainMessage, String... debug) {

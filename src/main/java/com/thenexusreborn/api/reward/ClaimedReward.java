@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.reward;
 
-import com.thenexusreborn.api.storage.annotations.Primary;
-import com.thenexusreborn.api.storage.annotations.TableInfo;
+import com.starmediadev.starsql.annotations.Primary;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 
 import java.util.Objects;
 import java.util.UUID;

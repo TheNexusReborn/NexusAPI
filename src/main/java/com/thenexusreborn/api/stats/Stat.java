@@ -1,7 +1,9 @@
 package com.thenexusreborn.api.stats;
 
+import com.starmediadev.starsql.annotations.Primary;
+import com.starmediadev.starsql.annotations.column.*;
+import com.starmediadev.starsql.annotations.table.TableInfo;
 import com.thenexusreborn.api.frameworks.value.*;
-import com.thenexusreborn.api.storage.annotations.*;
 
 import java.util.*;
 

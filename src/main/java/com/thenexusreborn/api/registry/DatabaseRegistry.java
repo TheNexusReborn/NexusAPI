@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.registry;
 
-import com.thenexusreborn.api.storage.objects.Database;
+import com.starmediadev.starsql.objects.Database;
 
-public class DatabaseRegistry extends Registry<Database> {
+public class DatabaseRegistry extends com.starmediadev.starsql.DatabaseRegistry<Database> {
     
     @Override
     public Database get(String str) {
