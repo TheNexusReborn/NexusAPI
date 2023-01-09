@@ -2,17 +2,19 @@ package com.thenexusreborn.api.player;
 
 import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.codec.ToggleInfoCodec;
 
 import java.util.*;
 
-@TableInfo("toggles")
+@TableName("toggles")
 public class Toggle {
     @Primary
     private long id;
-    @ColumnInfo(name = "name", type = "varchar(100)", codec = ToggleInfoCodec.class)
+    @ColumnName("name")
+    @ColumnType("varchar(100)")
+    @ColumnCodec(ToggleInfoCodec.class)
     private Info info;
     private UUID uuid;
     private boolean value;
@@ -81,7 +83,7 @@ public class Toggle {
         return Objects.hash(info, uuid);
     }
     
-    @TableInfo("toggleinfo")
+    @TableName("toggleinfo")
     public static class Info {
         @Primary private long id;
         private String name, displayName, description;
@@ -146,6 +148,7 @@ public class Toggle {
         }
     }
     
+    @FunctionalInterface
     public interface Handler {
         void handleChange(Toggle toggle, NexusPlayer player, boolean oldValue, boolean newValue);
     }

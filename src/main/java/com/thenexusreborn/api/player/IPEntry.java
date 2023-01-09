@@ -1,11 +1,11 @@
 package com.thenexusreborn.api.player;
 
 import com.starmediadev.starsql.annotations.Primary;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.*;
 
-@TableInfo("iphistory")
+@TableName("iphistory")
 public class IPEntry {
     
     @Primary

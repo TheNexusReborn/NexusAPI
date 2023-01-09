@@ -2,7 +2,7 @@ package com.thenexusreborn.api.punishment;
 
 import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.codec.*;
 import com.thenexusreborn.api.helper.*;
@@ -12,7 +12,7 @@ import com.thenexusreborn.api.util.Constants;
 import java.util.UUID;
 
 @SuppressWarnings("DuplicatedCode")
-@TableInfo("punishments")
+@TableName("punishments")
 public class Punishment implements Comparable<Punishment> {
     public static final String KICK_FORMAT = """
             &d&lThe Nexus Reborn &7- {type}
@@ -28,9 +28,11 @@ public class Punishment implements Comparable<Punishment> {
     private String actor, target, server, reason;
     private PunishmentType type;
     private Visibility visibility;
-    @ColumnInfo(type = "varchar(1000)", codec = PardonInfoCodec.class)
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(PardonInfoCodec.class)
     private PardonInfo pardonInfo;
-    @ColumnInfo(type = "varchar(1000)", codec = AcknowledgeInfoCodec.class)
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(AcknowledgeInfoCodec.class)
     private AcknowledgeInfo acknowledgeInfo;
     
     //Cache variables
@@ -126,7 +128,7 @@ public class Punishment implements Comparable<Punishment> {
             return true;
         }
         
-        return System.currentTimeMillis() <= (this.date + this.length);
+        return System.currentTimeMillis() <= this.date + this.length;
     }
     
     public String getActorNameCache() {
@@ -177,7 +179,7 @@ public class Punishment implements Comparable<Punishment> {
             return -1;
         }
         
-        long timeRemaining = (this.date + this.length) - System.currentTimeMillis();
+        long timeRemaining = this.date + this.length - System.currentTimeMillis();
         return timeRemaining > 0 ? timeRemaining : -2;
     }
     

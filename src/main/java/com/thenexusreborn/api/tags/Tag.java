@@ -1,10 +1,10 @@
 package com.thenexusreborn.api.tags;
 
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.*;
 
-@TableInfo("unlockedtags")
+@TableName("unlockedtags")
 public class Tag {
     
     private long id;

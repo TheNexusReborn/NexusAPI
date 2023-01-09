@@ -2,13 +2,13 @@ package com.thenexusreborn.api.nickname;
 
 import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.ColumnIgnored;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.player.Rank;
 import com.thenexusreborn.api.skins.Skin;
 
 import java.util.UUID;
 
-@TableInfo("nicknames")
+@TableName("nicknames")
 public class Nickname {
     
     @Primary

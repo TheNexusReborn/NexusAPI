@@ -1,12 +1,12 @@
 package com.thenexusreborn.api.reward;
 
 import com.starmediadev.starsql.annotations.Primary;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.Objects;
 import java.util.UUID;
 
-@TableInfo("claimedrewards")
+@TableName("claimedrewards")
 public class ClaimedReward {
     @Primary
     private long id;
@@ -38,8 +38,12 @@ public class ClaimedReward {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ClaimedReward that = (ClaimedReward) o;
         return Objects.equals(uuid, that.uuid) && Objects.equals(rewardId, that.rewardId);
     }

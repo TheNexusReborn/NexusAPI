@@ -2,19 +2,21 @@ package com.thenexusreborn.api.gamearchive;
 
 import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.*;
 import com.thenexusreborn.api.storage.codec.StringArrayCodec;
 import com.thenexusreborn.api.storage.handler.GamesObjectHandler;
 
 import java.util.*;
 
-@TableInfo(value = "games", handler = GamesObjectHandler.class)
+@TableName("games")
+@TableHandler(GamesObjectHandler.class)
 public class GameInfo implements Comparable<GameInfo> {
     @Primary
     private long id;
     private long gameStart, gameEnd;
     private String serverName;
-    @ColumnInfo(type = "varchar(1000)", codec = StringArrayCodec.class) 
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(StringArrayCodec.class)
     private String[] players;
     private String winner, mapName, settings, firstBlood;
     private int playerCount;
@@ -107,7 +109,7 @@ public class GameInfo implements Comparable<GameInfo> {
         this.gameEnd = gameEnd;
     }
     
-    public void setPlayers(String[] players) {
+    public void setPlayers(String... players) {
         this.players = players;
     }
     

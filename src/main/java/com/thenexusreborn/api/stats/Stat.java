@@ -2,20 +2,22 @@ package com.thenexusreborn.api.stats;
 
 import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.frameworks.value.*;
 
 import java.util.*;
 
-@TableInfo(value = "stats")
+@TableName("stats")
 public class Stat implements Cloneable {
     @Primary 
     private long id;
     private String name;
     private UUID uuid;
-    @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(ValueCodec.class)
     private Value value;
-    @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(ValueCodec.class)
     private Value fakedValue;
     private long created;
     private long modified;
@@ -173,13 +175,14 @@ public class Stat implements Cloneable {
         return new Stat(this.getInfo(), 0, this.uuid, this.value.get(), System.currentTimeMillis(), System.currentTimeMillis());
     }
     
-    @TableInfo(value = "statinfo")
+    @TableName("statinfo")
     public static class Info {
         @Primary 
         private long id;
         private String name, displayName;
         private StatType type;
-        @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+        @ColumnType("varchar(1000)")
+        @ColumnCodec(ValueCodec.class)
         private Value defaultValue;
         
         private Info() {}

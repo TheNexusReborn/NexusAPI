@@ -19,7 +19,8 @@ public abstract class NexusProfile {
     protected String name;
     @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
-    @ColumnInfo(type = "varchar(1000)", codec = RanksCodec.class)
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(RanksCodec.class)
     protected PlayerRanks ranks;
     @ColumnIgnored
     protected PlayerStats stats;

@@ -1,14 +1,15 @@
 package com.thenexusreborn.api.player;
 
 import com.starmediadev.starsql.annotations.column.ColumnIgnored;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.*;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
 
 import java.util.UUID;
 
-@TableInfo(value = "players", handler = PlayerObjectHandler.class)
+@TableName("players")
+@TableHandler(PlayerObjectHandler.class)
 public class NexusPlayer extends NexusProfile {
     @ColumnIgnored
     protected NexusScoreboard scoreboard;

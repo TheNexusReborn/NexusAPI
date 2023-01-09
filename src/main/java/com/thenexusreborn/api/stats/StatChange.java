@@ -2,21 +2,22 @@ package com.thenexusreborn.api.stats;
 
 import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableInfo;
+import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
 
-@TableInfo(value = "statchanges")
+@TableName(value = "statchanges")
 public class StatChange implements Comparable<StatChange> {
     
     @Primary
     private long id;
     private UUID uuid;
     private String name;
-    @ColumnInfo(type = "varchar(1000)", codec = ValueCodec.class)
+    @ColumnType("varchar(1000)")
+    @ColumnCodec(ValueCodec.class)
     private Value value;
     private boolean fake;
     private StatOperator operator;
@@ -115,7 +116,7 @@ public class StatChange implements Comparable<StatChange> {
             return false;
         }
         StatChange that = (StatChange) o;
-        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(info.getName(), that.info.getName()) && Objects.equals(info.getType(), that.info.getType()) && Objects.equals(value, that.value) && operator == that.operator;
+        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(info.getName(), that.info.getName()) && info.getType() == that.info.getType() && Objects.equals(value, that.value) && operator == that.operator;
     }
     
     @Override
