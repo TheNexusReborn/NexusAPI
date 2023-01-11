@@ -326,19 +326,17 @@ public abstract class NexusAPI {
             }
         }
         getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
-        
-        List<Row> togglesRows = database.executeQuery("select `name`, `uuid`, `value` from toggles;");
-        for (Row row : togglesRows) {
-            String name = row.getString("name");
-            UUID uuid = UUID.fromString(row.getString("uuid"));
-            boolean value = row.getBoolean("value");
-            CachedPlayer player = playerManager.getCachedPlayers().get(uuid);
-            if (player == null) {
+    
+        List<Toggle> toggles = database.get(Toggle.class);
+        for (Toggle toggle : toggles) {
+            CachedPlayer cachedPlayer = playerManager.getCachedPlayers().get(toggle.getUuid());
+            if (cachedPlayer == null) {
                 continue;
             }
-            
-            player.setToggleValue(name.toLowerCase(), value);
+    
+            cachedPlayer.addToggle(toggle);
         }
+
         getLogger().info("Loaded toggle info for player profiles: Incognito, Vanish and Fly");
 
         List<Tag> allTags = database.get(Tag.class);
