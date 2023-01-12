@@ -227,6 +227,9 @@ public abstract class NexusProfile {
     }
     
     public PlayerToggles getToggles() {
+        if (toggles.getUniqueId() == null) {
+            toggles.setUniqueId(this.uniqueId);
+        }
         return toggles;
     }
     

@@ -8,6 +8,8 @@ import java.util.*;
 public class PlayerToggles {
     private final Map<String, Toggle> toggles = new HashMap<>();
     
+    private UUID uniqueId;
+    
     public Toggle get(String name) {
         return this.toggles.get(name.toLowerCase());
     }
@@ -20,7 +22,15 @@ public class PlayerToggles {
         Toggle toggle = get(name);
         if (toggle != null) {
             toggle.setValue(value);
+        } else {
+            Info info = NexusAPI.getApi().getToggleRegistry().get(name);
+            if (info != null) {
+                this.add(toggle = new Toggle(info, uniqueId, value));
+            }
         }
+    
+        Toggle finalToggle = toggle;
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().pushSilent(finalToggle));
     }
     
     public boolean getValue(String name) {
@@ -35,6 +45,14 @@ public class PlayerToggles {
                 throw new IllegalArgumentException("Invalid toggle name: " + name);
             }
         }
+    }
+    
+    public UUID getUniqueId() {
+        return uniqueId;
+    }
+    
+    public void setUniqueId(UUID uniqueId) {
+        this.uniqueId = uniqueId;
     }
     
     public void setAll(List<Toggle> toggles) {
