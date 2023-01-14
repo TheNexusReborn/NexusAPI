@@ -33,15 +33,42 @@ public class Value implements Cloneable {
     }
     
     public int getAsInt() {
-        return (int) object;
+        if (object instanceof Integer) {
+            return (int) object;
+        } else if (object instanceof Double d) {
+            return d.intValue();
+        } else if (object instanceof Long l) {
+            return l.intValue();
+        } else if (object instanceof String str) {
+            return Integer.parseInt(str);
+        }
+        return 0;
     }
     
     public double getAsDouble() {
-        return (double) object;
+        if (object instanceof Integer i) {
+            return i.doubleValue();
+        } else if (object instanceof Double d) {
+            return (double) object;
+        } else if (object instanceof Long l) {
+            return l.doubleValue();
+        } else if (object instanceof String str) {
+            return Double.parseDouble(str);
+        }
+        return 0.0;
     }
     
     public long getAsLong() {
-        return (long) object;
+        if (object instanceof Integer i) {
+            return i.longValue();
+        } else if (object instanceof Double d) {
+            return d.longValue();
+        } else if (object instanceof Long l) {
+            return (long) object;
+        } else if (object instanceof String str) {
+            return Long.parseLong(str);
+        }
+        return 0;
     }
     
     public String getAsString() {
