@@ -25,8 +25,21 @@ public abstract class ScoreboardView {
             if (team.getValueUpdater() != null) {
                 team.getValueUpdater().update(scoreboard.getPlayer(), team);
             }
+            
+            if (team.isVisible()) {
+                if (!scoreboard.isRegistered(team)) {
+                    createTeam(team);
+                }
+            } else {
+                if (scoreboard.isRegistered(team)) {
+                    team.unregister();
+                }
+            }
         }
     }
+    
+    public abstract void createTeam(ITeam team);
+    
     public abstract void registerObjective();
     
     protected void addEntry(IObjective objective, ITeam team, String text, int score) {

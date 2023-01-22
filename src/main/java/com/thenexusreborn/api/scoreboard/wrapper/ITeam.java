@@ -20,4 +20,12 @@ public interface ITeam {
     ValueUpdater getValueUpdater();
     
     void setValueUpdater(ValueUpdater valueUpdater);
+    
+    boolean isVisible();
+    
+    void setVisible(boolean visible);
+    
+    int getScore();
+    
+    void setScore(int score);
 }
