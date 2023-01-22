@@ -4,7 +4,6 @@ public class TeamBuilder {
     private String name, prefix, suffix, entry;
     private int score;
     private ValueUpdater valueUpdater;
-    private boolean visible;
     
     public TeamBuilder(String name) {
         this.name = name;
@@ -44,11 +43,6 @@ public class TeamBuilder {
         return this;
     }
     
-    public TeamBuilder visible(boolean visible) {
-        this.visible = visible;
-        return this;
-    }
-    
     public String getName() {
         return name;
     }
@@ -71,9 +65,5 @@ public class TeamBuilder {
     
     public ValueUpdater getValueUpdater() {
         return valueUpdater;
-    }
-    
-    public boolean isVisible() {
-        return visible;
     }
 }

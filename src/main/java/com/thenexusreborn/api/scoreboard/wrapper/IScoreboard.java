@@ -12,8 +12,4 @@ public interface IScoreboard {
     Set<ITeam> getTeams();
     
     IObjective registerNewObjective(String name);
-    
-    void registerTeam(ITeam team);
-    
-    boolean isRegistered(ITeam team);
 }

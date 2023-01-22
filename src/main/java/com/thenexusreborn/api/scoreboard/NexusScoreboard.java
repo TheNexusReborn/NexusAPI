@@ -69,8 +69,4 @@ public abstract class NexusScoreboard {
     public NexusPlayer getPlayer() {
         return player;
     }
-    
-    public boolean isRegistered(ITeam team) {
-        return this.scoreboard.isRegistered(team);
-    }
 }
