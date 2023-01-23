@@ -69,4 +69,8 @@ public abstract class NexusScoreboard {
     public NexusPlayer getPlayer() {
         return player;
     }
+    
+    public ScoreboardView getView() {
+        return view;
+    }
 }

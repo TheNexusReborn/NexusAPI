@@ -42,6 +42,10 @@ public abstract class ScoreboardView {
         return teams;
     }
     
+    public String getName() {
+        return name;
+    }
+    
     public abstract ITeam createTeam(TeamBuilder teamBuilder);
     
     public abstract void unregisterTeams();
