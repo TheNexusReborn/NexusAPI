@@ -86,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>com.starmediadev</groupId>
-            <artifactId>starsql-core</artifactId>
+            <artifactId>starsql</artifactId>
             <version>${starsql.version}</version>
         </dependency>
         <dependency>
