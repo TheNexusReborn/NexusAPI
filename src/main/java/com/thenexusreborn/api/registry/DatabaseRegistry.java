@@ -2,7 +2,13 @@ package com.thenexusreborn.api.registry;
 
 import com.starmediadev.starsql.objects.Database;
 
-public class DatabaseRegistry extends com.starmediadev.starsql.DatabaseRegistry<Database> {
+import java.util.logging.Logger;
+
+public class DatabaseRegistry extends com.starmediadev.starsql.DatabaseRegistry {
+    
+    public DatabaseRegistry(Logger logger) {
+        super(logger);
+    }
     
     @Override
     public Database get(String str) {

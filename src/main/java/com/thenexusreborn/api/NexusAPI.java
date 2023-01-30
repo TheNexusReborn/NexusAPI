@@ -191,7 +191,7 @@ public abstract class NexusAPI {
         }
         getLogger().info("Loaded the Networking System");
         
-        databaseRegistry = new DatabaseRegistry();
+        databaseRegistry = new DatabaseRegistry(logger);
         registerDatabases(databaseRegistry);
         getLogger().info("Registered the databases");
         
