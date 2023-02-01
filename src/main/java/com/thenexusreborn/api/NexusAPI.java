@@ -249,7 +249,7 @@ public abstract class NexusAPI {
         registerStats(statRegistry);
         
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
-            getPrimaryDatabase().pushSilent(statInfo);
+            getPrimaryDatabase().saveSilent(statInfo);
         }
         
         getLogger().info("Pushed stat types to the database");
@@ -269,7 +269,7 @@ public abstract class NexusAPI {
         registerToggles(toggleRegistry);
         getLogger().info("Registered toggle types");
         for (Toggle.Info object : toggleRegistry.getObjects()) {
-            getPrimaryDatabase().pushSilent(object);
+            getPrimaryDatabase().saveSilent(object);
         }
         getLogger().info("Pushed toggle types to the database");
 

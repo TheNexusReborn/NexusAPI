@@ -28,7 +28,7 @@ public abstract class PlayerManager {
     }
     
     public void saveToMySQLAsync(NexusPlayer player) {
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().pushSilent(player));
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(player));
     }
     
     public abstract NexusPlayer createPlayerData(UUID uniqueId, String name);
@@ -147,7 +147,7 @@ public abstract class PlayerManager {
     
     public void saveData() {
         for (NexusPlayer nexusPlayer : this.players.values()) {
-            NexusAPI.getApi().getPrimaryDatabase().pushSilent(nexusPlayer);
+            NexusAPI.getApi().getPrimaryDatabase().saveSilent(nexusPlayer);
         }
     }
     
@@ -174,7 +174,7 @@ public abstract class PlayerManager {
         }
     
         IPEntry ipEntry = new IPEntry(hostName, uniqueId);
-        NexusAPI.getApi().getPrimaryDatabase().pushSilent(ipEntry);
+        NexusAPI.getApi().getPrimaryDatabase().saveSilent(ipEntry);
         NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);
         cachedPlayer.getIpHistory().add(ipEntry);
     }

@@ -30,7 +30,7 @@ public class PlayerToggles {
         }
     
         Toggle finalToggle = toggle;
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().pushSilent(finalToggle));
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(finalToggle));
     }
     
     public boolean getValue(String name) {

@@ -69,19 +69,19 @@ public class PlayerObjectHandler extends ObjectHandler {
         NexusPlayer player = (NexusPlayer) object;
     
         for (Toggle toggle : player.getToggles().findAll()) {
-            database.pushSilent(toggle);
+            database.saveSilent(toggle);
         }
     
         for (Stat stat : player.getStats().findAll()) {
-            database.pushSilent(stat);
+            database.saveSilent(stat);
         }
     
         for (StatChange statChange : player.getStats().findAllChanges()) {
-            database.pushSilent(statChange);
+            database.saveSilent(statChange);
         }
     
         for (IPEntry ipEntry : player.getIpHistory()) {
-            database.pushSilent(ipEntry);
+            database.saveSilent(ipEntry);
             NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);
         }
     }

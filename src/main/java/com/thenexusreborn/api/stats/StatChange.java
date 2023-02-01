@@ -95,7 +95,7 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public StatChange push() {
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().pushSilent(this));
+        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(this));
         return this;
     }
     
