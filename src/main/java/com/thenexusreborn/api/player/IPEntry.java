@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.player;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.*;
@@ -8,7 +7,6 @@ import java.util.*;
 @TableName("iphistory")
 public class IPEntry {
     
-    @Primary
     private long id;
     private String ip;
     private UUID uuid;

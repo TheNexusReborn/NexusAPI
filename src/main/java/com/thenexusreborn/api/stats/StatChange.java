@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.stats;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
@@ -12,7 +11,6 @@ import java.util.*;
 @TableName(value = "statchanges")
 public class StatChange implements Comparable<StatChange> {
     
-    @Primary
     private long id;
     private UUID uuid;
     private String name;

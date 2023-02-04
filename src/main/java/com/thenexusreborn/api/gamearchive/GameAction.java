@@ -1,13 +1,11 @@
 package com.thenexusreborn.api.gamearchive;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.Objects;
 
 @TableName("gameactions")
 public class GameAction implements Comparable<GameAction> {
-    @Primary
     private long id;
     private long gameId;
     private long timestamp;

@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.stats;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.frameworks.value.*;
@@ -9,7 +8,6 @@ import java.util.*;
 
 @TableName("stats")
 public class Stat implements Cloneable {
-    @Primary 
     private long id;
     private String name;
     private UUID uuid;
@@ -177,7 +175,6 @@ public class Stat implements Cloneable {
     
     @TableName("statinfo")
     public static class Info {
-        @Primary 
         private long id;
         private String name, displayName;
         private StatType type;

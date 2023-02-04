@@ -4,9 +4,9 @@ import com.starmediadev.starsql.objects.*;
 import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.levels.LevelManager;
-import com.thenexusreborn.api.maven.*;
+import com.thenexusreborn.api.maven.MavenLibrary;
 import com.thenexusreborn.api.network.*;
-import com.thenexusreborn.api.network.cmd.*;
+import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.punishment.*;
@@ -14,9 +14,7 @@ import com.thenexusreborn.api.registry.*;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
-import com.thenexusreborn.api.storage.codec.RanksCodec;
-import com.thenexusreborn.api.tags.Tag;
-import com.thenexusreborn.api.tags.TagRegistry;
+import com.thenexusreborn.api.tags.*;
 import com.thenexusreborn.api.thread.ThreadFactory;
 
 import java.io.*;
@@ -295,24 +293,19 @@ public abstract class NexusAPI {
         Database database = getPrimaryDatabase();
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
-            CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), UUID.fromString(row.getString("uniqueId")), row.getString("name"));
-            String ranks = row.getString("ranks");
-            if (ranks == null || ranks.equals("")) {
-                getLogger().severe("Found an invalid rank entry for player " + cachedPlayer.getUniqueId().toString());
-                continue;
-            }
-            cachedPlayer.getRanks().setAll(new RanksCodec().decode(ranks));
+            UUID uniqueId = (UUID) row.getObject("uniqueId");
+            CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), uniqueId, row.getString("name"));
+            cachedPlayer.getRanks().setAll((PlayerRanks) row.getObject("ranks"));
             playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
         }
-        getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerRows.size() + " total profiles.");
+        getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerManager.getCachedPlayers().size() + " total profiles.");
         
         List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','privatealpha');");
         for (Row row : statsRows) {
             String name = row.getString("name");
             UUID uuid = UUID.fromString(row.getString("uuid"));
-            String rawValue = row.getString("value");
             Stat.Info info = StatHelper.getInfo(name);
-            Value value = new ValueCodec().decode(rawValue);
+            Value value = (Value) row.getObject("value");
             CachedPlayer player = playerManager.getCachedPlayer(uuid);
             if (player == null) {
                 continue;

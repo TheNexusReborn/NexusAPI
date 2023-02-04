@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.punishment;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
@@ -22,7 +21,6 @@ public class Punishment implements Comparable<Punishment> {
             &fExpires: &c{expire}
             &fPunishment ID: &e{id}""";
     
-    @Primary
     private long id = -1;
     private long date, length;
     private String actor, target, server, reason;

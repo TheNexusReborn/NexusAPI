@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.player;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
@@ -10,7 +9,6 @@ import java.util.*;
 
 @TableName("toggles")
 public class Toggle {
-    @Primary
     private long id;
     @ColumnName("name")
     @ColumnType("varchar(100)")
@@ -85,7 +83,7 @@ public class Toggle {
     
     @TableName("toggleinfo")
     public static class Info {
-        @Primary private long id;
+        private long id;
         private String name, displayName, description;
         private Rank minRank;
         private boolean defaultValue;

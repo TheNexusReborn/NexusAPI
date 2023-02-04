@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.player;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
 import com.thenexusreborn.api.frameworks.value.Value;
 import com.thenexusreborn.api.stats.*;
@@ -13,7 +12,6 @@ import java.util.UUID;
 
 public abstract class NexusProfile {
     
-    @Primary
     protected long id;
     protected UUID uniqueId;
     protected String name;

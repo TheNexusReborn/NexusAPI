@@ -1,11 +1,9 @@
 package com.thenexusreborn.api.server;
 
-import com.starmediadev.starsql.annotations.Primary;
 
 import java.util.Objects;
 
 public class ServerInfo {
-    @Primary
     private long id;
     private String ip, name;
     private int port, multicraftId;

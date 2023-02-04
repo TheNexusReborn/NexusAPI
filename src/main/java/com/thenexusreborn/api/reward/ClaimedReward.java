@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.reward;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.Objects;
@@ -8,7 +7,6 @@ import java.util.UUID;
 
 @TableName("claimedrewards")
 public class ClaimedReward {
-    @Primary
     private long id;
     private UUID uuid;
     private String rewardId;

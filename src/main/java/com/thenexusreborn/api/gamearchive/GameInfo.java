@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.gamearchive;
 
-import com.starmediadev.starsql.annotations.Primary;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.*;
 import com.thenexusreborn.api.storage.codec.StringArrayCodec;
@@ -11,7 +10,6 @@ import java.util.*;
 @TableName("games")
 @TableHandler(GamesObjectHandler.class)
 public class GameInfo implements Comparable<GameInfo> {
-    @Primary
     private long id;
     private long gameStart, gameEnd;
     private String serverName;

@@ -2,12 +2,12 @@ package com.thenexusreborn.api.frameworks.value;
 
 /**
  * <p>
- *  This class is a utility class to allow storing a variable type of values into the Storage API
- *  This is mainly taken from the existing Stats System to make it so that it can be reused in multiple places and system
- *  You must store this as a field
- *  If you intend to store in the Storage API, you must specifiy a @ColumnInfo annotation with the ValueCodec class as the codec
- *  If you intend to store an Enum, you must also provide enough space to store the fully qualified class name of the Enum type
- *  You must also provide enough space in the column to store the Type and the actual value
+ * This class is a utility class to allow storing a variable type of values into the Storage API
+ * This is mainly taken from the existing Stats System to make it so that it can be reused in multiple places and system
+ * You must store this as a field
+ * If you intend to store in the Storage API, you must specifiy a @ColumnInfo annotation with the ValueCodec class as the codec
+ * If you intend to store an Enum, you must also provide enough space to store the fully qualified class name of the Enum type
+ * You must also provide enough space in the column to store the Type and the actual value
  * </p>
  */
 public class Value implements Cloneable {
@@ -33,12 +33,8 @@ public class Value implements Cloneable {
     }
     
     public int getAsInt() {
-        if (object instanceof Integer) {
-            return (int) object;
-        } else if (object instanceof Double d) {
-            return d.intValue();
-        } else if (object instanceof Long l) {
-            return l.intValue();
+        if (object instanceof Number n) {
+            return n.intValue();
         } else if (object instanceof String str) {
             return Integer.parseInt(str);
         }
@@ -46,12 +42,8 @@ public class Value implements Cloneable {
     }
     
     public double getAsDouble() {
-        if (object instanceof Integer i) {
-            return i.doubleValue();
-        } else if (object instanceof Double d) {
-            return (double) object;
-        } else if (object instanceof Long l) {
-            return l.doubleValue();
+        if (object instanceof Number n) {
+            return n.doubleValue();
         } else if (object instanceof String str) {
             return Double.parseDouble(str);
         }
@@ -59,14 +51,11 @@ public class Value implements Cloneable {
     }
     
     public long getAsLong() {
-        if (object instanceof Integer i) {
-            return i.longValue();
-        } else if (object instanceof Double d) {
-            return d.longValue();
-        } else if (object instanceof Long l) {
-            return (long) object;
+        if (object instanceof Number n) {
+            return n.longValue();
         } else if (object instanceof String str) {
             return Long.parseLong(str);
+            
         }
         return 0;
     }
