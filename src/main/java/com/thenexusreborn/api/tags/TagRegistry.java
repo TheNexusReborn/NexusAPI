@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.tags;
 
-import com.thenexusreborn.api.registry.Registry;
+import com.starmediadev.starlib.Registry;
 
 public class TagRegistry extends Registry<String> {
     @Override

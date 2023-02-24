@@ -1,9 +1,10 @@
 package com.thenexusreborn.api.registry;
 
+import com.starmediadev.starlib.Registry;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.Toggle.Info;
 
-public class ToggleRegistry extends Registry<Toggle.Info> {
+public class ToggleRegistry extends Registry<Info> {
     public void register(String name, Rank rank, String displayName, String description, boolean defaultValue) {
         register(new Info(name, rank, displayName, description, defaultValue));
     }
