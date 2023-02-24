@@ -33,7 +33,6 @@ public class ValueCodec implements SqlCodec<Value> {
         }
         String[] split = encoded.split(":");
         if (split.length == 1) {
-            System.out.println(encoded);
             return new Value(Value.Type.valueOf(split[0]), null);
         }
     
