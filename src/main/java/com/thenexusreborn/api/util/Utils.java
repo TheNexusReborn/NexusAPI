@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.util;
 
-import com.starmediadev.starlib.Code;
+import com.starmediadev.starlib.util.Code;
 
 import java.text.DecimalFormat;
 import java.util.*;

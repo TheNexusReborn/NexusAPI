@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.registry;
 
-import com.starmediadev.starlib.Registry;
+import com.starmediadev.starlib.util.Registry;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 

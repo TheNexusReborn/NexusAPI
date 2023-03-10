@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.registry;
 
-import com.starmediadev.starlib.Registry;
+import com.starmediadev.starlib.util.Registry;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.Toggle.Info;
 

@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.stats;
 
+import com.starmediadev.starlib.util.Value;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.TableName;
-import com.thenexusreborn.api.frameworks.value.*;
 
 import java.util.*;
 
@@ -11,11 +11,7 @@ public class Stat implements Cloneable {
     private long id;
     private String name;
     private UUID uuid;
-    @ColumnType("varchar(1000)")
-    @ColumnCodec(ValueCodec.class)
     private Value value;
-    @ColumnType("varchar(1000)")
-    @ColumnCodec(ValueCodec.class)
     private Value fakedValue;
     private long created;
     private long modified;
@@ -23,7 +19,8 @@ public class Stat implements Cloneable {
     @ColumnIgnored
     private Info info;
     
-    private Stat() {}
+    private Stat() {
+    }
     
     public Stat(Info info, int id, UUID uuid, long created, long modified) {
         this(info, id, uuid, info.getDefaultValue(), created, modified);
@@ -126,7 +123,7 @@ public class Stat implements Cloneable {
             this.fakedValue.set(fakedValue);
         }
     }
-    
+
 //    public StatChange change(StatOperator operator, Object value) {
 //        return null;
 //    }
@@ -178,46 +175,45 @@ public class Stat implements Cloneable {
         private long id;
         private String name, displayName;
         private StatType type;
-        @ColumnType("varchar(1000)")
-        @ColumnCodec(ValueCodec.class)
         private Value defaultValue;
         
-        private Info() {}
-    
+        private Info() {
+        }
+        
         public Info(String name, StatType type, Object defaultValue) {
             this(name, "", type, defaultValue);
         }
-    
+        
         public Info(String name, String displayName, StatType type, Object defaultValue) {
             this.name = name;
             this.displayName = displayName;
             this.type = type;
             this.defaultValue = new Value(type.getValueType(), defaultValue);
         }
-    
+        
         public String getName() {
             return name;
         }
-    
+        
         public void setName(String name) {
             this.name = name;
         }
-    
+        
         public StatType getType() {
             return type;
         }
-    
+        
         public void setType(StatType type) {
             this.type = type;
         }
-    
+        
         public Value getDefaultValue() {
             if (this.defaultValue == null) {
                 this.defaultValue = new Value(getType().getValueType(), null);
             }
             return defaultValue;
         }
-    
+        
         public void setDefaultValue(Object value) {
             if (this.defaultValue == null) {
                 this.defaultValue = new Value(getType().getValueType(), value);
@@ -225,11 +221,11 @@ public class Stat implements Cloneable {
                 this.defaultValue.set(value);
             }
         }
-    
+        
         public String getDisplayName() {
             return displayName;
         }
-    
+        
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -241,12 +237,12 @@ public class Stat implements Cloneable {
             Info info = (Info) o;
             return Objects.equals(name, info.name) && type == info.type;
         }
-    
+        
         @Override
         public int hashCode() {
             return Objects.hash(name, type);
         }
-    
+        
         @Override
         public String toString() {
             return "Info{" +

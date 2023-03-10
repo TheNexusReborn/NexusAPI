@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.player;
 
+import com.starmediadev.starlib.util.Value;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.frameworks.value.Value;
 import com.thenexusreborn.api.stats.*;
 
 import java.util.*;

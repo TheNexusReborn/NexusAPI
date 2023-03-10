@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.player;
 
+import com.starmediadev.starlib.util.Value;
 import com.starmediadev.starsql.annotations.column.*;
-import com.thenexusreborn.api.frameworks.value.Value;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
 

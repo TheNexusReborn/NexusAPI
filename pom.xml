@@ -21,7 +21,7 @@
         <netty.version>4.1.85.Final</netty.version>
         <javaxml.api.version>2.3.1</javaxml.api.version>
         <javaxml.impl.version>4.0.0</javaxml.impl.version>
-        <starlib.version>1.4-SNAPSHOT</starlib.version>
+        <starlib.version>1.5-SNAPSHOT</starlib.version>
         <starsql.version>1.0-SNAPSHOT</starsql.version>
     </properties>
 

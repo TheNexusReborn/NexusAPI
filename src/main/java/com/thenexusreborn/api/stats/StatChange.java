@@ -1,9 +1,9 @@
 package com.thenexusreborn.api.stats;
 
+import com.starmediadev.starlib.util.Value;
 import com.starmediadev.starsql.annotations.column.*;
 import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.frameworks.value.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 
 import java.util.*;
@@ -15,7 +15,6 @@ public class StatChange implements Comparable<StatChange> {
     private UUID uuid;
     private String name;
     @ColumnType("varchar(1000)")
-    @ColumnCodec(ValueCodec.class)
     private Value value;
     private boolean fake;
     private StatOperator operator;

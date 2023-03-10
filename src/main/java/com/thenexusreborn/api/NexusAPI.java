@@ -1,7 +1,8 @@
 package com.thenexusreborn.api;
 
+import com.starmediadev.starlib.util.Value;
 import com.starmediadev.starsql.objects.*;
-import com.thenexusreborn.api.frameworks.value.*;
+import com.starmediadev.starsql.objects.typehandlers.ValueHandler;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.maven.MavenLibrary;
@@ -39,6 +40,7 @@ public abstract class NexusAPI {
     
     protected final Logger logger;
     protected final PlayerManager playerManager;
+    @Deprecated
     protected final ThreadFactory threadFactory;
     protected final ServerManager serverManager;
     protected final Environment environment;
@@ -153,7 +155,7 @@ public abstract class NexusAPI {
             UUID uuid = UUID.fromString(args[0]);
             Stat.Info info = StatHelper.getInfo(args[1]);
             StatOperator operator = StatOperator.valueOf(args[2]);
-            Object value = new ValueCodec().decode(args[3]);
+            Object value = new ValueHandler().getDeserializer().deserialize(null, args[3]);
             NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
             StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
             profile.addStatChange(statChange);

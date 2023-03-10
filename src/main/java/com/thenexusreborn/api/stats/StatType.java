@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.stats;
 
-import com.thenexusreborn.api.frameworks.value.Value;
-import com.thenexusreborn.api.frameworks.value.Value.Type;
+import com.starmediadev.starlib.util.Value;
+import com.starmediadev.starlib.util.Value.Type;
 
 import static com.thenexusreborn.api.stats.StatOperator.*;
 
