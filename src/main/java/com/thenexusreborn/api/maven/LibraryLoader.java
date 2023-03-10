@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.maven;
 
+import com.starmediadev.starlib.reflection.URLClassLoaderAccess;
 import com.thenexusreborn.api.NexusAPI;
 
 import java.io.*;
@@ -19,10 +20,7 @@ public final class LibraryLoader {
     
     public static void loadAll(Class<?> clazz, URLClassLoader classLoader) {
         MavenLibrary[] libs = clazz.getDeclaredAnnotationsByType(MavenLibrary.class);
-        if (libs == null) {
-            return;
-        }
-        
+    
         for (MavenLibrary lib : libs) {
             load(lib.groupId(), lib.artifactId(), lib.version(), lib.repo().value(), classLoader);
         }
