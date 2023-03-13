@@ -28,7 +28,7 @@ public abstract class PlayerManager {
     }
     
     public void saveToMySQLAsync(NexusPlayer player) {
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(player));
+        NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(player));
     }
     
     public abstract NexusPlayer createPlayerData(UUID uniqueId, String name);
@@ -64,7 +64,7 @@ public abstract class PlayerManager {
         if (players.containsKey(uniqueId)) {
             action.accept(players.get(uniqueId));
         } else {
-            NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+            NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> {
                 NexusPlayer nexusPlayer = null;
                 if (hasData(uniqueId)) {
                     do {
@@ -87,7 +87,7 @@ public abstract class PlayerManager {
                     }
                 }
                 NexusPlayer finalNexusPlayer = nexusPlayer;
-                NexusAPI.getApi().getThreadFactory().runSync(() -> {
+                NexusAPI.getApi().getScheduler().runTask(() -> {
                     players.put(finalNexusPlayer.getUniqueId(), finalNexusPlayer);
                     action.accept(finalNexusPlayer);
                 });
@@ -130,7 +130,7 @@ public abstract class PlayerManager {
             }
         }
         
-        NexusAPI.getApi().getThreadFactory().runAsync(() -> {
+        NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> {
             for (CachedPlayer cachedPlayer : getCachedPlayers().values()) {
                 if (cachedPlayer.getName().equalsIgnoreCase(name)) {
                     NexusPlayer nexusPlayer = cachedPlayer.loadFully();

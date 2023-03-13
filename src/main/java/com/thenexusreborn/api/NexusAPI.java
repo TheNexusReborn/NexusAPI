@@ -1,5 +1,7 @@
 package com.thenexusreborn.api;
 
+import com.starmediadev.starlib.StarLib;
+import com.starmediadev.starlib.scheduler.Scheduler;
 import com.starmediadev.starlib.util.Value;
 import com.starmediadev.starsql.objects.*;
 import com.starmediadev.starsql.objects.typehandlers.ValueHandler;
@@ -41,7 +43,7 @@ public abstract class NexusAPI {
     protected final Logger logger;
     protected final PlayerManager playerManager;
     @Deprecated
-    protected final ThreadFactory threadFactory;
+    protected ThreadFactory threadFactory;
     protected final ServerManager serverManager;
     protected final Environment environment;
     protected final NetworkManager networkManager;
@@ -58,12 +60,13 @@ public abstract class NexusAPI {
     
     protected Database primaryDatabase;
     
-    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, ThreadFactory threadFactory, ServerManager serverManager) {
+    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, Scheduler scheduler, ServerManager serverManager) {
         this.logger = logger;
+        StarLib.setStarlibLogger(logger);
         this.environment = environment;
         this.networkManager = new NetworkManager(context);
         this.playerManager = playerManager;
-        this.threadFactory = threadFactory;
+        StarLib.setScheduler(scheduler);
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
@@ -387,6 +390,11 @@ public abstract class NexusAPI {
         return playerManager;
     }
     
+    public Scheduler getScheduler() {
+        return StarLib.getScheduler();
+    }
+    
+    @Deprecated
     public ThreadFactory getThreadFactory() {
         return threadFactory;
     }
