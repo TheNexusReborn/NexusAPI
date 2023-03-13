@@ -18,7 +18,6 @@ import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.tags.*;
-import com.thenexusreborn.api.thread.ThreadFactory;
 
 import java.io.*;
 import java.net.*;
@@ -42,8 +41,6 @@ public abstract class NexusAPI {
     
     protected final Logger logger;
     protected final PlayerManager playerManager;
-    @Deprecated
-    protected ThreadFactory threadFactory;
     protected final ServerManager serverManager;
     protected final Environment environment;
     protected final NetworkManager networkManager;
@@ -392,11 +389,6 @@ public abstract class NexusAPI {
     
     public Scheduler getScheduler() {
         return StarLib.getScheduler();
-    }
-    
-    @Deprecated
-    public ThreadFactory getThreadFactory() {
-        return threadFactory;
     }
     
     public Logger getLogger() {
