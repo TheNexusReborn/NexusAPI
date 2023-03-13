@@ -90,7 +90,6 @@ public final class FileHelper {
         try {
             Files.copy(source, dest, REPLACE_EXISTING);
         } catch (Exception e) {
-            System.out.println(source);
             throw new RuntimeException(e.getMessage(), e);
         }
     }

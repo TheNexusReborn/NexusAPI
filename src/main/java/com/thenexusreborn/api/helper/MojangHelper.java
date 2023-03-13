@@ -44,7 +44,7 @@ public final class MojangHelper {
     }
     
     public static UUID getUUIDFromName(String username) {
-        String s = "https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + (System.currentTimeMillis() / 1000);
+        String s = "https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis() / 1000;
         
         JsonObject json = getJsonObject(s);
         if (json == null) {

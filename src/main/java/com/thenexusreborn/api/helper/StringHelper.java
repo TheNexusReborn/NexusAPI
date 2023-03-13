@@ -15,13 +15,13 @@ public final class StringHelper {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < word.length(); i++) {
                 if (i == 0) {
-                    sb.append(Character.toUpperCase(word.charAt(i)));
+                    sb.append(Character.toUpperCase(word.charAt(0)));
                 } else {
                     sb.append(word.charAt(i));
                 }
             }
             name.append(sb);
-            if (w < (words.length - 1)) {
+            if (w < words.length - 1) {
                 name.append(" ");
             }
         }
@@ -39,8 +39,9 @@ public final class StringHelper {
             return "";
         } else {
             Object first = iterator.next();
-            if (first == null)
+            if (first == null) {
                 return "";
+            }
             if (!iterator.hasNext()) {
                 return first.toString();
             } else {
@@ -64,14 +65,13 @@ public final class StringHelper {
     }
     
     public static boolean isEmpty(String str) {
-        return str == null || str.length() == 0;
+        return str == null || str.isEmpty();
     }
     
     public static UUID toUUID(String id) {
         if (UUID_PATTERN.matcher(id).matches()) {
             return UUID.fromString(id);
         }
-    
     
         id = id.substring(0, 8) + "-" +
                 id.substring(8, 12) + "-" +
