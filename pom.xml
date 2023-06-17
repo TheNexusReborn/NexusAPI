@@ -71,13 +71,6 @@
         </resources>
     </build>
     
-    <repositories>
-        <repository>
-            <id>starmediadev</id>
-            <url>https://repo.starmediadev.com/snapshots/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>com.starmediadev</groupId>
