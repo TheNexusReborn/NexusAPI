@@ -23,6 +23,9 @@
         <javaxml.impl.version>4.0.0</javaxml.impl.version>
         <starlib.version>1.5-SNAPSHOT</starlib.version>
         <starsql.version>1.0-SNAPSHOT</starsql.version>
+        <starclock.version>1.1-SNAPSHOT</starclock.version>
+        <starcore.version>1.1-SNAPSHOT</starcore.version>
+        <starui.version>1.0-SNAPSHOT</starui.version>
     </properties>
 
     <build>
@@ -87,6 +90,24 @@
                     <artifactId>protobuf-java</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.starmediadev</groupId>
+            <artifactId>starclock</artifactId>
+            <version>${starclock.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.starmediadev.plugins</groupId>
+            <artifactId>starcore</artifactId>
+            <version>${starcore.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.starmediadev</groupId>
+            <artifactId>starui</artifactId>
+            <version>${starui.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
