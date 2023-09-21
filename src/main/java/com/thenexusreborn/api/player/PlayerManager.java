@@ -2,6 +2,8 @@ package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.helper.MojangHelper;
+import com.thenexusreborn.api.punishment.Punishment;
+import com.thenexusreborn.api.punishment.PunishmentType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -12,6 +14,9 @@ public abstract class PlayerManager {
     
     protected final Map<UUID, NexusPlayer> players = new HashMap<>();
     protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>();
+
+    protected Map<UUID, Long> loginTimes = new HashMap<>();
+    protected Map<UUID, Session> sessions = new HashMap<>();
     
     protected final Set<IPEntry> ipHistory = new HashSet<>();
     
@@ -31,7 +36,19 @@ public abstract class PlayerManager {
         NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(player));
     }
     
-    public abstract NexusPlayer createPlayerData(UUID uniqueId, String name);
+    public NexusPlayer createPlayerData(UUID uniqueId, String name) {
+        NexusPlayer nexusPlayer = new NexusPlayer(uniqueId);
+        if (name != null && !name.equalsIgnoreCase("")) {
+            nexusPlayer.setName(name);
+        }
+        nexusPlayer.setFirstJoined(System.currentTimeMillis());
+        nexusPlayer.setLastLogin(System.currentTimeMillis());
+        nexusPlayer.setLastLogout(System.currentTimeMillis());
+        NexusAPI.getApi().getPrimaryDatabase().saveSilent(nexusPlayer);
+        CachedPlayer player = new CachedPlayer(nexusPlayer);
+        getCachedPlayers().put(nexusPlayer.getUniqueId(), player);
+        return nexusPlayer;
+    }
     
     public void handlePlayerLeave(NexusPlayer player) {
         this.cachedPlayers.put(player.getUniqueId(), new CachedPlayer(player));
@@ -199,5 +216,21 @@ public abstract class PlayerManager {
         }
         
         return getCachedPlayer(uuid).loadFully();
+    }
+
+    protected Punishment checkPunishments(UUID uniqueId) {
+        List<Punishment> punishments = NexusAPI.getApi().getPunishmentManager().getPunishmentsByTarget(uniqueId);
+        if (!punishments.isEmpty()) {
+            for (Punishment punishment : punishments) {
+                if (punishment.getType() == PunishmentType.BAN || punishment.getType() == PunishmentType.BLACKLIST) {
+                    if (punishment.isActive()) {
+                        if (!PlayerManager.NEXUS_TEAM.contains(uniqueId)) {
+                            return punishment;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
