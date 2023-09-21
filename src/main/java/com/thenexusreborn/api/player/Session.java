@@ -4,7 +4,7 @@ import com.starmediadev.starsql.annotations.table.TableName;
 
 import java.util.UUID;
 
-@TableName("privatealphasessions")
+@TableName("sessions")
 public class Session {
     private long id;
     private UUID uniqueId;
