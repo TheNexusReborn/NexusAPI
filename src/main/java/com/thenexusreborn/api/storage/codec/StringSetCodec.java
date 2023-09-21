@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.storage.codec;
 
-import com.starmediadev.starsql.objects.SqlCodec;
 import com.thenexusreborn.api.helper.StringHelper;
+import me.firestar311.starsql.api.objects.SqlCodec;
 
 import java.util.*;
 

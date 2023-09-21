@@ -1,13 +1,15 @@
 package com.thenexusreborn.api.storage.handler;
 
-import com.starmediadev.starsql.objects.*;
 import com.thenexusreborn.api.gamearchive.*;
+import me.firestar311.starsql.api.objects.ObjectHandler;
+import me.firestar311.starsql.api.objects.SQLDatabase;
+import me.firestar311.starsql.api.objects.Table;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class GamesObjectHandler extends ObjectHandler {
-    public GamesObjectHandler(Object object, Database database, Table table) {
+    public GamesObjectHandler(Object object, SQLDatabase database, Table table) {
         super(object, database, table);
     }
     

@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.maven;
 
-import com.starmediadev.starlib.reflection.URLClassLoaderAccess;
 import com.thenexusreborn.api.NexusAPI;
+import me.firestar311.starlib.api.reflection.URLClassLoaderAccess;
 
 import java.io.*;
 import java.net.*;

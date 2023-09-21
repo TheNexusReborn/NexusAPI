@@ -1,7 +1,5 @@
 package com.thenexusreborn.api.util;
 
-import com.starmediadev.starlib.util.Code;
-
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -12,7 +10,7 @@ public final class Utils {
     }
     
     public static String generateCode(int amount, boolean caps, boolean useAlphabet, boolean useNumbers) {
-        return new Code(amount, caps, useAlphabet, useNumbers).getValue();
+        return ""; //TODO
     }
     
     @SuppressWarnings("UseOfSystemOutOrSystemErr")

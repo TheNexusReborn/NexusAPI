@@ -6,7 +6,7 @@
 
     <groupId>com.thenexusreborn</groupId>
     <artifactId>NexusAPI</artifactId>
-    <version>1.10.4-ALPHA</version>
+    <version>1.11-ALPHA</version>
 
     <properties>
         <java.version>17</java.version>
@@ -21,10 +21,15 @@
         <netty.version>4.1.85.Final</netty.version>
         <javaxml.api.version>2.3.1</javaxml.api.version>
         <javaxml.impl.version>4.0.0</javaxml.impl.version>
-        <starlib.version>1.5-SNAPSHOT</starlib.version>
-        <starsql.version>1.0-SNAPSHOT</starsql.version>
-        <starclock.version>1.1-SNAPSHOT</starclock.version>
     </properties>
+    
+    <repositories>
+        <repository>
+            <id>reposilite</id>
+            <name>Laptop Repo</name>
+            <url>http://localhost:8080/snapshots</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -74,25 +79,21 @@
     
     <dependencies>
         <dependency>
-            <groupId>com.starmediadev</groupId>
-            <artifactId>StarLib</artifactId>
-            <version>${starlib.version}</version>
+            <groupId>me.firestar311.starlib</groupId>
+            <artifactId>starlib-api</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.starmediadev</groupId>
-            <artifactId>starsql</artifactId>
-            <version>${starsql.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.protobuf</groupId>
-                    <artifactId>protobuf-java</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>me.firestar311.starsql</groupId>
+            <artifactId>starsql-mysql</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.starmediadev</groupId>
-            <artifactId>starclock</artifactId>
-            <version>${starclock.version}</version>
+            <groupId>me.firestar311.starclock</groupId>
+            <artifactId>starclock-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

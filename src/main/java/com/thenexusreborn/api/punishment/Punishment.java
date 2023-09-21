@@ -1,12 +1,14 @@
 package com.thenexusreborn.api.punishment;
 
-import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.codec.*;
 import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.CachedPlayer;
 import com.thenexusreborn.api.util.Constants;
+import me.firestar311.starsql.api.annotations.column.ColumnCodec;
+import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
+import me.firestar311.starsql.api.annotations.column.ColumnType;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.UUID;
 

@@ -20,12 +20,12 @@ public final class StatHelper {
     }
     
     public static void addStatInfo(Stat.Info info) {
-        registry.register(info);
+        registry.register(info.getName(), info);
     }
     
     public static Stat.Info getInfo(String name) {
         String statName = formatStatName(name);
-        for (Info info : registry.getObjects()) {
+        for (Info info : registry.getRegisteredObjects().values()) {
             if (info.getName().equals(statName)) {
                 return info;
             }

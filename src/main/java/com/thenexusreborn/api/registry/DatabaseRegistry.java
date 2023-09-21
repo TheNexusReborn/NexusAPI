@@ -1,18 +1,18 @@
 package com.thenexusreborn.api.registry;
 
-import com.starmediadev.starsql.objects.Database;
+import me.firestar311.starsql.api.objects.SQLDatabase;
 
 import java.util.logging.Logger;
 
-public class DatabaseRegistry extends com.starmediadev.starsql.DatabaseRegistry {
+public class DatabaseRegistry extends me.firestar311.starsql.api.DatabaseRegistry {
     
     public DatabaseRegistry(Logger logger) {
         super(logger);
     }
     
     @Override
-    public Database get(String str) {
-        for (Database object : getObjects()) {
+    public SQLDatabase get(String str) {
+        for (SQLDatabase object : getRegisteredObjects().values()) {
             if (object.getName().equalsIgnoreCase(str)) {
                 return object;
             }

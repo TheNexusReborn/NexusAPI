@@ -1,9 +1,11 @@
 package com.thenexusreborn.api.player;
 
-import com.starmediadev.starlib.util.Value;
-import com.starmediadev.starsql.annotations.column.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
+import me.firestar311.starlib.api.Value;
+import me.firestar311.starsql.api.annotations.column.ColumnCodec;
+import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
+import me.firestar311.starsql.api.annotations.column.ColumnType;
 
 import java.util.HashSet;
 import java.util.Objects;
