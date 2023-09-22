@@ -20,6 +20,7 @@ import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
+import me.firestar311.starclock.api.ClockManager;
 import me.firestar311.starlib.api.Value;
 import me.firestar311.starlib.api.scheduler.Scheduler;
 import me.firestar311.starsql.api.objects.Row;
@@ -33,8 +34,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
@@ -62,6 +61,7 @@ public abstract class NexusAPI {
     protected final NetworkManager networkManager;
     protected final PunishmentManager punishmentManager;
     protected final LevelManager levelManager;
+    protected ClockManager clockManager;
     protected Version version;
     protected Scheduler scheduler;
     
@@ -103,19 +103,6 @@ public abstract class NexusAPI {
     
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
-        
-        try {
-            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {
-                Driver driver = e.nextElement();
-                DriverManager.deregisterDriver(driver);
-            }
-            Driver mysqlDriver = new com.mysql.cj.jdbc.Driver();
-            DriverManager.registerDriver(mysqlDriver);
-            getLogger().info("Registered the correct MySQL Driver");
-        } catch (SQLException e) {
-            getLogger().severe("Error while loading the MySQL driver, disabling plugin");
-            throw e;
-        }
         
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
@@ -211,7 +198,7 @@ public abstract class NexusAPI {
         getLogger().info("Registered the databases");
         
         for (SQLDatabase database : databaseRegistry.getRegisteredObjects().values()) {
-            if (database.isPrimary()) {
+            if (database.getName().toLowerCase().contains("nexus")) { //TODO Temporary
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
@@ -459,5 +446,13 @@ public abstract class NexusAPI {
     
     public Map<UUID, PrivateAlphaUser> getPrivateAlphaUsers() {
         return privateAlphaUsers;
+    }
+
+    public ClockManager getClockManager() {
+        return clockManager;
+    }
+
+    public void setClockManager(ClockManager clockManager) {
+        this.clockManager = clockManager;
     }
 }

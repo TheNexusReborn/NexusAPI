@@ -86,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>me.firestar311.starsql</groupId>
-            <artifactId>starsql-mysql</artifactId>
+            <artifactId>starsql-api</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
