@@ -82,6 +82,7 @@ public abstract class NexusAPI {
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
+        this.scheduler = scheduler;
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
