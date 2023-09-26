@@ -37,26 +37,30 @@ public final class FileHelper {
     
     public static Path downloadFile(String downloadUrl, Path downloadDir, String fileName, boolean userAgent) {
         try {
-            Path tmpFile = FileSystems.getDefault().getPath(downloadDir.toString(), fileName + ".tmp");
-            if (Files.exists(tmpFile)) {
-                Files.delete(tmpFile);
-            }
-            Files.createFile(tmpFile);
-            URL url = new URL(downloadUrl);
-            URLConnection connection = url.openConnection();
-            if (userAgent) {
-                connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
-            }
-            try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream()); FileOutputStream out = new FileOutputStream(tmpFile.toFile())) {
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = in.read(buffer, 0, 1024)) != -1) {
-                    out.write(buffer, 0, read);
-                }
-            }
-            
             Path targetFile = FileSystems.getDefault().getPath(downloadDir.toString(), fileName);
-            Files.move(tmpFile, targetFile, REPLACE_EXISTING);
+            if (downloadUrl.startsWith("file://")) {
+                Files.copy(Path.of(downloadUrl.replace("file://", "")), targetFile, REPLACE_EXISTING);
+            } else {
+                URL url = new URL(downloadUrl);
+                Path tmpFile = FileSystems.getDefault().getPath(downloadDir.toString(), fileName + ".tmp");
+                if (Files.exists(tmpFile)) {
+                    Files.delete(tmpFile);
+                }
+                Files.createFile(tmpFile);
+                URLConnection connection = url.openConnection();
+                if (userAgent) {
+                    connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
+                }
+                try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream()); FileOutputStream out = new FileOutputStream(tmpFile.toFile())) {
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = in.read(buffer, 0, 1024)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
+                }
+
+                Files.move(tmpFile, targetFile, REPLACE_EXISTING);
+            }
             return targetFile;
         } catch (Exception e) {
             e.printStackTrace();
