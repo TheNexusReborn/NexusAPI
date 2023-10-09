@@ -1,5 +1,7 @@
 package com.thenexusreborn.api.player;
 
+import com.thenexusreborn.api.NexusAPI;
+
 import java.util.*;
 
 public class PlayerRanks {
@@ -11,7 +13,7 @@ public class PlayerRanks {
     }
     
     public Rank get() {
-        if (PlayerManager.NEXUS_TEAM.contains(uniqueId)) {
+        if (NexusAPI.NEXUS_TEAM.contains(uniqueId)) {
             return Rank.NEXUS;
         }
         
