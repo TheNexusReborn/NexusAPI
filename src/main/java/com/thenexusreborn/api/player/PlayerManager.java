@@ -233,4 +233,8 @@ public abstract class PlayerManager {
         }
         return null;
     }
+
+    public Session getSession(UUID uniqueId) {
+        return this.sessions.get(uniqueId);
+    }
 }
