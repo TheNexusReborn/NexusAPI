@@ -70,8 +70,6 @@ public abstract class NexusAPI {
     protected TagRegistry tagRegistry;
     protected DatabaseRegistry databaseRegistry;
     
-    protected Map<UUID, PrivateAlphaUser> privateAlphaUsers = new HashMap<>();
-    
     protected SQLDatabase primaryDatabase;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, Scheduler scheduler, ServerManager serverManager) {
@@ -164,20 +162,6 @@ public abstract class NexusAPI {
             profile.addStatChange(statChange);
         }));
         
-        networkCommandRegistry.register("updateprivatealpha", new NetworkCommand("updateprivatealpha", (cmd, origin, args) -> {
-            String action = args[0];
-            if (action.equalsIgnoreCase("add")) {
-                long id = Long.parseLong(args[1]);
-                UUID uuid = UUID.fromString(args[2]);
-                String name = args[3];
-                long timestamp = Long.parseLong(args[4]);
-                this.privateAlphaUsers.put(uuid, new PrivateAlphaUser(id, uuid, name, timestamp));
-            } else if (action.equalsIgnoreCase("remove")) {
-                UUID uuid = UUID.fromString(args[1]);
-                this.privateAlphaUsers.remove(uuid);
-            }
-        }));
-        
         networkCommandRegistry.register("playercreate", new NetworkCommand("playercreate", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             try {
@@ -213,7 +197,6 @@ public abstract class NexusAPI {
                 database.registerClass(Punishment.class);
                 database.registerClass(Nickname.class);
                 database.registerClass(Tag.class);
-                database.registerClass(PrivateAlphaUser.class);
                 database.registerClass(Session.class);
                 this.primaryDatabase = database;
             }
@@ -360,11 +343,6 @@ public abstract class NexusAPI {
         }
         getLogger().info("Sorted IP History for player profiles.");
     
-        List<PrivateAlphaUser> privateAlphaUsers = getPrimaryDatabase().get(PrivateAlphaUser.class);
-        for (PrivateAlphaUser pau : privateAlphaUsers) {
-            this.privateAlphaUsers.put(pau.getUuid(), pau);
-        }
-    
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
@@ -445,10 +423,6 @@ public abstract class NexusAPI {
         return levelManager;
     }
     
-    public Map<UUID, PrivateAlphaUser> getPrivateAlphaUsers() {
-        return privateAlphaUsers;
-    }
-
     public ClockManager getClockManager() {
         return clockManager;
     }
