@@ -46,8 +46,6 @@ public abstract class NexusAPI {
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
     public static final NetworkType NETWORK_TYPE = NetworkType.SINGLE;
     
-    public static final Set<UUID> NEXUS_TEAM = new HashSet<>();
-    
     public static void setApi(NexusAPI api) {
         instance = api;
     }
@@ -186,7 +184,6 @@ public abstract class NexusAPI {
         
         for (SQLDatabase database : databaseRegistry.getRegisteredObjects().values()) {
             if (database.getName().toLowerCase().contains("nexus")) { //TODO Temporary
-                database.registerClass(NexusTeamMember.class);
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
@@ -212,24 +209,6 @@ public abstract class NexusAPI {
         databaseRegistry.setup();
         getLogger().info("Successfully setup the database tables");
 
-        List<NexusTeamMember> ntmembers = primaryDatabase.get(NexusTeamMember.class);
-        for (NexusTeamMember ntmember : ntmembers) {
-            NEXUS_TEAM.add(ntmember.getUniqueId());
-        }
-        boolean hasFirestar311 = false;
-        for (UUID nexusTeamMember : NEXUS_TEAM) {
-            if (nexusTeamMember.toString().equals("3f7891ce-5a73-4d52-a2ba-299839053fdc")) {
-                hasFirestar311 = true;
-                break;
-            }
-        }
-
-        if (!hasFirestar311) {
-            NexusTeamMember firestar311 = new NexusTeamMember(UUID.fromString("3f7891ce-5a73-4d52-a2ba-299839053fdc"));
-            NEXUS_TEAM.add(firestar311.getUniqueId());
-            primaryDatabase.saveSilent(firestar311);
-        }
-        
         statRegistry = StatHelper.getRegistry();
         
         List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
