@@ -8,11 +8,18 @@ import java.util.*;
 public class StringSetCodec implements SqlCodec<Set<String>> {
     @Override
     public String encode(Object object) {
-        return StringHelper.join((Set<String>) object, ",");
+        Set<String> stringSet = (Set<String>) object;
+        if (stringSet.isEmpty()) {
+            return null; //TODO Might cause an issue, will have to test
+        }
+        return StringHelper.join(stringSet, ",");
     }
     
     @Override
     public Set<String> decode(String encoded) {
+        if (encoded == null) {
+            return new HashSet<>();
+        }
         return new HashSet<>(Arrays.asList(encoded.split(",")));
     }
 }
