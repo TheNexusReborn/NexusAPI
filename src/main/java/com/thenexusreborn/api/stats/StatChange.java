@@ -7,6 +7,7 @@ import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
 import me.firestar311.starsql.api.annotations.column.ColumnType;
 import me.firestar311.starsql.api.annotations.table.TableName;
 
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -94,7 +95,13 @@ public class StatChange implements Comparable<StatChange> {
     }
     
     public StatChange push() {
-        NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(this));
+        NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> {
+            try {
+                NexusAPI.getApi().getPrimaryDatabase().save(this);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
         return this;
     }
     
