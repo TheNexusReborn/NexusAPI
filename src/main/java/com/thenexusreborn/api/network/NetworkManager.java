@@ -29,7 +29,7 @@ public class NetworkManager {
     }
     
     public void send(String action, String... data) {
-        
+        handleInboundPacket(new NexusPacket("Nexus", action, data)); //Temporary to allow staff chat and other things that rely on the network system to work
     }
     
     public void handleInboundPacket(NexusPacket packet) {
