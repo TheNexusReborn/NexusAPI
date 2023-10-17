@@ -7,7 +7,8 @@ import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
 import me.firestar311.starsql.api.annotations.column.ColumnType;
 import me.firestar311.starsql.api.annotations.table.TableName;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.UUID;
 
 @TableName(value = "statchanges")
 public class StatChange implements Comparable<StatChange> {
@@ -114,7 +115,7 @@ public class StatChange implements Comparable<StatChange> {
             return false;
         }
         StatChange that = (StatChange) o;
-        return id == that.id && timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(info.getName(), that.info.getName()) && info.getType() == that.info.getType() && Objects.equals(value, that.value) && operator == that.operator;
+        return timestamp == that.timestamp && Objects.equals(uuid, that.uuid) && Objects.equals(info.getName(), that.info.getName()) && info.getType() == that.info.getType() && Objects.equals(value, that.value) && operator == that.operator;
     }
     
     @Override
