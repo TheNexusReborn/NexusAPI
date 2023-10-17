@@ -23,7 +23,7 @@ public class Punishment implements Comparable<Punishment> {
             &fExpires: &c{expire}
             &fPunishment ID: &e{id}""";
     
-    private long id = -1;
+    private long id;
     private long date, length;
     private String actor, target, server, reason;
     private PunishmentType type;
@@ -53,7 +53,7 @@ public class Punishment implements Comparable<Punishment> {
     }
     
     public Punishment(long date, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
-        this(date, -1, actor, target, server, reason, type, visibility);
+        this(date, 0, actor, target, server, reason, type, visibility);
     }
     
     public void setId(long id) {
