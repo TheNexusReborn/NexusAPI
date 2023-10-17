@@ -39,7 +39,7 @@ public class Stat implements Cloneable {
     }
     
     public Stat(Info info, UUID uuid, Object value, long created, long modified) {
-        this(info, -1, uuid, value, created, modified);
+        this(info, 0, uuid, value, created, modified);
     }
     
     public Stat(Info info, int id, UUID uuid, Object value, long created, long modified) {

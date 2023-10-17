@@ -94,10 +94,6 @@ public final class StatHelper {
             List<StatChange> statChanges = NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString());
             statChanges.addAll(player.getStats().findAllChanges());
             for (StatChange statChange : new TreeSet<>(statChanges)) {
-                if (statChange.getId() == 0) {
-                    NexusAPI.getApi().getLogger().info("Stat Change for stat " + statChange.getStatName() + " had an ID of 0");
-                    continue;
-                }
                 Stat stat = player.getStat(statChange.getStatName());
                 if (stat == null) {
                     Info info = getInfo(statChange.getStatName());
