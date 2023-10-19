@@ -51,7 +51,7 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public void sendMessage(String message) {
-        playerProxy.sendMessage(message);
+        getPlayer().sendMessage(message);
     }
     
     public String getTablistName() {
