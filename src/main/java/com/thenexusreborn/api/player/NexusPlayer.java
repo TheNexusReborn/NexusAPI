@@ -1,10 +1,11 @@
 package com.thenexusreborn.api.player;
 
-import com.starmediadev.starsql.annotations.column.ColumnIgnored;
-import com.starmediadev.starsql.annotations.table.*;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
+import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
+import me.firestar311.starsql.api.annotations.table.TableHandler;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class NexusPlayer extends NexusProfile {
     }
     
     public void sendMessage(String message) {
-        playerProxy.sendMessage(message);
+        getPlayer().sendMessage(message);
     }
     
     public String getTablistName() {

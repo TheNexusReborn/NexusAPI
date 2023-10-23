@@ -1,9 +1,9 @@
 package com.thenexusreborn.api.nickname;
 
-import com.starmediadev.starsql.annotations.column.ColumnIgnored;
-import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.player.Rank;
 import com.thenexusreborn.api.skins.Skin;
+import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.UUID;
 

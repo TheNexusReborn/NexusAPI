@@ -1,12 +1,14 @@
 package com.thenexusreborn.api.punishment;
 
-import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableName;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.codec.*;
 import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.player.CachedPlayer;
 import com.thenexusreborn.api.util.Constants;
+import me.firestar311.starsql.api.annotations.column.ColumnCodec;
+import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
+import me.firestar311.starsql.api.annotations.column.ColumnType;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ public class Punishment implements Comparable<Punishment> {
             &fExpires: &c{expire}
             &fPunishment ID: &e{id}""";
     
-    private long id = -1;
+    private long id;
     private long date, length;
     private String actor, target, server, reason;
     private PunishmentType type;
@@ -51,7 +53,7 @@ public class Punishment implements Comparable<Punishment> {
     }
     
     public Punishment(long date, String actor, String target, String server, String reason, PunishmentType type, Visibility visibility) {
-        this(date, -1, actor, target, server, reason, type, visibility);
+        this(date, 0, actor, target, server, reason, type, visibility);
     }
     
     public void setId(long id) {

@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.stats;
 
-import com.starmediadev.starlib.util.Value;
-import com.starmediadev.starsql.annotations.column.*;
-import com.starmediadev.starsql.annotations.table.TableName;
+import me.firestar311.starlib.api.Value;
+import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.*;
 
@@ -39,7 +39,7 @@ public class Stat implements Cloneable {
     }
     
     public Stat(Info info, UUID uuid, Object value, long created, long modified) {
-        this(info, -1, uuid, value, created, modified);
+        this(info, 0, uuid, value, created, modified);
     }
     
     public Stat(Info info, int id, UUID uuid, Object value, long created, long modified) {

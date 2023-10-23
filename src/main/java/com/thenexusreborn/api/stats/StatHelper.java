@@ -20,12 +20,12 @@ public final class StatHelper {
     }
     
     public static void addStatInfo(Stat.Info info) {
-        registry.register(info);
+        registry.register(info.getName(), info);
     }
     
     public static Stat.Info getInfo(String name) {
         String statName = formatStatName(name);
-        for (Info info : registry.getObjects()) {
+        for (Info info : registry.getRegisteredObjects().values()) {
             if (info.getName().equals(statName)) {
                 return info;
             }
@@ -94,10 +94,6 @@ public final class StatHelper {
             List<StatChange> statChanges = NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString());
             statChanges.addAll(player.getStats().findAllChanges());
             for (StatChange statChange : new TreeSet<>(statChanges)) {
-                if (statChange.getId() == 0) {
-                    NexusAPI.getApi().getLogger().info("Stat Change for stat " + statChange.getStatName() + " had an ID of 0");
-                    continue;
-                }
                 Stat stat = player.getStat(statChange.getStatName());
                 if (stat == null) {
                     Info info = getInfo(statChange.getStatName());

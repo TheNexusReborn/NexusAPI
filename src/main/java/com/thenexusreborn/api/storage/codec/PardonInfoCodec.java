@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.storage.codec;
 
-import com.starmediadev.starsql.objects.SqlCodec;
 import com.thenexusreborn.api.punishment.PardonInfo;
+import me.firestar311.starsql.api.objects.SqlCodec;
 
 public class PardonInfoCodec implements SqlCodec<PardonInfo> {
     @Override

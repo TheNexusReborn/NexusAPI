@@ -1,9 +1,9 @@
 package com.thenexusreborn.api.storage.codec;
 
-import com.starmediadev.starsql.objects.SqlCodec;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.Toggle;
 import com.thenexusreborn.api.player.Toggle.Info;
+import me.firestar311.starsql.api.objects.SqlCodec;
 
 public class ToggleInfoCodec implements SqlCodec<Info> {
     @Override

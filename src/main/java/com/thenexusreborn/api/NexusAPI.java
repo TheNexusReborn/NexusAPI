@@ -1,35 +1,50 @@
 package com.thenexusreborn.api;
 
-import com.starmediadev.starlib.StarLib;
-import com.starmediadev.starlib.scheduler.Scheduler;
-import com.starmediadev.starlib.util.Value;
-import com.starmediadev.starsql.objects.*;
-import com.starmediadev.starsql.objects.typehandlers.ValueHandler;
-import com.thenexusreborn.api.gamearchive.*;
+import com.thenexusreborn.api.gamearchive.GameAction;
+import com.thenexusreborn.api.gamearchive.GameInfo;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.maven.MavenLibrary;
-import com.thenexusreborn.api.network.*;
+import com.thenexusreborn.api.network.NetworkContext;
+import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.*;
-import com.thenexusreborn.api.registry.*;
+import com.thenexusreborn.api.punishment.Punishment;
+import com.thenexusreborn.api.punishment.PunishmentManager;
+import com.thenexusreborn.api.registry.DatabaseRegistry;
+import com.thenexusreborn.api.registry.NetworkCommandRegistry;
+import com.thenexusreborn.api.registry.StatRegistry;
+import com.thenexusreborn.api.registry.ToggleRegistry;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
-import com.thenexusreborn.api.tags.*;
+import com.thenexusreborn.api.tags.Tag;
+import com.thenexusreborn.api.tags.TagRegistry;
+import me.firestar311.starclock.api.ClockManager;
+import me.firestar311.starlib.api.Value;
+import me.firestar311.starlib.api.scheduler.Scheduler;
+import me.firestar311.starsql.api.objects.Row;
+import me.firestar311.starsql.api.objects.SQLDatabase;
+import me.firestar311.starsql.api.objects.typehandlers.ValueHandler;
 
-import java.io.*;
-import java.net.*;
-import java.sql.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
 @MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
+    public static final NetworkType NETWORK_TYPE = NetworkType.SINGLE;
     
     public static void setApi(NexusAPI api) {
         instance = api;
@@ -46,27 +61,26 @@ public abstract class NexusAPI {
     protected final NetworkManager networkManager;
     protected final PunishmentManager punishmentManager;
     protected final LevelManager levelManager;
+    protected ClockManager clockManager;
     protected Version version;
+    protected Scheduler scheduler;
     
     protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
     protected DatabaseRegistry databaseRegistry;
     
-    protected Map<UUID, PrivateAlphaUser> privateAlphaUsers = new HashMap<>();
-    
-    protected Database primaryDatabase;
+    protected SQLDatabase primaryDatabase;
     
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, Scheduler scheduler, ServerManager serverManager) {
         this.logger = logger;
-        StarLib.setStarlibLogger(logger);
         this.environment = environment;
         this.networkManager = new NetworkManager(context);
         this.playerManager = playerManager;
-        StarLib.setScheduler(scheduler);
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
+        this.scheduler = scheduler;
         
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -89,22 +103,9 @@ public abstract class NexusAPI {
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
         
-        try {
-            for (Enumeration<Driver> e = DriverManager.getDrivers(); e.hasMoreElements(); ) {
-                Driver driver = e.nextElement();
-                DriverManager.deregisterDriver(driver);
-            }
-            Driver mysqlDriver = new com.mysql.cj.jdbc.Driver();
-            DriverManager.registerDriver(mysqlDriver);
-            getLogger().info("Registered the correct MySQL Driver");
-        } catch (SQLException e) {
-            getLogger().severe("Error while loading the MySQL driver, disabling plugin");
-            throw e;
-        }
-        
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
-        networkCommandRegistry.register(new NetworkCommand("updaterank", (cmd, origin, args) -> {
+        networkCommandRegistry.register("updaterank", new NetworkCommand("updaterank", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             String action = args[1];
             Rank rank = Rank.parseRank(args[2]);
@@ -121,7 +122,7 @@ public abstract class NexusAPI {
             }
         }));
         
-        networkCommandRegistry.register(new NetworkCommand("updatetag", (cmd, origin, args) -> {
+        networkCommandRegistry.register("updatetag", new NetworkCommand("updatetag", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             String action = args[1];
             String tag = args.length > 2 ? args[2] : "";
@@ -148,7 +149,7 @@ public abstract class NexusAPI {
             }
         }));
     
-        networkCommandRegistry.register(new NetworkCommand("updatestat", (cmd, origin, args) -> {
+        networkCommandRegistry.register("updatestat", new NetworkCommand("updatestat", (cmd, origin, args) -> {
             if (getServerManager().getCurrentServer().getName().equalsIgnoreCase(origin)) {
                 return;
             }
@@ -161,21 +162,7 @@ public abstract class NexusAPI {
             profile.addStatChange(statChange);
         }));
         
-        networkCommandRegistry.register(new NetworkCommand("updateprivatealpha", (cmd, origin, args) -> {
-            String action = args[0];
-            if (action.equalsIgnoreCase("add")) {
-                long id = Long.parseLong(args[1]);
-                UUID uuid = UUID.fromString(args[2]);
-                String name = args[3];
-                long timestamp = Long.parseLong(args[4]);
-                this.privateAlphaUsers.put(uuid, new PrivateAlphaUser(id, uuid, name, timestamp));
-            } else if (action.equalsIgnoreCase("remove")) {
-                UUID uuid = UUID.fromString(args[1]);
-                this.privateAlphaUsers.remove(uuid);
-            }
-        }));
-        
-        networkCommandRegistry.register(new NetworkCommand("playercreate", (cmd, origin, args) -> {
+        networkCommandRegistry.register("playercreate", new NetworkCommand("playercreate", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             try {
                 NexusPlayer nexusPlayer = getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uuid).get(0);
@@ -186,7 +173,7 @@ public abstract class NexusAPI {
         }));
         
         networkManager.init("localhost", 3408);
-        for (NetworkCommand netCmd : networkCommandRegistry.getObjects()) {
+        for (NetworkCommand netCmd : networkCommandRegistry.getRegisteredObjects().values()) {
             networkManager.addCommand(netCmd);
         }
         getLogger().info("Loaded the Networking System");
@@ -195,8 +182,8 @@ public abstract class NexusAPI {
         registerDatabases(databaseRegistry);
         getLogger().info("Registered the databases");
         
-        for (Database database : databaseRegistry.getObjects()) {
-            if (database.isPrimary()) {
+        for (SQLDatabase database : databaseRegistry.getRegisteredObjects().values()) {
+            if (database.getName().toLowerCase().contains("nexus")) { //TODO Temporary
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
@@ -210,26 +197,24 @@ public abstract class NexusAPI {
                 database.registerClass(Punishment.class);
                 database.registerClass(Nickname.class);
                 database.registerClass(Tag.class);
-                database.registerClass(PrivateAlphaUser.class);
                 database.registerClass(Session.class);
                 this.primaryDatabase = database;
-                getLogger().info("Found the Primary Database: " + this.primaryDatabase.getHost() + "/" + this.primaryDatabase.getName());
             }
         }
         
         if (primaryDatabase == null) {
             throw new SQLException("Could not find the primary database.");
         }
-        
+
         databaseRegistry.setup();
         getLogger().info("Successfully setup the database tables");
-        
+
         statRegistry = StatHelper.getRegistry();
         
         List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
         
         for (Info statInfo : statInfos) {
-            statRegistry.register(statInfo);
+            statRegistry.register(statInfo.getName(), statInfo);
         }
         
         statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0);
@@ -248,7 +233,7 @@ public abstract class NexusAPI {
         statRegistry.register("server", "Server", StatType.STRING, "null");
         registerStats(statRegistry);
         
-        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects()) {
+        for (Stat.Info statInfo : StatHelper.getRegistry().getRegisteredObjects().values()) {
             getPrimaryDatabase().saveSilent(statInfo);
         }
         
@@ -259,7 +244,7 @@ public abstract class NexusAPI {
     
         List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
         for (Toggle.Info toggleInfo : toggleInfos) {
-            toggleRegistry.register(toggleInfo);
+            toggleRegistry.register(toggleInfo.getName(), toggleInfo);
         }
     
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
@@ -268,7 +253,7 @@ public abstract class NexusAPI {
         
         registerToggles(toggleRegistry);
         getLogger().info("Registered toggle types");
-        for (Toggle.Info object : toggleRegistry.getObjects()) {
+        for (Toggle.Info object : toggleRegistry.getRegisteredObjects().values()) {
             getPrimaryDatabase().saveSilent(object);
         }
         getLogger().info("Pushed toggle types to the database");
@@ -277,9 +262,9 @@ public abstract class NexusAPI {
         this.tagRegistry = new TagRegistry();
         String[] defaultTags = {"thicc", "son", "e-girl", "god", "e-dater", "lord", "epic", "bacca", "benja", "milk man", "champion"};
         for (String dt : defaultTags) {
-            this.tagRegistry.register(dt);
+            this.tagRegistry.register(dt, dt);
         }
-        getLogger().info("Registered " + this.tagRegistry.getObjects().size() + " default tags.");
+        getLogger().info("Registered " + this.tagRegistry.getRegisteredObjects().size() + " default tags.");
 
         serverManager.setupCurrentServer();
         getLogger().info("Set up the current server");
@@ -292,7 +277,7 @@ public abstract class NexusAPI {
         playerManager.getIpHistory().addAll(getPrimaryDatabase().get(IPEntry.class));
         getLogger().info("Loaded IP History");
         
-        Database database = getPrimaryDatabase();
+        SQLDatabase database = getPrimaryDatabase();
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
             UUID uniqueId = (UUID) row.getObject("uniqueId");
@@ -358,11 +343,6 @@ public abstract class NexusAPI {
         }
         getLogger().info("Sorted IP History for player profiles.");
     
-        List<PrivateAlphaUser> privateAlphaUsers = getPrimaryDatabase().get(PrivateAlphaUser.class);
-        for (PrivateAlphaUser pau : privateAlphaUsers) {
-            this.privateAlphaUsers.put(pau.getUuid(), pau);
-        }
-    
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
@@ -388,7 +368,7 @@ public abstract class NexusAPI {
     }
     
     public Scheduler getScheduler() {
-        return StarLib.getScheduler();
+        return scheduler;
     }
     
     public Logger getLogger() {
@@ -419,7 +399,7 @@ public abstract class NexusAPI {
         logger.log(level, "---------------------------------");
     }
     
-    public Database getPrimaryDatabase() {
+    public SQLDatabase getPrimaryDatabase() {
         return this.primaryDatabase;
     }
     
@@ -443,7 +423,11 @@ public abstract class NexusAPI {
         return levelManager;
     }
     
-    public Map<UUID, PrivateAlphaUser> getPrivateAlphaUsers() {
-        return privateAlphaUsers;
+    public ClockManager getClockManager() {
+        return clockManager;
+    }
+
+    public void setClockManager(ClockManager clockManager) {
+        this.clockManager = clockManager;
     }
 }

@@ -1,6 +1,9 @@
 package com.thenexusreborn.api.player;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class PlayerRanks {
     private UUID uniqueId;
@@ -11,7 +14,7 @@ public class PlayerRanks {
     }
     
     public Rank get() {
-        if (PlayerManager.NEXUS_TEAM.contains(uniqueId)) {
+        if (this.uniqueId.toString().equals("3f7891ce-5a73-4d52-a2ba-299839053fdc")) {
             return Rank.NEXUS;
         }
         

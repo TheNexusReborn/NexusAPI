@@ -1,10 +1,10 @@
 package com.thenexusreborn.api.player;
 
-import com.starmediadev.starsql.annotations.table.TableName;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.UUID;
 
-@TableName("privatealphasessions")
+@TableName("sessions")
 public class Session {
     private long id;
     private UUID uniqueId;

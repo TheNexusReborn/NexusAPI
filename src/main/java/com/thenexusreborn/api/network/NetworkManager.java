@@ -2,7 +2,6 @@ package com.thenexusreborn.api.network;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
-import com.thenexusreborn.api.network.netty.app.*;
 import com.thenexusreborn.api.network.netty.model.NexusPacket;
 
 import java.util.*;
@@ -13,20 +12,12 @@ public class NetworkManager {
     
     private final NetworkContext context;
     
-    private NettyApp nettyApp;
-    
     public NetworkManager(NetworkContext context) {
         this.context = context;
     }
     
     public void init(String host, int port) {
-        if (context == NetworkContext.CLIENT) {
-            nettyApp = new NettyClient(host, port);
-        } else {
-            nettyApp = new NettyServer(host, port);
-        }
         
-        nettyApp.init();
     }
     
     public void addCommand(NetworkCommand command) {
@@ -38,14 +29,10 @@ public class NetworkManager {
     }
     
     public void send(String action, String... data) {
-        nettyApp.send(NexusAPI.getApi().getServerManager().getCurrentServer().getName(), action, data);
+        handleInboundPacket(new NexusPacket("Nexus", action, data)); //Temporary to allow staff chat and other things that rely on the network system to work
     }
     
     public void handleInboundPacket(NexusPacket packet) {
-        if (context == NetworkContext.SERVER) {
-            nettyApp.send(packet);
-        }
-        
         NetworkCommand command = getCommand(packet.action());
         if (command != null) {
             if (command.getExecutor() != null) {
@@ -57,6 +44,6 @@ public class NetworkManager {
     }
     
     public void close() {
-        nettyApp.close();
+        
     }
 }

@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.reward;
 
-import com.starmediadev.starsql.annotations.table.TableName;
+import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.Objects;
 import java.util.UUID;
