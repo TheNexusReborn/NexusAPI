@@ -60,19 +60,19 @@ public final class StatHelper {
         return 0;
     }
     
-    public static StatChange changeStat(Stat stat, StatOperator operator, Object value) {
+    public static void changeStat(Stat stat, StatChange change) {
         Object newValue = null;
-        
-        if (operator == StatOperator.SET) {
-            newValue = value;
-        } else if (operator == StatOperator.RESET) {
+
+        if (change.getOperator() == StatOperator.SET) {
+            newValue = change.getValue();
+        } else if (change.getOperator() == StatOperator.RESET) {
             newValue = getInfo(stat.getName()).getDefaultValue().get();
         } else {
             Object oldValue = stat.getValue().get();
             if (stat.getType() == StatType.BOOLEAN) {
                 newValue = !((boolean) oldValue);
             } else if (Stream.of(StatType.INTEGER, StatType.DOUBLE, StatType.LONG).anyMatch(statType -> stat.getType() == statType)) {
-                double calculated = calculate(operator, (Number) oldValue, (Number) value);
+                double calculated = calculate(change.getOperator(), (Number) oldValue, (Number) change.getValue().get());
                 if (stat.getType() == StatType.INTEGER) {
                     newValue = (int) calculated;
                 } else if (stat.getType() == StatType.DOUBLE) {
@@ -81,24 +81,33 @@ public final class StatHelper {
                     newValue = (long) calculated;
                 } else {
                     NexusAPI.getApi().getLogger().warning("Unhandled number type for stat " + stat.getName());
-                    return null;
+                    return;
                 }
             }
         }
         stat.setValue(newValue);
-        return new StatChange(stat.getInfo(), stat.getUuid(), newValue, operator, System.currentTimeMillis());
+    }
+    
+    public static StatChange changeStat(Stat stat, StatOperator operator, Object value) {
+        StatChange statChange = new StatChange(stat.getInfo(), stat.getUuid(), value, operator, System.currentTimeMillis());
+        changeStat(stat, statChange);
+        return statChange;
     }
     
     public static void consolidateStats(NexusPlayer player) {
         try {
-            List<StatChange> statChanges = NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString());
-            statChanges.addAll(player.getStats().findAllChanges());
-            for (StatChange statChange : new TreeSet<>(statChanges)) {
-                Stat stat = player.getStat(statChange.getStatName());
-                if (stat == null) {
-                    Info info = getInfo(statChange.getStatName());
-                    stat = new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis());
-                    player.addStat(stat);
+            List<Stat> rawStats = NexusAPI.getApi().getPrimaryDatabase().get(Stat.class, "uuid", player.getUniqueId().toString());
+            Map<String, Stat> stats = new HashMap<>();
+            for (Stat rawStat : rawStats) {
+                stats.put(rawStat.getName(), rawStat);
+            }
+            
+            Set<StatChange> statChanges = new TreeSet<>(NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.toString()));
+            for (StatChange statChange : statChanges) {
+                Info info = getInfo(statChange.getStatName());
+                Stat stat = stats.getOrDefault(statChange.getStatName(), new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis()));
+                if (!stats.containsKey(info.getName())) {
+                    stats.put(stat.getName(), stat);
                 }
                 
                 if (!stat.getType().isAllowedOperator(statChange.getOperator())) {
@@ -111,12 +120,11 @@ public final class StatHelper {
                     stat.setValue(stat.getType().getDefaultValue());
                 }
                 
-                changeStat(stat, statChange.getOperator(), statChange.getValue().get());
+                changeStat(stat, statChange);
                 if (statChange.getId() > 0) {
                     NexusAPI.getApi().getPrimaryDatabase().deleteSilent(StatChange.class, statChange.getId());
                 }
             }
-            player.clearStatChanges();
         } catch (SQLException e) {
             e.printStackTrace();
         }
