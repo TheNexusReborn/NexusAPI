@@ -15,9 +15,6 @@ public abstract class PlayerManager {
     protected final Map<UUID, NexusPlayer> players = new HashMap<>();
     protected final Map<UUID, CachedPlayer> cachedPlayers = new HashMap<>();
 
-    protected Map<UUID, Long> loginTimes = new HashMap<>();
-    protected Map<UUID, Session> sessions = new HashMap<>();
-    
     protected final Set<IPEntry> ipHistory = new HashSet<>();
     
     public Map<UUID, NexusPlayer> getPlayers() {
@@ -232,9 +229,5 @@ public abstract class PlayerManager {
             }
         }
         return null;
-    }
-
-    public Session getSession(UUID uniqueId) {
-        return this.sessions.get(uniqueId);
     }
 }

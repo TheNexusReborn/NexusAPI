@@ -30,6 +30,9 @@ public class NexusPlayer extends NexusProfile {
     @ColumnIgnored
     protected int cps;
     
+    @ColumnIgnored
+    protected Session session;
+    
     private NexusPlayer() {
         this(null, "");
     }
@@ -116,7 +119,15 @@ public class NexusPlayer extends NexusProfile {
     public void resetCPS() {
         this.cps = 0;
     }
-    
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
     @Override
     public boolean isOnline() {
         if (getPlayer() != null) {
