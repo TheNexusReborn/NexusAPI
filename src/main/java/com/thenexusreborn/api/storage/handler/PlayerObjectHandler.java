@@ -48,8 +48,8 @@ public class PlayerObjectHandler extends ObjectHandler {
         }
     
         try {
-            List<IPEntry> statChanges = database.get(IPEntry.class, "uuid", player.getUniqueId());
-            for (IPEntry ipEntry : statChanges) {
+            List<IPEntry> ipEntries = database.get(IPEntry.class, "uuid", player.getUniqueId());
+            for (IPEntry ipEntry : ipEntries) {
                 player.getIpHistory().add(ipEntry);
             }
         } catch (SQLException e) {

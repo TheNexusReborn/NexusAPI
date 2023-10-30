@@ -3,7 +3,6 @@ package com.thenexusreborn.api.punishment;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.storage.codec.*;
 import com.thenexusreborn.api.helper.*;
-import com.thenexusreborn.api.player.CachedPlayer;
 import com.thenexusreborn.api.util.Constants;
 import me.firestar311.starsql.api.annotations.column.ColumnCodec;
 import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
@@ -135,11 +134,9 @@ public class Punishment implements Comparable<Punishment> {
         if (actorNameCache == null) {
             try {
                 UUID uuid = UUID.fromString(getActor());
-                CachedPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
-                if (actorCachePlayer == null) {
+                actorNameCache = NexusAPI.getApi().getPlayerManager().getNameFromUUID(uuid);
+                if (actorNameCache == null) {
                     actorNameCache = actor;
-                } else {
-                    actorNameCache = actorCachePlayer.getName();
                 }
             } catch (Exception e) {
                 this.actorNameCache = actor;
@@ -157,11 +154,9 @@ public class Punishment implements Comparable<Punishment> {
         if (targetNameCache == null) {
             try {
                 UUID uuid = UUID.fromString(getTarget());
-                CachedPlayer targetCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
-                if (targetCachePlayer == null) {
+                targetNameCache = NexusAPI.getApi().getPlayerManager().getNameFromUUID(uuid);
+                if (targetNameCache == null) {
                     targetNameCache = actor;
-                } else {
-                    targetNameCache = targetCachePlayer.getName();
                 }
             } catch (Exception e) {
                 this.targetNameCache = actor;

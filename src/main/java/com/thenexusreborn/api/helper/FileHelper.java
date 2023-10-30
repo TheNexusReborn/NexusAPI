@@ -8,7 +8,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public final class FileHelper {
-    
     public static void createFileIfNotExists(Path path) {
         createDirectoryIfNotExists(path.getParent());
         

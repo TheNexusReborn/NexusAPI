@@ -9,6 +9,7 @@ import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
+import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentManager;
 import com.thenexusreborn.api.registry.DatabaseRegistry;
@@ -18,10 +19,10 @@ import com.thenexusreborn.api.registry.ToggleRegistry;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.stats.Stat.Info;
+import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
 import me.firestar311.starclock.api.ClockManager;
-import me.firestar311.starlib.api.Value;
 import me.firestar311.starlib.api.scheduler.Scheduler;
 import me.firestar311.starsql.api.objects.Row;
 import me.firestar311.starsql.api.objects.SQLDatabase;
@@ -110,14 +111,24 @@ public abstract class NexusAPI {
             String action = args[1];
             Rank rank = Rank.parseRank(args[2]);
             long expire = args.length > 3 ? Long.parseLong(args[3]) : -1;
+            PlayerRanks playerRanks = playerManager.getUuidRankMap().get(uuid);
+
+            NexusPlayer player = getPlayerManager().getNexusPlayer(uuid);
             
-            NexusProfile profile = getPlayerManager().getProfile(uuid);
-            
-            if (profile != null) {
+            if (player != null) {
                 switch (action) {
-                    case "add" -> profile.addRank(rank, expire);
-                    case "remove" -> profile.removeRank(rank);
-                    case "set" -> profile.setRank(rank, expire);
+                    case "add" -> {
+                        player.addRank(rank, expire);
+                        playerRanks.add(rank, expire);
+                    }
+                    case "remove" -> {
+                        player.removeRank(rank);
+                        playerRanks.add(rank, expire);
+                    }
+                    case "set" -> {
+                        player.setRank(rank, expire);
+                        playerRanks.add(rank, expire);
+                    }
                 }
             }
         }));
@@ -137,7 +148,7 @@ public abstract class NexusAPI {
                 }
             } else {
                 if (player == null) {
-                    player = playerManager.getCachedPlayer(uuid).loadFully();
+                    return;
                 }
                 
                 if (action.equalsIgnoreCase("unlock")) {
@@ -157,19 +168,9 @@ public abstract class NexusAPI {
             Stat.Info info = StatHelper.getInfo(args[1]);
             StatOperator operator = StatOperator.valueOf(args[2]);
             Object value = new ValueHandler().getDeserializer().deserialize(null, args[3]);
-            NexusProfile profile = NexusAPI.getApi().getPlayerManager().getProfile(uuid);
+            NexusPlayer player = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
             StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
-            profile.addStatChange(statChange);
-        }));
-        
-        networkCommandRegistry.register("playercreate", new NetworkCommand("playercreate", (cmd, origin, args) -> {
-            UUID uuid = UUID.fromString(args[0]);
-            try {
-                NexusPlayer nexusPlayer = getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uuid).get(0);
-                getPlayerManager().getCachedPlayers().put(nexusPlayer.getUniqueId(), new CachedPlayer(nexusPlayer));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            player.addStatChange(statChange);
         }));
         
         networkManager.init("localhost", 3408);
@@ -183,7 +184,7 @@ public abstract class NexusAPI {
         getLogger().info("Registered the databases");
         
         for (SQLDatabase database : databaseRegistry.getRegisteredObjects().values()) {
-            if (database.getName().toLowerCase().contains("nexus")) { //TODO Temporary
+            if (database.getName().toLowerCase().contains("nexus")) {
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
@@ -281,68 +282,12 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
         for (Row row : playerRows) {
             UUID uniqueId = (UUID) row.getObject("uniqueId");
-            CachedPlayer cachedPlayer = new CachedPlayer(row.getLong("id"), uniqueId, row.getString("name"));
-            cachedPlayer.getRanks().setAll((PlayerRanks) row.getObject("ranks"));
-            playerManager.getCachedPlayers().put(cachedPlayer.getUniqueId(), cachedPlayer);
-        }
-        getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerManager.getCachedPlayers().size() + " total profiles.");
-        
-        List<Row> statsRows = database.executeQuery("select `name`,`uuid`,`value` from stats where `name` in ('server','online','lastlogout','privatealpha');");
-        for (Row row : statsRows) {
             String name = row.getString("name");
-            UUID uuid = UUID.fromString(row.getString("uuid"));
-            Stat.Info info = StatHelper.getInfo(name);
-            Value value = (Value) row.getObject("value");
-            CachedPlayer player = playerManager.getCachedPlayer(uuid);
-            if (player == null) {
-                continue;
-            }
-            if (name.equalsIgnoreCase("server")) {
-                player.setServer(value.getAsString());
-            } else if (name.equalsIgnoreCase("online")) {
-                player.setOnline(value.getAsBoolean());
-            } else if (name.equalsIgnoreCase("lastlogout")) {
-                player.setLastLogout(value.getAsLong());
-            }
+            PlayerRanks playerRanks = new RanksCodec().decode(row.getString("ranks"));
+            playerManager.getUuidNameMap().put(uniqueId, new Name(name));
+            playerManager.getUuidRankMap().put(uniqueId, playerRanks);
         }
-        getLogger().info("Loaded stats for player profiles: Current Server, Online Status, and Last Logout time");
-    
-        List<Toggle> toggles = database.get(Toggle.class);
-        for (Toggle toggle : toggles) {
-            CachedPlayer cachedPlayer = playerManager.getCachedPlayers().get(toggle.getUuid());
-            if (cachedPlayer == null) {
-                continue;
-            }
-    
-            cachedPlayer.addToggle(toggle);
-        }
-
-        getLogger().info("Loaded toggle info for player profiles: Incognito, Vanish and Fly");
-
-        List<Tag> allTags = database.get(Tag.class);
-        Map<UUID, List<Tag>> sortedTags = new HashMap<>();
-        for (Tag tag : allTags) {
-            if (sortedTags.containsKey(tag.getUuid())) {
-                sortedTags.get(tag.getUuid()).add(tag);
-            } else {
-                sortedTags.put(tag.getUuid(), new ArrayList<>(Collections.singletonList(tag)));
-            }
-        }
-
-        sortedTags.forEach((uuid, tags) -> {
-            NexusProfile profile = playerManager.getProfile(uuid);
-            profile.getTags().addAll(tags);
-        });
-        getLogger().info("Loaded all tag settings for players.");
-
-        for (IPEntry entry : playerManager.getIpHistory()) {
-            CachedPlayer player = playerManager.getCachedPlayer(entry.getUuid());
-            if (player != null) {
-                player.getIpHistory().add(entry);
-            }
-        }
-        getLogger().info("Sorted IP History for player profiles.");
-    
+        getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerManager.getUuidNameMap().size() + " total profiles.");
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     

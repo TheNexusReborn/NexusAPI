@@ -29,10 +29,6 @@ public final class StringHelper {
         return name.toString();
     }
     
-    public static String join(Object[] objects, String separator) {
-        return join(Arrays.asList(objects), separator);
-    }
-    
     public static String join(Collection<?> collection, String separator) {
         Iterator<?> iterator = collection.iterator();
         if (!iterator.hasNext()) {

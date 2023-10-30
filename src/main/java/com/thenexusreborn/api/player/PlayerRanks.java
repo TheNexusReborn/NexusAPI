@@ -1,13 +1,12 @@
 package com.thenexusreborn.api.player;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class PlayerRanks {
     private UUID uniqueId;
-    protected Map<Rank, Long> ranks = new HashMap<>();
+    protected Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
     
     public PlayerRanks(UUID uniqueId) {
         this.uniqueId = uniqueId;
@@ -57,7 +56,7 @@ public class PlayerRanks {
     }
     
     public Map<Rank, Long> findAll() {
-        return new HashMap<>(this.ranks);
+        return new EnumMap<>(this.ranks);
     }
     
     public UUID getUniqueId() {

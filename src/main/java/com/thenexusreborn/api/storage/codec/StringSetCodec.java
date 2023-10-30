@@ -10,7 +10,7 @@ public class StringSetCodec implements SqlCodec<Set<String>> {
     public String encode(Object object) {
         Set<String> stringSet = (Set<String>) object;
         if (stringSet.isEmpty()) {
-            return null; //TODO Might cause an issue, will have to test
+            return null;
         }
         return StringHelper.join(stringSet, ",");
     }

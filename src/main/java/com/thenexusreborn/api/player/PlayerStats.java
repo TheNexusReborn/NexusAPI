@@ -20,6 +20,16 @@ public class PlayerStats {
         return this.stats.containsKey(statName);
     }
     
+    public void addAllStats(Collection<Stat> stats) {
+        for (Stat stat : stats) {
+            this.stats.put(stat.getName(), stat);
+        }
+    }
+    
+    public void addAllChanges(Collection<StatChange> changes) {
+        this.statChanges.addAll(changes);
+    }
+    
     public void add(Stat stat) {
         if (stat.getName() != null) {
             this.stats.put(stat.getName(), stat);

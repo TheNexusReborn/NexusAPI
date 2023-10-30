@@ -1,7 +1,6 @@
 package com.thenexusreborn.api.punishment;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.player.CachedPlayer;
 
 import java.util.UUID;
 
@@ -46,12 +45,10 @@ public class PardonInfo {
         if (actorNameCache == null) {
             try {
                 UUID uuid = UUID.fromString(getActor());
-                CachedPlayer actorCachePlayer = NexusAPI.getApi().getPlayerManager().getCachedPlayers().get(uuid);
-                if (actorCachePlayer == null) {
+                actorNameCache = NexusAPI.getApi().getPlayerManager().getNameFromUUID(uuid);
+                if (actorNameCache == null) {
                     actorNameCache = actor;
-                } else {
-                    actorNameCache = actorCachePlayer.getName();
-                }
+                } 
             } catch (Exception e) {
                 this.actorNameCache = actor;
             }

@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.reward;
 
-import com.thenexusreborn.api.player.NexusProfile;
+import com.thenexusreborn.api.player.NexusPlayer;
 
 public abstract class Reward {
     protected final String id, name;
@@ -18,5 +18,5 @@ public abstract class Reward {
         return name;
     }
 
-    public abstract void applyReward(NexusProfile profile);
+    public abstract void applyReward(NexusPlayer profile);
 }

@@ -13,7 +13,7 @@ public class RanksCodec implements SqlCodec<PlayerRanks> {
         
         StringBuilder sb = new StringBuilder();
     
-        if (ranks.size() == 0) {
+        if (ranks.isEmpty()) {
             return Rank.MEMBER.name() + "=-1";
         }
     
@@ -21,7 +21,7 @@ public class RanksCodec implements SqlCodec<PlayerRanks> {
             sb.append(entry.getKey().name()).append("=").append(entry.getValue()).append(",");
         }
     
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             return sb.substring(0, sb.toString().length() - 1);
         } else {
             return "";
@@ -31,19 +31,15 @@ public class RanksCodec implements SqlCodec<PlayerRanks> {
     @Override
     public PlayerRanks decode(String encoded) {
         PlayerRanks playerRanks = new PlayerRanks(null);
-        Map<Rank, Long> ranks = new EnumMap<>(Rank.class);
         if (encoded == null || encoded.equals("")) {
             return playerRanks;
         }
     
         String[] rawRanks = encoded.split(",");
-        if (rawRanks == null) {
-            return playerRanks;
-        }
-    
+
         for (String rawRank : rawRanks) {
             String[] rankSplit = rawRank.split("=");
-            if (rankSplit == null || rankSplit.length != 2) {
+            if (rankSplit.length != 2) {
                 continue;
             }
         
