@@ -1,0 +1,9 @@
+{
+    "configurations": [
+        {
+            "type": "maven",
+            "name": "NexusAPI Build",
+            "tasks": ["clean", "package", "install"],
+        },
+    ]
+}
