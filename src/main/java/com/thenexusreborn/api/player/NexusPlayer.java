@@ -46,8 +46,6 @@ public class NexusPlayer {
     @ColumnIgnored
     protected PlayerProxy playerProxy;
     @ColumnIgnored
-    protected int cps;
-    @ColumnIgnored
     protected Session session;
     
     protected NexusPlayer() {
@@ -125,22 +123,6 @@ public class NexusPlayer {
 
     public void setPlayerProxy(PlayerProxy playerProxy) {
         this.playerProxy = playerProxy;
-    }
-
-    public int getCPS() {
-        return cps;
-    }
-
-    public void setCPS(int cps) {
-        this.cps = cps;
-    }
-
-    public void incrementCPS() {
-        this.cps++;
-    }
-
-    public void resetCPS() {
-        this.cps = 0;
     }
 
     public Session getSession() {
