@@ -1,12 +1,12 @@
 package com.thenexusreborn.api.registry;
 
+import com.stardevllc.starlib.registry.StringRegistry;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
-import me.firestar311.starlib.api.Registry;
 
-public class NetworkCommandRegistry extends Registry<NetworkCommand> {
+public class NetworkCommandRegistry extends StringRegistry<NetworkCommand> {
     @Override
     public NetworkCommand get(String str) {
-        for (NetworkCommand object : this.getRegisteredObjects().values()) {
+        for (NetworkCommand object : this.getObjects().values()) {
             if (object.getName().equalsIgnoreCase(str)) {
                 return object;
             }

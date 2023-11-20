@@ -1,10 +1,12 @@
 package com.thenexusreborn.api.registry;
 
-import com.thenexusreborn.api.stats.*;
+import com.stardevllc.starlib.registry.StringRegistry;
+import com.thenexusreborn.api.stats.Stat;
 import com.thenexusreborn.api.stats.Stat.Info;
-import me.firestar311.starlib.api.Registry;
+import com.thenexusreborn.api.stats.StatHelper;
+import com.thenexusreborn.api.stats.StatType;
 
-public class StatRegistry extends Registry<Info> {
+public class StatRegistry extends StringRegistry<Info> {
     public void register(String name, StatType type, Object defaultValue) {
         register(StatHelper.formatStatName(name), new Stat.Info(StatHelper.formatStatName(name), type, defaultValue));
     }
@@ -15,7 +17,7 @@ public class StatRegistry extends Registry<Info> {
     
     @Override
     public Info get(String str) {
-        for (Info object : getRegisteredObjects().values()) {
+        for (Info object : getObjects().values()) {
             if (object.getName().equalsIgnoreCase(str)) {
                 return object;
             }

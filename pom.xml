@@ -25,9 +25,8 @@
     
     <repositories>
         <repository>
-            <id>reposilite</id>
-            <name>Laptop Repo</name>
-            <url>http://localhost:8080/snapshots</url>
+            <id>jitpack.io</id>
+            <url>https://www.jitpack.io</url>
         </repository>
     </repositories>
 
@@ -79,10 +78,10 @@
     
     <dependencies>
         <dependency>
-            <groupId>me.firestar311.starlib</groupId>
-            <artifactId>starlib-api</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
+            <groupId>com.github.StarDevelopmentLLC</groupId>
+            <artifactId>StarLib</artifactId>
+            <version>1.0.0-alpha.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>me.firestar311.starsql</groupId>
