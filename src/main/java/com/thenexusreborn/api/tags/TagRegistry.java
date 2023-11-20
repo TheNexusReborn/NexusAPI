@@ -1,11 +1,11 @@
 package com.thenexusreborn.api.tags;
 
-import me.firestar311.starlib.api.Registry;
+import com.stardevllc.starlib.registry.StringRegistry;
 
-public class TagRegistry extends Registry<String> {
+public class TagRegistry extends StringRegistry<String> {
     @Override
     public String get(String str) {
-        for (String object : getRegisteredObjects().values()) {
+        for (String object : getObjects().values()) {
             if (object.equalsIgnoreCase(str)) {
                 return object;
             }

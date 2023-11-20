@@ -84,15 +84,15 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>me.firestar311.starsql</groupId>
-            <artifactId>starsql-api</artifactId>
-            <version>1.0.4-SNAPSHOT</version>
+            <groupId>com.github.Firestar311.StarSQL</groupId>
+            <artifactId>api</artifactId>
+            <version>09988aece6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>me.firestar311.starclock</groupId>
-            <artifactId>starclock-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.github.Firestar311.StarClock</groupId>
+            <artifactId>api</artifactId>
+            <version>ff3b94d2ce</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
