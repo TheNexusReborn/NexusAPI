@@ -174,7 +174,7 @@ public abstract class NexusAPI {
         }));
         
         networkManager.init("localhost", 3408);
-        for (NetworkCommand netCmd : networkCommandRegistry.getRegisteredObjects().values()) {
+        for (NetworkCommand netCmd : networkCommandRegistry.getObjects().values()) {
             networkManager.addCommand(netCmd);
         }
         getLogger().info("Loaded the Networking System");
@@ -234,7 +234,7 @@ public abstract class NexusAPI {
         statRegistry.register("server", "Server", StatType.STRING, "null");
         registerStats(statRegistry);
         
-        for (Stat.Info statInfo : StatHelper.getRegistry().getRegisteredObjects().values()) {
+        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects().values()) {
             getPrimaryDatabase().saveSilent(statInfo);
         }
         
@@ -254,7 +254,7 @@ public abstract class NexusAPI {
         
         registerToggles(toggleRegistry);
         getLogger().info("Registered toggle types");
-        for (Toggle.Info object : toggleRegistry.getRegisteredObjects().values()) {
+        for (Toggle.Info object : toggleRegistry.getObjects().values()) {
             getPrimaryDatabase().saveSilent(object);
         }
         getLogger().info("Pushed toggle types to the database");

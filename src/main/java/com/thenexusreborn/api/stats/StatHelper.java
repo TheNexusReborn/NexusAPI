@@ -25,7 +25,7 @@ public final class StatHelper {
     
     public static Stat.Info getInfo(String name) {
         String statName = formatStatName(name);
-        for (Info info : registry.getRegisteredObjects().values()) {
+        for (Info info : registry.getObjects().values()) {
             if (info.getName().equals(statName)) {
                 return info;
             }
