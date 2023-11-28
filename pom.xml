@@ -90,10 +90,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.Firestar311.StarClock</groupId>
-            <artifactId>api</artifactId>
-            <version>ff3b94d2ce</version>
-            <scope>provided</scope>
+            <groupId>com.github.StarDevelopmentLLC</groupId>
+            <artifactId>StarClock</artifactId>
+            <version>1.0.0-alpha.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
