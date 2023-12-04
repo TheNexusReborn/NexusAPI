@@ -81,7 +81,7 @@
             <groupId>com.github.StarDevelopmentLLC</groupId>
             <artifactId>StarLib</artifactId>
             <version>1.0.0-alpha.1</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.Firestar311.StarSQL</groupId>
@@ -93,7 +93,7 @@
             <groupId>com.github.StarDevelopmentLLC</groupId>
             <artifactId>StarClock</artifactId>
             <version>1.0.0-alpha.1</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
