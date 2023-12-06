@@ -19,6 +19,10 @@ public class LevelManager {
             addLevel(playerLevel);
         }
     }
+    
+    public PlayerLevel getLevel(int level) {
+        return this.playerLevels.get(level);
+    }
 
     public void addLevel(PlayerLevel playerLevel) {
         this.playerLevels.put(playerLevel.getNumber(), playerLevel);

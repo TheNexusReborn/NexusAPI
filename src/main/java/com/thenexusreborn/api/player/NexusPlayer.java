@@ -2,6 +2,8 @@ package com.thenexusreborn.api.player;
 
 import com.stardevllc.starlib.Value;
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.levels.LevelManager;
+import com.thenexusreborn.api.levels.PlayerLevel;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
@@ -246,6 +248,29 @@ public class NexusPlayer {
 
     public void addCredits(int credits) {
         getStats().change("credits", credits, StatOperator.ADD).push();
+    }
+    
+    public void addXp(double xp) {
+        double currentXp = getStatValue("xp").getAsDouble();
+        double newXp = currentXp + xp;
+        int currentLevel = getStatValue("level").getAsInt();
+        LevelManager levelManager = NexusAPI.getApi().getLevelManager();
+        PlayerLevel playerLevel = levelManager.getLevel(currentLevel);
+        PlayerLevel nextLevel = levelManager.getLevel(currentLevel + 1);
+        if (nextLevel == null) {
+            changeStat("xp", xp, StatOperator.ADD);
+            return;
+        }
+        
+        if (newXp >= nextLevel.getXpRequired()) {
+            double leftOverXp = nextLevel.getXpRequired() - newXp;
+            changeStat("level", 1, StatOperator.ADD);
+            changeStat("xp", leftOverXp, StatOperator.SET);
+            
+            
+        } else {
+            changeStat("xp", xp, StatOperator.ADD);
+        }
     }
     
     public long getId() {
