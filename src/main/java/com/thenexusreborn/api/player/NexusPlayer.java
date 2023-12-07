@@ -4,6 +4,7 @@ import com.stardevllc.starlib.Value;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.levels.LevelManager;
 import com.thenexusreborn.api.levels.PlayerLevel;
+import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
@@ -267,7 +268,15 @@ public class NexusPlayer {
             changeStat("level", 1, StatOperator.ADD);
             changeStat("xp", leftOverXp, StatOperator.SET);
             
-            
+            if (this.playerProxy != null) {
+                this.playerProxy.sendMessage("");
+                this.playerProxy.sendMessage("&a&lLEVEL UP!");
+                this.playerProxy.sendMessage("&e" + currentLevel + " &a-> &e" + nextLevel.getNumber());
+                this.playerProxy.sendMessage("");
+                for (Reward reward : nextLevel.getRewards()) {
+                    reward.applyReward(this);
+                }
+            }
         } else {
             changeStat("xp", xp, StatOperator.ADD);
         }
