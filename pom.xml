@@ -49,12 +49,6 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <relocations>
-                                <relocation>
-                                    <pattern>io.netty</pattern>
-                                    <shadedPattern>com.thenexusreborn.netty</shadedPattern>
-                                </relocation>
-                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -80,19 +74,19 @@
         <dependency>
             <groupId>com.github.StarDevelopmentLLC</groupId>
             <artifactId>StarLib</artifactId>
-            <version>1.0.0-alpha.1</version>
+            <version>1.0.0-alpha.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.Firestar311.StarSQL</groupId>
             <artifactId>api</artifactId>
-            <version>09988aece6</version>
+            <version>15dd9f0c77</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.StarDevelopmentLLC</groupId>
             <artifactId>StarClock</artifactId>
-            <version>1.0.0-alpha.1</version>
+            <version>1.0.0-alpha.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
