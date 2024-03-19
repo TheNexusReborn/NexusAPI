@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.stats;
 
-import me.firestar311.starlib.api.Value;
+import com.stardevllc.starlib.Value;
 import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
 import me.firestar311.starsql.api.annotations.table.TableName;
 

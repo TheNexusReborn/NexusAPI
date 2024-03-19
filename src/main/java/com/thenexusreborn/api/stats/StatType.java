@@ -1,7 +1,6 @@
 package com.thenexusreborn.api.stats;
 
-import me.firestar311.starlib.api.Value;
-import me.firestar311.starlib.api.Value.Type;
+import com.stardevllc.starlib.Value.Type;
 
 import static com.thenexusreborn.api.stats.StatOperator.*;
 
@@ -13,10 +12,10 @@ public enum StatType {
     BOOLEAN(false, Type.BOOLEAN, RESET, INVERT, SET);
     
     private final Object defaultValue;
-    private final Value.Type valueType;
+    private final Type valueType;
     private final StatOperator[] allowedOperators;
     
-    StatType(Object defaultValue, Value.Type valueType, StatOperator... allowedOperators) {
+    StatType(Object defaultValue, Type valueType, StatOperator... allowedOperators) {
         this.defaultValue = defaultValue;
         this.valueType = valueType;
         this.allowedOperators = allowedOperators;

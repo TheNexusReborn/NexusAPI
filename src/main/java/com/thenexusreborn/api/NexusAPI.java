@@ -1,5 +1,7 @@
 package com.thenexusreborn.api;
 
+import com.stardevllc.starclock.ClockManager;
+import com.stardevllc.starlib.task.TaskFactory;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
 import com.thenexusreborn.api.levels.LevelManager;
@@ -22,8 +24,6 @@ import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
-import me.firestar311.starclock.api.ClockManager;
-import me.firestar311.starlib.api.scheduler.Scheduler;
 import me.firestar311.starsql.api.objects.Row;
 import me.firestar311.starsql.api.objects.SQLDatabase;
 import me.firestar311.starsql.api.objects.typehandlers.ValueHandler;
@@ -36,7 +36,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,7 +65,7 @@ public abstract class NexusAPI {
     protected final LevelManager levelManager;
     protected ClockManager clockManager;
     protected Version version;
-    protected Scheduler scheduler;
+    protected TaskFactory scheduler;
     
     protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
@@ -73,7 +74,7 @@ public abstract class NexusAPI {
     
     protected SQLDatabase primaryDatabase;
     
-    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, Scheduler scheduler, ServerManager serverManager) {
+    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, TaskFactory scheduler, ServerManager serverManager) {
         this.logger = logger;
         this.environment = environment;
         this.networkManager = new NetworkManager(context);
@@ -183,7 +184,7 @@ public abstract class NexusAPI {
         registerDatabases(databaseRegistry);
         getLogger().info("Registered the databases");
         
-        for (SQLDatabase database : databaseRegistry.getRegisteredObjects().values()) {
+        for (SQLDatabase database : databaseRegistry.getObjects().values()) {
             if (database.getName().toLowerCase().contains("nexus")) {
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.Info.class);
@@ -265,7 +266,7 @@ public abstract class NexusAPI {
         for (String dt : defaultTags) {
             this.tagRegistry.register(dt, dt);
         }
-        getLogger().info("Registered " + this.tagRegistry.getRegisteredObjects().size() + " default tags.");
+        getLogger().info("Registered " + this.tagRegistry.getObjects().size() + " default tags.");
 
         serverManager.setupCurrentServer();
         getLogger().info("Set up the current server");
@@ -312,7 +313,7 @@ public abstract class NexusAPI {
         return playerManager;
     }
     
-    public Scheduler getScheduler() {
+    public TaskFactory getScheduler() {
         return scheduler;
     }
     

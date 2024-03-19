@@ -12,7 +12,7 @@ public class DatabaseRegistry extends me.firestar311.starsql.api.DatabaseRegistr
     
     @Override
     public SQLDatabase get(String str) {
-        for (SQLDatabase object : getRegisteredObjects().values()) {
+        for (SQLDatabase object : getObjects().values()) {
             if (object.getName().equalsIgnoreCase(str)) {
                 return object;
             }

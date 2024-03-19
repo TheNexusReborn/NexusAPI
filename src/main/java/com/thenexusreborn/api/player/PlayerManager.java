@@ -4,10 +4,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.stardevllc.starlib.Pair;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentType;
-import me.firestar311.starlib.api.Pair;
 
 import java.sql.SQLException;
 import java.util.*;
