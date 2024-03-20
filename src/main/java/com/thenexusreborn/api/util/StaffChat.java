@@ -43,23 +43,10 @@ public final class StaffChat {
             String name = NexusAPI.getApi().getPlayerManager().getNameFromUUID(uuid);
     
             displayName = rank.getColor() + name;
-            switch (event) {
-                case "chat" -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 2; i < args.length; i++) {
-                        sb.append(args[i]).append(" ");
-                    }
-                    String message = sb.toString().trim();
-                    format = "{prefix} {displayName}&8: &f" + message;
-                    displayName = rank.getPrefix() + rank.getColor() + " " + name;
-                }
-                case "join" -> format = "{prefix} {displayName} &7&l-> &6{origin}";
-                case "disconnect" -> format = "{prefix} {displayName} &7disconnected";
-                case "anticheat" -> {
-                    String hack = args[2];
-                    int violation = Integer.parseInt(args[3]);
-                    format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
-                }
+            if (event.equals("anticheat")) {
+                String hack = args[2];
+                int violation = Integer.parseInt(args[3]);
+                format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
             }
         } catch (Exception e) {
             if (event.contains("punishment")) {
@@ -128,27 +115,6 @@ public final class StaffChat {
     
     public static void sendPunishmentRemoval(Punishment punishment) {
         NETWORK.send("staffchat", "removepunishment", punishment.getId() + "");
-    }
-    
-    public static void sendChat(NexusPlayer nexusPlayer, String message) {
-        String[] msgSplit = message.split(" ");
-        
-        String[] args = new String[msgSplit.length + 3];
-        args[0] = "chat";
-        args[1] = nexusPlayer.getUniqueId().toString();
-        args[2] = nexusPlayer.getRank().name();
-        System.arraycopy(msgSplit, 0, args, 3, msgSplit.length);
-        NETWORK.send("staffchat", args);
-    }
-    
-    public static void sendJoin(NexusPlayer nexusPlayer) {
-        String[] args = {"join", nexusPlayer.getUniqueId().toString(), nexusPlayer.getRank().name()};
-        NETWORK.send("staffchat", args);
-    }
-    
-    public static void sendDisconnect(NexusPlayer nexusPlayer) {
-        String[] args = {"disconnect", nexusPlayer.getUniqueId().toString(), nexusPlayer.getRank().name()};
-        NETWORK.send("staffchat", args);
     }
     
     public static void sendAnticheat(NexusPlayer player, String hack, int violation) {
