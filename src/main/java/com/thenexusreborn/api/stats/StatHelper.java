@@ -122,7 +122,7 @@ public final class StatHelper {
                 
                 changeStat(stat, statChange);
                 if (statChange.getId() > 0) {
-                    NexusAPI.getApi().getPrimaryDatabase().deleteSilent(StatChange.class, statChange.getId());
+                    NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
             }
         } catch (SQLException e) {
