@@ -130,7 +130,15 @@ public class Toggle {
         public void setHandler(Handler handler) {
             this.handler = handler;
         }
-    
+
+        public void setMinRank(Rank minRank) {
+            this.minRank = minRank;
+        }
+
+        public void setDefaultValue(boolean defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {

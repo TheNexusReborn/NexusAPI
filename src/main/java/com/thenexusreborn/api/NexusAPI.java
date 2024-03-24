@@ -88,7 +88,7 @@ public abstract class NexusAPI {
         try (InputStream in = url.openStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String line = reader.readLine();
-            if (line == null || line.equals("")) {
+            if (line == null || line.isEmpty()) {
                 logger.warning("Could not find the NexusAPI Version.");
             } else {
                 this.version = new Version(line);
@@ -213,12 +213,6 @@ public abstract class NexusAPI {
 
         statRegistry = StatHelper.getRegistry();
         
-        List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
-        
-        for (Info statInfo : statInfos) {
-            statRegistry.register(statInfo.getName(), statInfo);
-        }
-        
         statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0);
         statRegistry.register("level", "Level", StatType.INTEGER, 0);
         statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0);
@@ -233,32 +227,58 @@ public abstract class NexusAPI {
         statRegistry.register("tag", "Tag", StatType.STRING, "null");
         statRegistry.register("online", "Online", StatType.BOOLEAN, false);
         statRegistry.register("server", "Server", StatType.STRING, "null");
-        registerStats(statRegistry);
+
+        int initialStatSize = statRegistry.getObjects().size();
+        getLogger().info("Registered " + initialStatSize + " default stat types.");
         
+        registerStats(statRegistry);
+        getLogger().info("Registered " + (statRegistry.getObjects().size() - initialStatSize) + " additional default stat types from other plugins.");
+        
+        List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
+        for (Info statInfo : statInfos) {
+            Info existingStatInfo = statRegistry.get(statInfo.getName());
+            if (existingStatInfo == null) {
+                statRegistry.register(statInfo.getName(), statInfo);
+            } else {
+                if (!existingStatInfo.getDefaultValue().get().equals(statInfo.getDefaultValue().get())) {
+                    existingStatInfo.setDefaultValue(statInfo.getDefaultValue());
+                }
+            }
+        }
+        getLogger().info("Loaded stat infos from the database. Total: " + statRegistry.getObjects().size());
+
         for (Stat.Info statInfo : StatHelper.getRegistry().getObjects().values()) {
             getPrimaryDatabase().saveSilent(statInfo);
         }
         
-        getLogger().info("Pushed stat types to the database");
-        getLogger().info("Registered Stat types");
-        
         toggleRegistry = new ToggleRegistry();
-    
-        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
-        for (Toggle.Info toggleInfo : toggleInfos) {
-            toggleRegistry.register(toggleInfo.getName(), toggleInfo);
-        }
     
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
         toggleRegistry.register("incognito", Rank.MEDIA, "Incognito", "A media+ thing where you can be hidden from others", false);
         toggleRegistry.register("fly", Rank.DIAMOND, "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
         
+        int initialToggleSize = toggleRegistry.getObjects().size();
+        getLogger().info("Registered " + initialToggleSize + " default toggle types.");
+        
         registerToggles(toggleRegistry);
-        getLogger().info("Registered toggle types");
+        getLogger().info("Registered " + (toggleRegistry.getObjects().size() + " additional default toggle types."));
+
+        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
+        for (Toggle.Info toggleInfo : toggleInfos) {
+            Toggle.Info existingInfo = toggleRegistry.get(toggleInfo.getName());
+            if (existingInfo == null) {
+                toggleRegistry.register(toggleInfo.getName(), toggleInfo);
+            } else {
+                existingInfo.setDefaultValue(toggleInfo.getDefaultValue());
+                existingInfo.setMinRank(toggleInfo.getMinRank());
+            }
+        }
+
+        getLogger().info("Loaded toggle type values from the database.");
+
         for (Toggle.Info object : toggleRegistry.getObjects().values()) {
             getPrimaryDatabase().saveSilent(object);
         }
-        getLogger().info("Pushed toggle types to the database");
 
         getLogger().info("Registering and Setting up Tags");
         this.tagRegistry = new TagRegistry();
