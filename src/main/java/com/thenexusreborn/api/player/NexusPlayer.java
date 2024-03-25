@@ -36,6 +36,9 @@ public class NexusPlayer {
     protected PlayerTime playerTime;
     
     @ColumnIgnored
+    protected PlayerBalance balance;
+    
+    @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     @ColumnType("varchar(1000)")
     @ColumnCodec(RanksCodec.class)
@@ -77,6 +80,10 @@ public class NexusPlayer {
         this.tags = new PlayerTags(uniqueId);
         this.playerTime = new PlayerTime(uniqueId);
         this.experience = new PlayerExperience(uniqueId);
+    }
+
+    public PlayerBalance getBalance() {
+        return balance;
     }
 
     public PlayerExperience getExperience() {
@@ -222,10 +229,6 @@ public class NexusPlayer {
         getStats().addChange(change);
     }
     
-    public Stat getStat(String statName) {
-        return getStats().get(statName);
-    }
-    
     public void clearStatChanges() {
         getStats().clearChanges();
     }
@@ -235,7 +238,7 @@ public class NexusPlayer {
     }
 
     public void addCredits(int credits) {
-        getStats().change("credits", credits, StatOperator.ADD).push();
+        this.balance.setCredits(this.balance.getCredits() + credits);
     }
     
     public void addXp(double xp) {
@@ -347,7 +350,7 @@ public class NexusPlayer {
     }
     
     public void removeCredits(int credits) {
-        getStats().change("credits", credits, StatOperator.SUBTRACT).push();
+        this.balance.setCredits(this.balance.getCredits() - credits);
     }
     
     public boolean isOnline() {

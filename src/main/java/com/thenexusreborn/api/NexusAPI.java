@@ -183,6 +183,7 @@ public abstract class NexusAPI {
             if (database.getName().toLowerCase().contains("nexus")) {
                 database.registerClass(PlayerExperience.class);
                 database.registerClass(PlayerTime.class);
+                database.registerClass(PlayerBalance.class);
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.class);
                 database.registerClass(StatChange.class);
@@ -223,8 +224,8 @@ public abstract class NexusAPI {
 
         statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0); //TODO Remove after migration
         statRegistry.register("level", "Level", StatType.INTEGER, 0); //TODO Remove after migration
-        statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0); //TODO Move to currency table
-        statRegistry.register("credits", "Credits", StatType.DOUBLE, 0.0); //TODO Move to currency table
+        statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0); //TODO Remove after migration
+        statRegistry.register("credits", "Credits", StatType.DOUBLE, 0.0); //TODO Remove after migration
         statRegistry.register("playtime", "Playtime", StatType.LONG, 0L); //TODO Remove after migration
         statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L); //TODO Remove after migration
         statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L); //TODO Remove after migration
@@ -350,12 +351,18 @@ public abstract class NexusAPI {
                 for (PlayerTime pt : this.primaryDatabase.get(PlayerTime.class)) {
                     playerTimes.put(pt.getUniqueId(), pt);
                 }
+                
+                Map<UUID, PlayerBalance> playerBalances = new HashMap<>();
+                for (PlayerBalance pb : this.primaryDatabase.get(PlayerBalance.class)) {
+                    playerBalances.put(pb.getUniqueId(), pb);
+                }
 
-                ResultSet statsSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin' OR `name`='lastlogout';");
+                ResultSet statsSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin' OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites';");
                 while (statsSet.next()) {
                     UUID uuid = UUID.fromString(statsSet.getString("uuid"));
                     PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, PlayerExperience::new);
                     PlayerTime playerTime = playerTimes.computeIfAbsent(uuid, PlayerTime::new);
+                    PlayerBalance playerBalance = playerBalances.computeIfAbsent(uuid, PlayerBalance::new);
 
                     String statName = statsSet.getString("name");
                     String value = statsSet.getString("value").split(":")[1];
@@ -371,6 +378,10 @@ public abstract class NexusAPI {
                         playerTime.setLastLogin(Long.parseLong(value));
                     } else if (statName.equalsIgnoreCase("lastlogout")) {
                         playerTime.setLastLogout(Long.parseLong(value));
+                    } else if (statName.equalsIgnoreCase("credits")) {
+                        playerBalance.setCredits(Double.parseDouble(value));
+                    } else if (statName.equalsIgnoreCase("nexites")) {
+                        playerBalance.setNexites(Double.parseDouble(value));
                     }
                 }
 
@@ -384,10 +395,15 @@ public abstract class NexusAPI {
                 }
                 getLogger().info("Moved the player time stats to the new playertimes table");
 
-                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout';");
-                getLogger().info("Cleared the stats table of the xp, level, playtime, firstjoined, lastlogin and lastlogout stat types.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout';");
-                getLogger().info("Cleared the statchanges table of the xp, level, playtime, firstjoined, lastlogin and lastlogout stat types.");
+                for (PlayerBalance pb : playerBalances.values()) {
+                    this.primaryDatabase.save(pb);
+                }
+                getLogger().info("Moved the player balance stats to the new balances table");
+
+                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites';");
+                getLogger().info("Cleared the stats table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits and nexites stat types.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites';");
+                getLogger().info("Cleared the statchanges table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits and nexites stat types.");
             }
 
             try (FileWriter fileWriter = new FileWriter(migrationFile)) {

@@ -43,6 +43,16 @@ public class PlayerObjectHandler extends ObjectHandler {
                 e.printStackTrace();
             }
         }
+
+        try {
+            PlayerBalance balance = database.get(PlayerBalance.class, "uniqueid", player.getUniqueId().toString()).get(0);
+            player.getBalance().setCredits(balance.getCredits());
+            player.getBalance().setNexites(balance.getNexites());
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
+            }
+        }
     
         try {
             List<Toggle> toggles = database.get(Toggle.class, "uuid", player.getUniqueId());
