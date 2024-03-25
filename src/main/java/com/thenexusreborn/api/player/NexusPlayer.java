@@ -2,8 +2,9 @@ package com.thenexusreborn.api.player;
 
 import com.stardevllc.starlib.Value;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.levels.LevelManager;
-import com.thenexusreborn.api.levels.PlayerLevel;
+import com.thenexusreborn.api.experience.LevelManager;
+import com.thenexusreborn.api.experience.ExperienceLevel;
+import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.stats.*;
@@ -27,6 +28,10 @@ public class NexusPlayer {
     protected long id;
     protected UUID uniqueId;
     protected String name;
+    
+    @ColumnIgnored
+    protected PlayerExperience experience;
+    
     @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     @ColumnType("varchar(1000)")
@@ -67,6 +72,14 @@ public class NexusPlayer {
         this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
         this.tags = new PlayerTags(uniqueId);
+    }
+
+    public PlayerExperience getExperience() {
+        return experience;
+    }
+
+    public void setExperience(PlayerExperience experience) {
+        this.experience = experience;
     }
 
     public NexusScoreboard getScoreboard() {
@@ -221,20 +234,20 @@ public class NexusPlayer {
     }
     
     public void addXp(double xp) {
-        double currentXp = getStatValue("xp").getAsDouble();
+        double currentXp = this.experience.getLevelXp();
         double newXp = currentXp + xp;
-        int currentLevel = getStatValue("level").getAsInt();
+        int currentLevel = this.experience.getLevel();
         LevelManager levelManager = NexusAPI.getApi().getLevelManager();
-        PlayerLevel nextLevel = levelManager.getLevel(currentLevel + 1);
+        ExperienceLevel nextLevel = levelManager.getLevel(currentLevel + 1);
         if (nextLevel == null) {
-            changeStat("xp", xp, StatOperator.ADD);
+            this.experience.setLevelXp(this.experience.getLevelXp() + xp);
             return;
         }
         
         if (newXp >= nextLevel.getXpRequired()) {
             double leftOverXp = nextLevel.getXpRequired() - newXp;
-            changeStat("level", 1, StatOperator.ADD);
-            changeStat("xp", leftOverXp, StatOperator.SET);
+            this.experience.setLevel(this.experience.getLevel() + 1);
+            this.experience.setLevelXp(this.experience.getLevelXp() + leftOverXp);
             
             if (this.playerProxy != null) {
                 this.playerProxy.sendMessage("");
@@ -246,7 +259,7 @@ public class NexusPlayer {
                 }
             }
         } else {
-            changeStat("xp", xp, StatOperator.ADD);
+            this.experience.setLevelXp(this.experience.getLevelXp() + xp);
         }
     }
     

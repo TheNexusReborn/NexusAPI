@@ -1,16 +1,16 @@
-package com.thenexusreborn.api.levels;
+package com.thenexusreborn.api.experience;
 
 import com.thenexusreborn.api.reward.Reward;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerLevel {
+public class ExperienceLevel {
     private final int number;
     private final int xpRequired;
     private final List<Reward> rewards = new ArrayList<>();
 
-    public PlayerLevel(int number, int xpRequired) {
+    public ExperienceLevel(int number, int xpRequired) {
         this.number = number;
         this.xpRequired = xpRequired;
     }

@@ -1,34 +1,34 @@
-package com.thenexusreborn.api.levels;
+package com.thenexusreborn.api.experience;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class LevelManager {
-    private Map<Integer, PlayerLevel> playerLevels = new HashMap<>();
+    private Map<Integer, ExperienceLevel> playerLevels = new HashMap<>();
 
     public void init() {
-        addLevel(new PlayerLevel(0, 0));
+        addLevel(new ExperienceLevel(0, 0));
         for (int i = 1; i <= 100; i++) {
-            PlayerLevel playerLevel;
+            ExperienceLevel playerLevel;
             if (i <= 5) {
-                playerLevel = new PlayerLevel(i, i * 1000);
+                playerLevel = new ExperienceLevel(i, i * 1000);
             } else {
-                playerLevel = new PlayerLevel(i, 5000);
+                playerLevel = new ExperienceLevel(i, 5000);
             }
             playerLevel.addReward(new CreditReward(i * 100));
             addLevel(playerLevel);
         }
     }
     
-    public PlayerLevel getLevel(int level) {
+    public ExperienceLevel getLevel(int level) {
         return this.playerLevels.get(level);
     }
 
-    public void addLevel(PlayerLevel playerLevel) {
+    public void addLevel(ExperienceLevel playerLevel) {
         this.playerLevels.put(playerLevel.getNumber(), playerLevel);
     }
 
-    public Map<Integer, PlayerLevel> getPlayerLevels() {
+    public Map<Integer, ExperienceLevel> getPlayerLevels() {
         return new HashMap<>(playerLevels);
     }
 }

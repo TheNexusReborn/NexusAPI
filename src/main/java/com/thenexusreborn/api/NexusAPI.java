@@ -2,9 +2,10 @@ package com.thenexusreborn.api;
 
 import com.stardevllc.starclock.ClockManager;
 import com.stardevllc.starlib.task.TaskFactory;
+import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
-import com.thenexusreborn.api.levels.LevelManager;
+import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.network.NetworkContext;
 import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
@@ -180,6 +181,7 @@ public abstract class NexusAPI {
         
         for (SQLDatabase database : databaseRegistry.getObjects().values()) {
             if (database.getName().toLowerCase().contains("nexus")) {
+                database.registerClass(PlayerExperience.class);
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.class);
                 database.registerClass(StatChange.class);
@@ -213,15 +215,49 @@ public abstract class NexusAPI {
             }
         }
 
+        databaseRegistry.setup();
+        getLogger().info("Successfully setup the database tables");
+
         if (migrate) {
             getLogger().info("Detected the need to migrate...");
             try (Connection connection = this.primaryDatabase.getConnection(); Statement statement = connection.createStatement()) {
-                statement.execute("DROP TABLE `nicknames`, `sggamesettings`, `sglobbysettings`, `sgsettinginfo`, `statinfo`, `toggleinfo`;");
+                statement.execute("DROP TABLE IF EXISTS `nicknames`, `sggamesettings`, `sglobbysettings`, `sgsettinginfo`, `statinfo`, `toggleinfo`;");
                 getLogger().info("Dropped the nicknames, sggamesettings, sglobbysettings, sgsettinginfo, statinfo and toggleinfo tables.");
                 statement.execute("DELETE FROM `stats` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
                 getLogger().info("Cleared the stats table of unused stats.");
                 statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
                 getLogger().info("Cleared the statchanges table of unused stats.");
+                
+                Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
+                List<PlayerExperience> pexp = this.primaryDatabase.get(PlayerExperience.class);
+                for (PlayerExperience exp : pexp) {
+                    playerExperiences.put(exp.getUniqueId(), exp);
+                }
+                
+                ResultSet expSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level';");
+                while (expSet.next()) {
+                    UUID uuid = UUID.fromString(expSet.getString("uuid"));
+                    PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, u -> new PlayerExperience(u, 0, 0));
+
+                    String statName = expSet.getString("name");
+                    String value = expSet.getString("value").split(":")[1];
+                    if (statName.equalsIgnoreCase("xp")) {
+                        experience.setLevelXp(Double.parseDouble(value));
+                    } else if (statName.equalsIgnoreCase("level")) {
+                        experience.setLevel(Integer.parseInt(value));
+                    }
+                }
+
+                for (PlayerExperience exp : playerExperiences.values()) {
+                    this.primaryDatabase.save(exp);
+                }
+                
+                getLogger().info("Moved Experience to the new experience table");
+                
+                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level';");
+                getLogger().info("Cleared the stats table of the xp and level stat types.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level';");
+                getLogger().info("Cleared the statchanges table of the xp and level stat types.");
             }
 
             try (FileWriter fileWriter = new FileWriter(migrationFile)) {
@@ -230,9 +266,6 @@ public abstract class NexusAPI {
             }
             getLogger().info("Migration complete.");
         }
-
-        databaseRegistry.setup();
-        getLogger().info("Successfully setup the database tables");
 
         statRegistry = StatHelper.getRegistry();
         

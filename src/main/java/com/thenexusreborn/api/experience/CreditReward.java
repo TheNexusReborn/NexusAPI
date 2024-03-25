@@ -1,4 +1,4 @@
-package com.thenexusreborn.api.levels;
+package com.thenexusreborn.api.experience;
 
 import com.thenexusreborn.api.player.NexusPlayer;
 import com.thenexusreborn.api.reward.Reward;

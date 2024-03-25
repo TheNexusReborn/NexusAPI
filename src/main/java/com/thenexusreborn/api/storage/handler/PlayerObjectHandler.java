@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.storage.handler;
 
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
@@ -20,6 +21,17 @@ public class PlayerObjectHandler extends ObjectHandler {
     public void afterLoad() {
         NexusPlayer player = (NexusPlayer) object;
         player.setPlayerProxy(PlayerProxy.of(player.getUniqueId()));
+        
+        try {
+            PlayerExperience experience = database.get(PlayerExperience.class, "uniqueid", player.getUniqueId().toString()).get(0);
+            player.setExperience(experience);
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
+            } else {
+                player.setExperience(new PlayerExperience(player.getUniqueId(), 0, 0));
+            }
+        }
     
         try {
             List<Toggle> toggles = database.get(Toggle.class, "uuid", player.getUniqueId());
@@ -69,6 +81,10 @@ public class PlayerObjectHandler extends ObjectHandler {
     @Override
     public void afterSave() {
         NexusPlayer player = (NexusPlayer) object;
+        
+        if (player.getExperience() != null) {
+            database.saveSilent(player.getExperience());
+        }
     
         for (Toggle toggle : player.getToggles().findAll()) {
             database.saveSilent(toggle);
