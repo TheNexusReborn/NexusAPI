@@ -5,7 +5,6 @@ import com.stardevllc.starlib.task.TaskFactory;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
 import com.thenexusreborn.api.levels.LevelManager;
-import com.thenexusreborn.api.maven.MavenLibrary;
 import com.thenexusreborn.api.network.NetworkContext;
 import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
@@ -43,8 +42,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@MavenLibrary(groupId = "mysql", artifactId = "mysql-connector-java", version = "8.0.30")
-@MavenLibrary(groupId = "javax.xml.bind", artifactId = "jaxb-api", version = "2.3.1")
 public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
