@@ -9,7 +9,6 @@ import com.thenexusreborn.api.maven.MavenLibrary;
 import com.thenexusreborn.api.network.NetworkContext;
 import com.thenexusreborn.api.network.NetworkManager;
 import com.thenexusreborn.api.network.cmd.NetworkCommand;
-import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
@@ -198,7 +197,6 @@ public abstract class NexusAPI {
                 database.registerClass(GameInfo.class);
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
-                database.registerClass(Nickname.class);
                 database.registerClass(Tag.class);
                 database.registerClass(Session.class);
                 this.primaryDatabase = database;
