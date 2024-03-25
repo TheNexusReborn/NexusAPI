@@ -34,8 +34,12 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -230,7 +234,7 @@ public abstract class NexusAPI {
         
         registerStats(statRegistry);
         getLogger().info("Registered " + (statRegistry.getObjects().size() - initialStatSize) + " additional default stat types from other plugins.");
-        
+
         toggleRegistry = new ToggleRegistry();
     
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
@@ -264,6 +268,7 @@ public abstract class NexusAPI {
         
         SQLDatabase database = getPrimaryDatabase();
         List<Row> playerRows = database.executeQuery("select * from players;");
+        
         for (Row row : playerRows) {
             UUID uniqueId = (UUID) row.getObject("uniqueId");
             String name = row.getString("name");
@@ -272,6 +277,58 @@ public abstract class NexusAPI {
             playerManager.getUuidRankMap().put(uniqueId, playerRanks);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerManager.getUuidNameMap().size() + " total profiles.");
+
+        if (database.count(StatChange.class) > 0) {
+            getLogger().info("Found stat changes that have not been processed, processing them now...");
+
+            Set<String> rawUuids = new HashSet<>();
+            
+            try (Connection connection = database.getConnection(); Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery("select `uuid` from `statchanges`;");
+                while (resultSet.next()) {
+                    rawUuids.add(resultSet.getString("uuid"));
+                }
+            }
+            
+            getLogger().info("  Found a total of " + rawUuids.size() + " players that need to have stats processed.");
+            
+            int totalSize = rawUuids.size();
+
+            int tenDemonination;
+            if (totalSize < 100) {
+                tenDemonination = 100;
+            } else {
+                tenDemonination = Math.min(10, totalSize / 10);
+            }
+            
+            int totalProcessed = 0, processed = 0;
+            for (String rawUuid : rawUuids) {
+                List<NexusPlayer> players = database.get(NexusPlayer.class, "uniqueid", UUID.fromString(rawUuid));
+                if (players.size() != 1) {
+                    continue;
+                }
+
+                NexusPlayer player = players.get(0);
+                StatHelper.consolidateStats(player);
+                player.clearStatChanges();
+                database.save(player);
+                totalProcessed++;
+                processed++;
+                
+                if (processed >= tenDemonination) {
+                    getLogger().info("Processed " + totalProcessed + " out of " + totalSize);
+                    processed = 0;
+                }
+            }
+
+            int leftOver = database.count(StatChange.class);
+            if (leftOver == 0) {
+                getLogger().info("Processing complete, all statchanges have been processed.");
+            } else {
+                getLogger().info("There are " + leftOver + " stat changes that were not processed.");
+            }
+        }
+
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
     
