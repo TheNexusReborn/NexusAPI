@@ -80,17 +80,27 @@ public class NexusPlayer {
         this.tags = new PlayerTags(uniqueId);
         this.playerTime = new PlayerTime(uniqueId);
         this.experience = new PlayerExperience(uniqueId);
+        this.balance = new PlayerBalance(uniqueId);
     }
 
     public PlayerBalance getBalance() {
+        if (balance.getUniqueId() == null) {
+            balance.setUniqueId(uniqueId);
+        }
         return balance;
     }
 
     public PlayerExperience getExperience() {
+        if (this.experience.getUniqueId() == null) {
+            experience.setUniqueId(uniqueId);
+        }
         return experience;
     }
 
     public PlayerTime getPlayerTime() {
+        if (this.playerTime.getUniqueId() == null) {
+            this.playerTime.setUniqueId(uniqueId);
+        }
         return playerTime;
     }
 

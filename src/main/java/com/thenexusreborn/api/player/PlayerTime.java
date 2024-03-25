@@ -58,4 +58,8 @@ public class PlayerTime {
     public void setPlaytime(long playtime) {
         this.playtime = playtime;
     }
+
+    public void setUniqueId(UUID uniqueId) {
+        this.uniqueId = uniqueId;
+    }
 }

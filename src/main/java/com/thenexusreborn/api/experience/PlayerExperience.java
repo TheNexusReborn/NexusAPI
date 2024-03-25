@@ -60,4 +60,8 @@ public class PlayerExperience {
     public double getLevelXp() {
         return levelXp;
     }
+
+    public void setUniqueId(UUID uniqueId) {
+        this.uniqueId = uniqueId;
+    }
 }

@@ -45,4 +45,8 @@ public class PlayerBalance {
     public void setCredits(double credits) {
         this.credits = credits;
     }
+
+    public void setUniqueId(UUID uniqueId) {
+        this.uniqueId = uniqueId;
+    }
 }
