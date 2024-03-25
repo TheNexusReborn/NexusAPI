@@ -72,14 +72,11 @@ public class NexusPlayer {
         this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
         this.tags = new PlayerTags(uniqueId);
+        this.experience = new PlayerExperience(uniqueId);
     }
 
     public PlayerExperience getExperience() {
         return experience;
-    }
-
-    public void setExperience(PlayerExperience experience) {
-        this.experience = experience;
     }
 
     public NexusScoreboard getScoreboard() {

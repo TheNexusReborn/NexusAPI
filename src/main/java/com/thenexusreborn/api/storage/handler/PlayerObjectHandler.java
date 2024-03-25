@@ -24,12 +24,11 @@ public class PlayerObjectHandler extends ObjectHandler {
         
         try {
             PlayerExperience experience = database.get(PlayerExperience.class, "uniqueid", player.getUniqueId().toString()).get(0);
-            player.setExperience(experience);
+            player.getExperience().setLevel(experience.getLevel());
+            player.getExperience().setLevelXp(experience.getLevelXp());
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 e.printStackTrace();
-            } else {
-                player.setExperience(new PlayerExperience(player.getUniqueId(), 0, 0));
             }
         }
     

@@ -346,13 +346,13 @@ public abstract class NexusAPI {
                     playerExperiences.put(exp.getUniqueId(), exp);
                 }
 
-                ResultSet expSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level';");
-                while (expSet.next()) {
-                    UUID uuid = UUID.fromString(expSet.getString("uuid"));
-                    PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, u -> new PlayerExperience(u, 0, 0));
+                ResultSet statsSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level';");
+                while (statsSet.next()) {
+                    UUID uuid = UUID.fromString(statsSet.getString("uuid"));
+                    PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, PlayerExperience::new);
 
-                    String statName = expSet.getString("name");
-                    String value = expSet.getString("value").split(":")[1];
+                    String statName = statsSet.getString("name");
+                    String value = statsSet.getString("value").split(":")[1];
                     if (statName.equalsIgnoreCase("xp")) {
                         experience.setLevelXp(Double.parseDouble(value));
                     } else if (statName.equalsIgnoreCase("level")) {

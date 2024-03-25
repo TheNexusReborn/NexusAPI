@@ -13,10 +13,8 @@ public class PlayerExperience {
 
     private PlayerExperience() {}
 
-    public PlayerExperience(UUID uniqueId, int level, double levelXp) {
+    public PlayerExperience(UUID uniqueId) {
         this.uniqueId = uniqueId;
-        this.level = level;
-        this.levelXp = levelXp;
     }
 
     public UUID getUniqueId() {
