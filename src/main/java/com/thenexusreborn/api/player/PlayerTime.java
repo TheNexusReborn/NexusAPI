@@ -49,6 +49,11 @@ public class PlayerTime {
     public long getPlaytime() {
         return playtime;
     }
+    
+    public long addPlaytime(long playtime) {
+        this.playtime += playtime;
+        return this.playtime;
+    }
 
     public void setPlaytime(long playtime) {
         this.playtime = playtime;

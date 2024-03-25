@@ -2,12 +2,12 @@ package com.thenexusreborn.api.player;
 
 import com.stardevllc.starlib.Value;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.experience.LevelManager;
-import com.thenexusreborn.api.experience.ExperienceLevel;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.stats.*;
+import com.thenexusreborn.api.stats.Stat;
+import com.thenexusreborn.api.stats.StatChange;
+import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
 import me.firestar311.starsql.api.annotations.column.ColumnCodec;
@@ -238,36 +238,22 @@ public class NexusPlayer {
     }
 
     public void addCredits(int credits) {
-        this.balance.setCredits(this.balance.getCredits() + credits);
+        this.balance.addCredits(credits);
     }
     
     public void addXp(double xp) {
-        double currentXp = this.experience.getLevelXp();
-        double newXp = currentXp + xp;
-        int currentLevel = this.experience.getLevel();
-        LevelManager levelManager = NexusAPI.getApi().getLevelManager();
-        ExperienceLevel nextLevel = levelManager.getLevel(currentLevel + 1);
-        if (nextLevel == null) {
-            this.experience.setLevelXp(this.experience.getLevelXp() + xp);
-            return;
-        }
+        boolean leveledUp = this.experience.addExperience(xp);
         
-        if (newXp >= nextLevel.getXpRequired()) {
-            double leftOverXp = nextLevel.getXpRequired() - newXp;
-            this.experience.setLevel(this.experience.getLevel() + 1);
-            this.experience.setLevelXp(this.experience.getLevelXp() + leftOverXp);
-            
+        if (leveledUp) {
             if (this.playerProxy != null) {
                 this.playerProxy.sendMessage("");
                 this.playerProxy.sendMessage("&a&lLEVEL UP!");
-                this.playerProxy.sendMessage("&e" + currentLevel + " &a-> &e" + nextLevel.getNumber());
+                this.playerProxy.sendMessage("&e" + (this.experience.getLevel() - 1) + " &a-> &e" + this.experience.getLevel());
                 this.playerProxy.sendMessage("");
-                for (Reward reward : nextLevel.getRewards()) {
+                for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(this.experience.getLevel()).getRewards()) {
                     reward.applyReward(this);
                 }
             }
-        } else {
-            this.experience.setLevelXp(this.experience.getLevelXp() + xp);
         }
     }
     
@@ -350,7 +336,7 @@ public class NexusPlayer {
     }
     
     public void removeCredits(int credits) {
-        this.balance.setCredits(this.balance.getCredits() - credits);
+        this.balance.addCredits(-credits);
     }
     
     public boolean isOnline() {

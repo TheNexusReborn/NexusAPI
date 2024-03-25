@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.experience;
 
+import com.thenexusreborn.api.NexusAPI;
 import me.firestar311.starsql.api.annotations.column.PrimaryKey;
 import me.firestar311.starsql.api.annotations.table.TableName;
 
@@ -19,6 +20,29 @@ public class PlayerExperience {
 
     public UUID getUniqueId() {
         return uniqueId;
+    }
+    
+    public boolean addExperience(double xp) {
+        double currentXp = this.levelXp;
+        double newXp = currentXp + xp;
+        int currentLevel = this.level;
+        LevelManager levelManager = NexusAPI.getApi().getLevelManager();
+        ExperienceLevel nextLevel = levelManager.getLevel(currentLevel + 1);
+        if (nextLevel == null) {
+            this.levelXp = newXp;
+            return false;
+        }
+
+        if (newXp >= nextLevel.getXpRequired()) {
+            double leftOverXp = nextLevel.getXpRequired() - newXp;
+            this.level++;
+            this.levelXp = leftOverXp;
+            return true;
+        } else {
+            this.levelXp = newXp;
+        }
+        
+        return false;
     }
 
     public void setLevel(int level) {

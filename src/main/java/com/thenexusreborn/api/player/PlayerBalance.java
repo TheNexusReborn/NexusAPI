@@ -23,9 +23,19 @@ public class PlayerBalance {
     public double getNexites() {
         return nexites;
     }
+    
+    public double addNexites(double nexites) {
+        this.nexites += nexites;
+        return this.nexites;
+    }
 
     public double getCredits() {
         return credits;
+    }
+    
+    public double addCredits(double credits) {
+        this.credits += credits;
+        return this.credits;
     }
 
     public void setNexites(double nexites) {
