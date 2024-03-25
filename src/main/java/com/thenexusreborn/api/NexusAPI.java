@@ -25,20 +25,14 @@ import me.firestar311.starsql.api.objects.Row;
 import me.firestar311.starsql.api.objects.SQLDatabase;
 import me.firestar311.starsql.api.objects.typehandlers.ValueHandler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -180,6 +174,7 @@ public abstract class NexusAPI {
         getLogger().info("Loaded the Networking System");
         
         databaseRegistry = new DatabaseRegistry(logger);
+
         registerDatabases(databaseRegistry);
         getLogger().info("Registered the databases");
         
@@ -202,6 +197,38 @@ public abstract class NexusAPI {
         
         if (primaryDatabase == null) {
             throw new SQLException("Could not find the primary database.");
+        }
+
+        boolean migrate = false;
+        File migrationFile = new File("." + File.separator + "nexusmigration");
+        if (!migrationFile.exists()) {
+            migrate = true;
+            migrationFile.createNewFile();
+        } else {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(migrationFile)))) {
+                String line = br.readLine();
+                if (line == null || !line.equals("1.12-ALPHA")) {
+                    migrate = true;
+                }
+            }
+        }
+
+        if (migrate) {
+            getLogger().info("Detected the need to migrate...");
+            try (Connection connection = this.primaryDatabase.getConnection(); Statement statement = connection.createStatement()) {
+                statement.execute("DROP TABLE `nicknames`, `sggamesettings`, `sglobbysettings`, `sgsettinginfo`, `statinfo`, `toggleinfo`;");
+                getLogger().info("Dropped the nicknames, sggamesettings, sglobbysettings, sgsettinginfo, statinfo and toggleinfo tables.");
+                statement.execute("DELETE FROM `stats` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
+                getLogger().info("Cleared the stats table of unused stats.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
+                getLogger().info("Cleared the statchanges table of unused stats.");
+            }
+
+            try (FileWriter fileWriter = new FileWriter(migrationFile)) {
+                fileWriter.write(this.version.toString());
+                fileWriter.flush();
+            }
+            getLogger().info("Migration complete.");
         }
 
         databaseRegistry.setup();
