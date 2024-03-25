@@ -4,7 +4,8 @@ import com.stardevllc.starlib.Value;
 import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
 import me.firestar311.starsql.api.annotations.table.TableName;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.UUID;
 
 @TableName("stats")
 public class Stat implements Cloneable {
@@ -77,9 +78,17 @@ public class Stat implements Cloneable {
     
     public void setValue(Object value) {
         if (this.value == null) {
-            this.value = new Value(getInfo().getType().getValueType(), value);
+            if (value instanceof Value v) {
+                this.value = v;
+            } else {
+                this.value = new Value(getInfo().getType().getValueType(), value);
+            }
         } else {
-            this.value.set(value);
+            if (value instanceof Value v) {
+                this.value.set(v.get());
+            } else {
+                this.value.set(value);
+            }
         }
         this.modified = System.currentTimeMillis();
     }
@@ -147,11 +156,15 @@ public class Stat implements Cloneable {
     
     @Override
     public String toString() {
+        if (value == null) {
+            this.value = new Value(getInfo().getType().getValueType(), getInfo().getDefaultValue().get());
+        }
+        
         return "Stat{" +
                 "info=" + getInfo() +
                 ", id=" + id +
                 ", uuid=" + uuid +
-                ", value=" + value +
+                ", value=" + value.get() +
                 ", fakedValue=" + fakedValue +
                 ", created=" + created +
                 ", modified=" + modified +
