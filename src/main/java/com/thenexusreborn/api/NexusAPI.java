@@ -20,7 +20,6 @@ import com.thenexusreborn.api.registry.StatRegistry;
 import com.thenexusreborn.api.registry.ToggleRegistry;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.stats.*;
-import com.thenexusreborn.api.stats.Stat.Info;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
@@ -187,10 +186,8 @@ public abstract class NexusAPI {
         for (SQLDatabase database : databaseRegistry.getObjects().values()) {
             if (database.getName().toLowerCase().contains("nexus")) {
                 database.registerClass(IPEntry.class);
-                database.registerClass(Stat.Info.class);
                 database.registerClass(Stat.class);
                 database.registerClass(StatChange.class);
-                database.registerClass(Toggle.Info.class);
                 database.registerClass(Toggle.class);
                 database.registerClass(NexusPlayer.class);
                 database.registerClass(ServerInfo.class);
@@ -234,23 +231,6 @@ public abstract class NexusAPI {
         registerStats(statRegistry);
         getLogger().info("Registered " + (statRegistry.getObjects().size() - initialStatSize) + " additional default stat types from other plugins.");
         
-        List<Stat.Info> statInfos = primaryDatabase.get(Stat.Info.class);
-        for (Info statInfo : statInfos) {
-            Info existingStatInfo = statRegistry.get(statInfo.getName());
-            if (existingStatInfo == null) {
-                statRegistry.register(statInfo.getName(), statInfo);
-            } else {
-                if (!existingStatInfo.getDefaultValue().get().equals(statInfo.getDefaultValue().get())) {
-                    existingStatInfo.setDefaultValue(statInfo.getDefaultValue());
-                }
-            }
-        }
-        getLogger().info("Loaded stat infos from the database. Total: " + statRegistry.getObjects().size());
-
-        for (Stat.Info statInfo : StatHelper.getRegistry().getObjects().values()) {
-            getPrimaryDatabase().saveSilent(statInfo);
-        }
-        
         toggleRegistry = new ToggleRegistry();
     
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
@@ -261,24 +241,7 @@ public abstract class NexusAPI {
         getLogger().info("Registered " + initialToggleSize + " default toggle types.");
         
         registerToggles(toggleRegistry);
-        getLogger().info("Registered " + (toggleRegistry.getObjects().size() + " additional default toggle types."));
-
-        List<Toggle.Info> toggleInfos = primaryDatabase.get(Toggle.Info.class);
-        for (Toggle.Info toggleInfo : toggleInfos) {
-            Toggle.Info existingInfo = toggleRegistry.get(toggleInfo.getName());
-            if (existingInfo == null) {
-                toggleRegistry.register(toggleInfo.getName(), toggleInfo);
-            } else {
-                existingInfo.setDefaultValue(toggleInfo.getDefaultValue());
-                existingInfo.setMinRank(toggleInfo.getMinRank());
-            }
-        }
-
-        getLogger().info("Loaded toggle type values from the database.");
-
-        for (Toggle.Info object : toggleRegistry.getObjects().values()) {
-            getPrimaryDatabase().saveSilent(object);
-        }
+        getLogger().info("Registered " + (toggleRegistry.getObjects().size() - initialToggleSize) + " additional default toggle types.");
 
         getLogger().info("Registering and Setting up Tags");
         this.tagRegistry = new TagRegistry();
