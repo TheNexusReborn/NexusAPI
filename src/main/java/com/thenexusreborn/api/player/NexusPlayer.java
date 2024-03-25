@@ -136,13 +136,6 @@ public class NexusPlayer {
         this.session = session;
     }
 
-    public boolean isOnline() {
-        if (getPlayer() != null) {
-            return getPlayer().isOnline();
-        }
-        return getStats().getValue("online").getAsBoolean();
-    }
-    
     public long getFirstJoined() {
         return getStats().getValue("firstjoined").getAsLong();
     }
@@ -192,30 +185,6 @@ public class NexusPlayer {
         getStats().change("lastlogout", lastLogout, StatOperator.SET).push();
     }
     
-    public boolean isPrealpha() {
-        return getStats().getValue("prealpha").getAsBoolean();
-    }
-    
-    public void setPrealpha(boolean prealpha) {
-        getStats().change("prealpha", prealpha, StatOperator.SET).push();
-    }
-    
-    public boolean isAlpha() {
-        return getStats().getValue("alpha").getAsBoolean();
-    }
-    
-    public void setAlpha(boolean alpha) {
-        getStats().change("alpha", alpha, StatOperator.SET).push();
-    }
-    
-    public boolean isBeta() {
-        return getStats().getValue("beta").getAsBoolean();
-    }
-    
-    public void setBeta(boolean beta) {
-        getStats().change("beta", beta, StatOperator.SET).push();
-    }
-    
     public PlayerStats getStats() {
         if (stats.getUniqueId() == null) {
             stats.setUniqueId(uniqueId);
@@ -256,7 +225,6 @@ public class NexusPlayer {
         double newXp = currentXp + xp;
         int currentLevel = getStatValue("level").getAsInt();
         LevelManager levelManager = NexusAPI.getApi().getLevelManager();
-        PlayerLevel playerLevel = levelManager.getLevel(currentLevel);
         PlayerLevel nextLevel = levelManager.getLevel(currentLevel + 1);
         if (nextLevel == null) {
             changeStat("xp", xp, StatOperator.ADD);
@@ -337,18 +305,6 @@ public class NexusPlayer {
         return getRanks().contains(rank);
     }
     
-    public void setOnline(boolean online) {
-        getStats().change("online", online, StatOperator.SET).push();
-    }
-    
-    public String getServer() {
-        return getStats().getValue("server").getAsString();
-    }
-    
-    public void setServer(String server) {
-        getStats().change("server", server, StatOperator.SET).push();
-    }
-    
     public PlayerToggles getToggles() {
         if (toggles.getUniqueId() == null) {
             toggles.setUniqueId(this.uniqueId);
@@ -374,6 +330,15 @@ public class NexusPlayer {
     
     public void removeCredits(int credits) {
         getStats().change("credits", credits, StatOperator.SUBTRACT).push();
+    }
+    
+    public boolean isOnline() {
+        PlayerProxy player = getPlayer();
+        if (player != null) {
+            return player.isOnline();
+        }
+        
+        return false;
     }
 
     public PlayerTags getTags() {

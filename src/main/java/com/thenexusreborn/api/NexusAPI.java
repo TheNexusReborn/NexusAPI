@@ -220,12 +220,7 @@ public abstract class NexusAPI {
         statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L); //TODO Move to playertimes table
         statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L); //TODO Move to playertimes table
         statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L); //TODO Move to playertimes table
-        statRegistry.register("prealpha", "PreAlpha", StatType.BOOLEAN, false); //TODO Remove
-        statRegistry.register("alpha", "Alpha", StatType.BOOLEAN, false); //TODO Remove
-        statRegistry.register("beta", "Beta", StatType.BOOLEAN, false); //TODO Remove
         statRegistry.register("tag", "Tag", StatType.STRING, "null"); //TODO Move to NexusPlayer (Until preferences system is implemented)
-        statRegistry.register("online", "Online", StatType.BOOLEAN, false); //TODO Remove
-        statRegistry.register("server", "Server", StatType.STRING, "null"); //TODO Remove
 
         int initialStatSize = statRegistry.getObjects().size();
         getLogger().info("Registered " + initialStatSize + " default stat types.");
