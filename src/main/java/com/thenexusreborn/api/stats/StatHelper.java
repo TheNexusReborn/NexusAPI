@@ -102,7 +102,7 @@ public final class StatHelper {
                 stats.put(rawStat.getName(), rawStat);
             }
             
-            Set<StatChange> statChanges = new TreeSet<>(NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.toString()));
+            Set<StatChange> statChanges = new TreeSet<>(NexusAPI.getApi().getPrimaryDatabase().get(StatChange.class, "uuid", player.getUniqueId().toString()));
             for (StatChange statChange : statChanges) {
                 Info info = getInfo(statChange.getStatName());
                 Stat stat = stats.getOrDefault(statChange.getStatName(), new Stat(info, player.getUniqueId(), info.getDefaultValue(), System.currentTimeMillis()));
@@ -119,12 +119,20 @@ public final class StatHelper {
                     NexusAPI.getApi().getLogger().warning("Stat " + stat.getName() + " failed to load a value or has no default value, using Java Defaults.");
                     stat.setValue(stat.getType().getDefaultValue());
                 }
-                
+
                 changeStat(stat, statChange);
                 if (statChange.getId() > 0) {
                     NexusAPI.getApi().getPrimaryDatabase().delete(StatChange.class, statChange.getId());
                 }
             }
+
+            for (Stat stat : stats.values()) {
+                NexusAPI.getApi().getPrimaryDatabase().queue(stat);
+            }
+            
+            player.clearStatChanges();
+            
+            NexusAPI.getApi().getPrimaryDatabase().flush();
         } catch (SQLException e) {
             e.printStackTrace();
         }
