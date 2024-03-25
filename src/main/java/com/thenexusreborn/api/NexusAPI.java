@@ -218,59 +218,10 @@ public abstract class NexusAPI {
         databaseRegistry.setup();
         getLogger().info("Successfully setup the database tables");
 
-        if (migrate) {
-            getLogger().info("Detected the need to migrate...");
-            try (Connection connection = this.primaryDatabase.getConnection(); Statement statement = connection.createStatement()) {
-                statement.execute("DROP TABLE IF EXISTS `nicknames`, `sggamesettings`, `sglobbysettings`, `sgsettinginfo`, `statinfo`, `toggleinfo`;");
-                getLogger().info("Dropped the nicknames, sggamesettings, sglobbysettings, sgsettinginfo, statinfo and toggleinfo tables.");
-                statement.execute("DELETE FROM `stats` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
-                getLogger().info("Cleared the stats table of unused stats.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
-                getLogger().info("Cleared the statchanges table of unused stats.");
-                
-                Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
-                List<PlayerExperience> pexp = this.primaryDatabase.get(PlayerExperience.class);
-                for (PlayerExperience exp : pexp) {
-                    playerExperiences.put(exp.getUniqueId(), exp);
-                }
-                
-                ResultSet expSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level';");
-                while (expSet.next()) {
-                    UUID uuid = UUID.fromString(expSet.getString("uuid"));
-                    PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, u -> new PlayerExperience(u, 0, 0));
-
-                    String statName = expSet.getString("name");
-                    String value = expSet.getString("value").split(":")[1];
-                    if (statName.equalsIgnoreCase("xp")) {
-                        experience.setLevelXp(Double.parseDouble(value));
-                    } else if (statName.equalsIgnoreCase("level")) {
-                        experience.setLevel(Integer.parseInt(value));
-                    }
-                }
-
-                for (PlayerExperience exp : playerExperiences.values()) {
-                    this.primaryDatabase.save(exp);
-                }
-                
-                getLogger().info("Moved Experience to the new experience table");
-                
-                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level';");
-                getLogger().info("Cleared the stats table of the xp and level stat types.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level';");
-                getLogger().info("Cleared the statchanges table of the xp and level stat types.");
-            }
-
-            try (FileWriter fileWriter = new FileWriter(migrationFile)) {
-                fileWriter.write(this.version.toString());
-                fileWriter.flush();
-            }
-            getLogger().info("Migration complete.");
-        }
-
         statRegistry = StatHelper.getRegistry();
         
-        statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0); //TODO Move to experience table
-        statRegistry.register("level", "Level", StatType.INTEGER, 0); //TODO Move to experience table
+        statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0); //TODO Remove after migration
+        statRegistry.register("level", "Level", StatType.INTEGER, 0); //TODO Remove after migration
         statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0); //TODO Move to currency table
         statRegistry.register("credits", "Credits", StatType.DOUBLE, 0.0); //TODO Move to currency table
         statRegistry.register("playtime", "Playtime", StatType.LONG, 0L); //TODO Move to playertimes table
@@ -377,6 +328,55 @@ public abstract class NexusAPI {
             } else {
                 getLogger().info("There are " + leftOver + " stat changes that were not processed.");
             }
+        }
+
+        if (migrate) {
+            getLogger().info("Detected the need to migrate...");
+            try (Connection connection = this.primaryDatabase.getConnection(); Statement statement = connection.createStatement()) {
+                statement.execute("DROP TABLE IF EXISTS `nicknames`, `sggamesettings`, `sglobbysettings`, `sgsettinginfo`, `statinfo`, `toggleinfo`;");
+                getLogger().info("Dropped the nicknames, sggamesettings, sglobbysettings, sgsettinginfo, statinfo and toggleinfo tables.");
+                statement.execute("DELETE FROM `stats` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
+                getLogger().info("Cleared the stats table of unused stats.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
+                getLogger().info("Cleared the statchanges table of unused stats.");
+
+                Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
+                List<PlayerExperience> pexp = this.primaryDatabase.get(PlayerExperience.class);
+                for (PlayerExperience exp : pexp) {
+                    playerExperiences.put(exp.getUniqueId(), exp);
+                }
+
+                ResultSet expSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level';");
+                while (expSet.next()) {
+                    UUID uuid = UUID.fromString(expSet.getString("uuid"));
+                    PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, u -> new PlayerExperience(u, 0, 0));
+
+                    String statName = expSet.getString("name");
+                    String value = expSet.getString("value").split(":")[1];
+                    if (statName.equalsIgnoreCase("xp")) {
+                        experience.setLevelXp(Double.parseDouble(value));
+                    } else if (statName.equalsIgnoreCase("level")) {
+                        experience.setLevel(Integer.parseInt(value));
+                    }
+                }
+
+                for (PlayerExperience exp : playerExperiences.values()) {
+                    this.primaryDatabase.save(exp);
+                }
+
+                getLogger().info("Moved Experience to the new experience table");
+
+                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level';");
+                getLogger().info("Cleared the stats table of the xp and level stat types.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level';");
+                getLogger().info("Cleared the statchanges table of the xp and level stat types.");
+            }
+
+            try (FileWriter fileWriter = new FileWriter(migrationFile)) {
+                fileWriter.write(this.version.toString());
+                fileWriter.flush();
+            }
+            getLogger().info("Migration complete.");
         }
 
         getLogger().info("NexusAPI v" + this.version + " load complete.");
