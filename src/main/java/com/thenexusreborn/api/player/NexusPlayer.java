@@ -33,6 +33,9 @@ public class NexusPlayer {
     protected PlayerExperience experience;
     
     @ColumnIgnored
+    protected PlayerTime playerTime;
+    
+    @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     @ColumnType("varchar(1000)")
     @ColumnCodec(RanksCodec.class)
@@ -72,11 +75,16 @@ public class NexusPlayer {
         this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
         this.tags = new PlayerTags(uniqueId);
+        this.playerTime = new PlayerTime(uniqueId);
         this.experience = new PlayerExperience(uniqueId);
     }
 
     public PlayerExperience getExperience() {
         return experience;
+    }
+
+    public PlayerTime getPlayerTime() {
+        return playerTime;
     }
 
     public NexusScoreboard getScoreboard() {
@@ -147,19 +155,19 @@ public class NexusPlayer {
     }
 
     public long getFirstJoined() {
-        return getStats().getValue("firstjoined").getAsLong();
+        return this.playerTime.getFirstJoined();
     }
     
     public void setFirstJoined(long firstJoined) {
-        getStats().change("firstjoined", firstJoined, StatOperator.SET).push();
+        this.playerTime.setFirstJoined(firstJoined);
     }
     
     public long getLastLogin() {
-        return getStats().getValue("lastlogin").getAsLong();
+        return this.playerTime.getLastLogin();
     }
     
     public void setLastLogin(long lastLogin) {
-        getStats().change("lastlogin", lastLogin, StatOperator.SET).push();
+        this.playerTime.setLastLogin(lastLogin);
     }
 
     public String getDisplayName() {
@@ -188,11 +196,11 @@ public class NexusPlayer {
     }
     
     public long getLastLogout() {
-        return getStats().getValue("lastlogout").getAsLong();
+        return this.playerTime.getLastLogout();
     }
     
     public void setLastLogout(long lastLogout) {
-        getStats().change("lastlogout", lastLogout, StatOperator.SET).push();
+        this.playerTime.setLastLogout(lastLogout);
     }
     
     public PlayerStats getStats() {

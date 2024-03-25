@@ -31,6 +31,18 @@ public class PlayerObjectHandler extends ObjectHandler {
                 e.printStackTrace();
             }
         }
+
+        try {
+            PlayerTime playerTime = database.get(PlayerTime.class, "uniqueid", player.getUniqueId().toString()).get(0);
+            player.getPlayerTime().setFirstJoined(playerTime.getFirstJoined());
+            player.getPlayerTime().setLastLogin(playerTime.getLastLogin());
+            player.getPlayerTime().setLastLogout(playerTime.getLastLogout());
+            player.getPlayerTime().setPlaytime(playerTime.getPlaytime());
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
+            }
+        }
     
         try {
             List<Toggle> toggles = database.get(Toggle.class, "uuid", player.getUniqueId());

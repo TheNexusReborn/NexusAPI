@@ -41,15 +41,15 @@ public abstract class NexusAPI {
     private static NexusAPI instance;
     public static final Phase PHASE = Phase.PRIVATE_ALPHA;
     public static final NetworkType NETWORK_TYPE = NetworkType.SINGLE;
-    
+
     public static void setApi(NexusAPI api) {
         instance = api;
     }
-    
+
     public static NexusAPI getApi() {
         return instance;
     }
-    
+
     protected final Logger logger;
     protected final PlayerManager playerManager;
     protected final ServerManager serverManager;
@@ -60,14 +60,14 @@ public abstract class NexusAPI {
     protected ClockManager clockManager;
     protected Version version;
     protected TaskFactory scheduler;
-    
+
     protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
     protected DatabaseRegistry databaseRegistry;
-    
+
     protected SQLDatabase primaryDatabase;
-    
+
     public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, TaskFactory scheduler, ServerManager serverManager) {
         this.logger = logger;
         this.environment = environment;
@@ -77,7 +77,7 @@ public abstract class NexusAPI {
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
         this.scheduler = scheduler;
-        
+
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -91,14 +91,14 @@ public abstract class NexusAPI {
             e.printStackTrace();
         }
     }
-    
+
     public Environment getEnvironment() {
         return environment;
     }
-    
+
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
-        
+
         NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
         registerNetworkCommands(networkCommandRegistry);
         networkCommandRegistry.register("updaterank", new NetworkCommand("updaterank", (cmd, origin, args) -> {
@@ -109,7 +109,7 @@ public abstract class NexusAPI {
             PlayerRanks playerRanks = playerManager.getUuidRankMap().get(uuid);
 
             NexusPlayer player = getPlayerManager().getNexusPlayer(uuid);
-            
+
             if (player != null) {
                 switch (action) {
                     case "add" -> {
@@ -127,7 +127,7 @@ public abstract class NexusAPI {
                 }
             }
         }));
-        
+
         networkCommandRegistry.register("updatetag", new NetworkCommand("updatetag", (cmd, origin, args) -> {
             UUID uuid = UUID.fromString(args[0]);
             String action = args[1];
@@ -145,7 +145,7 @@ public abstract class NexusAPI {
                 if (player == null) {
                     return;
                 }
-                
+
                 if (action.equalsIgnoreCase("unlock")) {
                     long timestamp = Long.parseLong(args[3]);
                     player.getTags().add(new Tag(player.getUniqueId(), tag, timestamp));
@@ -154,7 +154,7 @@ public abstract class NexusAPI {
                 }
             }
         }));
-    
+
         networkCommandRegistry.register("updatestat", new NetworkCommand("updatestat", (cmd, origin, args) -> {
             if (getServerManager().getCurrentServer().getName().equalsIgnoreCase(origin)) {
                 return;
@@ -167,21 +167,22 @@ public abstract class NexusAPI {
             StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
             player.addStatChange(statChange);
         }));
-        
+
         networkManager.init("localhost", 3408);
         for (NetworkCommand netCmd : networkCommandRegistry.getObjects().values()) {
             networkManager.addCommand(netCmd);
         }
         getLogger().info("Loaded the Networking System");
-        
+
         databaseRegistry = new DatabaseRegistry(logger);
 
         registerDatabases(databaseRegistry);
         getLogger().info("Registered the databases");
-        
+
         for (SQLDatabase database : databaseRegistry.getObjects().values()) {
             if (database.getName().toLowerCase().contains("nexus")) {
                 database.registerClass(PlayerExperience.class);
+                database.registerClass(PlayerTime.class);
                 database.registerClass(IPEntry.class);
                 database.registerClass(Stat.class);
                 database.registerClass(StatChange.class);
@@ -196,7 +197,7 @@ public abstract class NexusAPI {
                 this.primaryDatabase = database;
             }
         }
-        
+
         if (primaryDatabase == null) {
             throw new SQLException("Could not find the primary database.");
         }
@@ -219,32 +220,32 @@ public abstract class NexusAPI {
         getLogger().info("Successfully setup the database tables");
 
         statRegistry = StatHelper.getRegistry();
-        
+
         statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0); //TODO Remove after migration
         statRegistry.register("level", "Level", StatType.INTEGER, 0); //TODO Remove after migration
         statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0); //TODO Move to currency table
         statRegistry.register("credits", "Credits", StatType.DOUBLE, 0.0); //TODO Move to currency table
-        statRegistry.register("playtime", "Playtime", StatType.LONG, 0L); //TODO Move to playertimes table
-        statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L); //TODO Move to playertimes table
-        statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L); //TODO Move to playertimes table
-        statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L); //TODO Move to playertimes table
+        statRegistry.register("playtime", "Playtime", StatType.LONG, 0L); //TODO Remove after migration
+        statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L); //TODO Remove after migration
+        statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L); //TODO Remove after migration
+        statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L); //TODO Remove after migration
         statRegistry.register("tag", "Tag", StatType.STRING, "null"); //TODO Move to NexusPlayer (Until preferences system is implemented)
 
         int initialStatSize = statRegistry.getObjects().size();
         getLogger().info("Registered " + initialStatSize + " default stat types.");
-        
+
         registerStats(statRegistry);
         getLogger().info("Registered " + (statRegistry.getObjects().size() - initialStatSize) + " additional default stat types from other plugins.");
 
         toggleRegistry = new ToggleRegistry();
-    
+
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
         toggleRegistry.register("incognito", Rank.MEDIA, "Incognito", "A media+ thing where you can be hidden from others", false);
         toggleRegistry.register("fly", Rank.DIAMOND, "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
-        
+
         int initialToggleSize = toggleRegistry.getObjects().size();
         getLogger().info("Registered " + initialToggleSize + " default toggle types.");
-        
+
         registerToggles(toggleRegistry);
         getLogger().info("Registered " + (toggleRegistry.getObjects().size() - initialToggleSize) + " additional default toggle types.");
 
@@ -258,18 +259,18 @@ public abstract class NexusAPI {
 
         serverManager.setupCurrentServer();
         getLogger().info("Set up the current server");
-        
+
         for (Punishment punishment : getPrimaryDatabase().get(Punishment.class)) {
             punishmentManager.addPunishment(punishment);
         }
         getLogger().info("Cached punishments in memory");
-        
+
         playerManager.getIpHistory().addAll(getPrimaryDatabase().get(IPEntry.class));
         getLogger().info("Loaded IP History");
-        
+
         SQLDatabase database = getPrimaryDatabase();
         List<Row> playerRows = database.executeQuery("select * from players;");
-        
+
         for (Row row : playerRows) {
             UUID uniqueId = (UUID) row.getObject("uniqueId");
             String name = row.getString("name");
@@ -283,16 +284,16 @@ public abstract class NexusAPI {
             getLogger().info("Found stat changes that have not been processed, processing them now...");
 
             Set<String> rawUuids = new HashSet<>();
-            
+
             try (Connection connection = database.getConnection(); Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery("select `uuid` from `statchanges`;");
                 while (resultSet.next()) {
                     rawUuids.add(resultSet.getString("uuid"));
                 }
             }
-            
+
             getLogger().info("  Found a total of " + rawUuids.size() + " players that need to have stats processed.");
-            
+
             int totalSize = rawUuids.size();
 
             int tenDemonination;
@@ -301,7 +302,7 @@ public abstract class NexusAPI {
             } else {
                 tenDemonination = Math.min(1, totalSize / 10);
             }
-            
+
             int totalProcessed = 0, processed = 0;
             for (String rawUuid : rawUuids) {
                 List<NexusPlayer> players = database.get(NexusPlayer.class, "uniqueid", UUID.fromString(rawUuid));
@@ -315,7 +316,7 @@ public abstract class NexusAPI {
                 database.save(player);
                 totalProcessed++;
                 processed++;
-                
+
                 if (processed >= tenDemonination) {
                     getLogger().info("      Processed " + totalProcessed + " out of " + totalSize);
                     processed = 0;
@@ -341,15 +342,20 @@ public abstract class NexusAPI {
                 getLogger().info("Cleared the statchanges table of unused stats.");
 
                 Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
-                List<PlayerExperience> pexp = this.primaryDatabase.get(PlayerExperience.class);
-                for (PlayerExperience exp : pexp) {
+                for (PlayerExperience exp : this.primaryDatabase.get(PlayerExperience.class)) {
                     playerExperiences.put(exp.getUniqueId(), exp);
                 }
 
-                ResultSet statsSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level';");
+                Map<UUID, PlayerTime> playerTimes = new HashMap<>();
+                for (PlayerTime pt : this.primaryDatabase.get(PlayerTime.class)) {
+                    playerTimes.put(pt.getUniqueId(), pt);
+                }
+
+                ResultSet statsSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin' OR `name`='lastlogout';");
                 while (statsSet.next()) {
                     UUID uuid = UUID.fromString(statsSet.getString("uuid"));
                     PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, PlayerExperience::new);
+                    PlayerTime playerTime = playerTimes.computeIfAbsent(uuid, PlayerTime::new);
 
                     String statName = statsSet.getString("name");
                     String value = statsSet.getString("value").split(":")[1];
@@ -357,19 +363,31 @@ public abstract class NexusAPI {
                         experience.setLevelXp(Double.parseDouble(value));
                     } else if (statName.equalsIgnoreCase("level")) {
                         experience.setLevel(Integer.parseInt(value));
+                    } else if (statName.equalsIgnoreCase("playtime")) {
+                        playerTime.setPlaytime(Long.parseLong(value));
+                    } else if (statName.equalsIgnoreCase("firstjoined")) {
+                        playerTime.setFirstJoined(Long.parseLong(value));
+                    } else if (statName.equalsIgnoreCase("lastlogin")) {
+                        playerTime.setLastLogin(Long.parseLong(value));
+                    } else if (statName.equalsIgnoreCase("lastlogout")) {
+                        playerTime.setLastLogout(Long.parseLong(value));
                     }
                 }
 
                 for (PlayerExperience exp : playerExperiences.values()) {
                     this.primaryDatabase.save(exp);
                 }
+                getLogger().info("Moved experience stats to the new experience table");
 
-                getLogger().info("Moved Experience to the new experience table");
+                for (PlayerTime pt : playerTimes.values()) {
+                    this.primaryDatabase.save(pt);
+                }
+                getLogger().info("Moved the player time stats to the new playertimes table");
 
-                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level';");
-                getLogger().info("Cleared the stats table of the xp and level stat types.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level';");
-                getLogger().info("Cleared the statchanges table of the xp and level stat types.");
+                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout';");
+                getLogger().info("Cleared the stats table of the xp, level, playtime, firstjoined, lastlogin and lastlogout stat types.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout';");
+                getLogger().info("Cleared the statchanges table of the xp, level, playtime, firstjoined, lastlogin and lastlogout stat types.");
             }
 
             try (FileWriter fileWriter = new FileWriter(migrationFile)) {
@@ -381,48 +399,48 @@ public abstract class NexusAPI {
 
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
-    
+
     public abstract void registerDatabases(DatabaseRegistry registry);
-    
+
     public abstract void registerStats(StatRegistry registry);
-    
+
     public abstract void registerNetworkCommands(NetworkCommandRegistry registry);
-    
+
     public abstract void registerToggles(ToggleRegistry registry);
-    
+
     public Version getVersion() {
         return version;
     }
-    
+
     @Deprecated
     public abstract Connection getConnection() throws SQLException;
-    
+
     public abstract File getFolder();
-    
+
     public PlayerManager getPlayerManager() {
         return playerManager;
     }
-    
+
     public TaskFactory getScheduler() {
         return scheduler;
     }
-    
+
     public Logger getLogger() {
         return logger;
     }
-    
+
     public ServerManager getServerManager() {
         return serverManager;
     }
-    
+
     public NetworkManager getNetworkManager() {
         return this.networkManager;
     }
-    
+
     public PunishmentManager getPunishmentManager() {
         return punishmentManager;
     }
-    
+
     public static void logMessage(Level level, String mainMessage, String... debug) {
         Logger logger = NexusAPI.getApi().getLogger();
         logger.log(level, "----------- Nexus Log -----------");
@@ -434,19 +452,19 @@ public abstract class NexusAPI {
         }
         logger.log(level, "---------------------------------");
     }
-    
+
     public SQLDatabase getPrimaryDatabase() {
         return this.primaryDatabase;
     }
-    
+
     public StatRegistry getStatRegistry() {
         return statRegistry;
     }
-    
+
     public ToggleRegistry getToggleRegistry() {
         return toggleRegistry;
     }
-    
+
     public URLClassLoader getLoader() {
         ClassLoader classLoader = getClass().getClassLoader();
         if (classLoader instanceof URLClassLoader) {
@@ -454,11 +472,11 @@ public abstract class NexusAPI {
         }
         return null;
     }
-    
+
     public LevelManager getLevelManager() {
         return levelManager;
     }
-    
+
     public ClockManager getClockManager() {
         return clockManager;
     }
