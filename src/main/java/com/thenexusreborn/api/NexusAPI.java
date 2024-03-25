@@ -296,10 +296,10 @@ public abstract class NexusAPI {
             int totalSize = rawUuids.size();
 
             int tenDemonination;
-            if (totalSize < 100) {
-                tenDemonination = 100;
+            if (totalSize < 10) {
+                tenDemonination = 10;
             } else {
-                tenDemonination = Math.min(10, totalSize / 10);
+                tenDemonination = Math.min(1, totalSize / 10);
             }
             
             int totalProcessed = 0, processed = 0;
@@ -317,7 +317,7 @@ public abstract class NexusAPI {
                 processed++;
                 
                 if (processed >= tenDemonination) {
-                    getLogger().info("Processed " + totalProcessed + " out of " + totalSize);
+                    getLogger().info("      Processed " + totalProcessed + " out of " + totalSize);
                     processed = 0;
                 }
             }
