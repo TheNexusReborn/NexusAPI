@@ -135,11 +135,11 @@ public abstract class NexusAPI {
             NexusPlayer player = playerManager.getNexusPlayer(uuid);
             if (action.equalsIgnoreCase("reset")) {
                 if (player != null) {
-                    player.getTags().setActive(null);
+                    player.setActiveTag(null);
                 }
             } else if (action.equalsIgnoreCase("set")) {
                 if (player != null) {
-                    player.getTags().setActive(tag);
+                    player.setActiveTag(tag);
                 }
             } else {
                 if (player == null) {
@@ -148,7 +148,7 @@ public abstract class NexusAPI {
 
                 if (action.equalsIgnoreCase("unlock")) {
                     long timestamp = Long.parseLong(args[3]);
-                    player.getTags().add(new Tag(player.getUniqueId(), tag, timestamp));
+                    player.addTag(new Tag(player.getUniqueId(), tag, timestamp));
                 } else if (action.equalsIgnoreCase("remove")) {
                     player.getTags().remove(tag);
                 }
@@ -230,7 +230,7 @@ public abstract class NexusAPI {
         statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L); //TODO Remove after migration
         statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L); //TODO Remove after migration
         statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L); //TODO Remove after migration
-        statRegistry.register("tag", "Tag", StatType.STRING, "null"); //TODO Move to NexusPlayer (Until preferences system is implemented)
+        statRegistry.register("tag", "Tag", StatType.STRING, "null"); //TODO Remove after migration
 
         int initialStatSize = statRegistry.getObjects().size();
         getLogger().info("Registered " + initialStatSize + " default stat types.");
@@ -341,6 +341,8 @@ public abstract class NexusAPI {
                 getLogger().info("Cleared the stats table of unused stats.");
                 statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
                 getLogger().info("Cleared the statchanges table of unused stats.");
+                statement.execute("ALTER TABLE `players` ADD COLUMN `activetag` varchar(32);");
+                getLogger().info("Added the activetag column to the players table");
 
                 Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
                 for (PlayerExperience exp : this.primaryDatabase.get(PlayerExperience.class)) {
@@ -400,10 +402,10 @@ public abstract class NexusAPI {
                 }
                 getLogger().info("Moved the player balance stats to the new balances table");
 
-                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites';");
-                getLogger().info("Cleared the stats table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits and nexites stat types.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites';");
-                getLogger().info("Cleared the statchanges table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits and nexites stat types.");
+                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites' OR `name`='tag';");
+                getLogger().info("Cleared the stats table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits, nexites and tag stat types.");
+                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites' OR `name`='tag';");
+                getLogger().info("Cleared the statchanges table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits, nexites and tag stat types.");
             }
 
             try (FileWriter fileWriter = new FileWriter(migrationFile)) {

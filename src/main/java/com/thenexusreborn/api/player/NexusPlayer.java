@@ -10,16 +10,14 @@ import com.thenexusreborn.api.stats.StatChange;
 import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.storage.codec.RanksCodec;
 import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
+import com.thenexusreborn.api.tags.Tag;
 import me.firestar311.starsql.api.annotations.column.ColumnCodec;
 import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
 import me.firestar311.starsql.api.annotations.column.ColumnType;
 import me.firestar311.starsql.api.annotations.table.TableHandler;
 import me.firestar311.starsql.api.annotations.table.TableName;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @TableName("players")
 @TableHandler(PlayerObjectHandler.class)
@@ -48,8 +46,6 @@ public class NexusPlayer {
     @ColumnIgnored
     protected PlayerToggles toggles;
     @ColumnIgnored
-    protected PlayerTags tags;
-    @ColumnIgnored
     protected NexusScoreboard scoreboard;
     @ColumnIgnored
     protected UUID lastMessage;
@@ -61,6 +57,11 @@ public class NexusPlayer {
     protected PlayerProxy playerProxy;
     @ColumnIgnored
     protected Session session;
+    
+    @ColumnIgnored
+    private Map<String, Tag> tags = new HashMap<>();
+    
+    private String activeTag;
     
     protected NexusPlayer() {
         this(null);
@@ -77,7 +78,6 @@ public class NexusPlayer {
         this.toggles = new PlayerToggles();
         this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
-        this.tags = new PlayerTags(uniqueId);
         this.playerTime = new PlayerTime(uniqueId);
         this.experience = new PlayerExperience(uniqueId);
         this.balance = new PlayerBalance(uniqueId);
@@ -358,14 +358,44 @@ public class NexusPlayer {
         return false;
     }
 
-    public PlayerTags getTags() {
-        if (tags.getUuid() == null) {
-            tags.setUuid(this.uniqueId);
-        }
-        return tags;
-    }
-    
     public void addToggle(Toggle toggle) {
         getToggles().add(toggle);
+    }
+
+    public Tag getActiveTag() {
+        return this.tags.get(activeTag);
+    }
+
+    public void setActiveTag(String active) {
+        if (active == null || active.equalsIgnoreCase("null")) {
+            this.activeTag = null;
+        }
+        if (this.tags.containsKey(active)) {
+            this.activeTag = active;
+        }
+    }
+
+    public boolean hasActiveTag() {
+        return activeTag != null && !activeTag.isEmpty() && !activeTag.equals("null");
+    }
+
+    public void addTag(Tag tag) {
+        this.tags.put(tag.getName(), tag);
+    }
+
+    public void removeTag(String tag) {
+        this.tags.remove(tag);
+    }
+
+    public void addAllTags(List<Tag> tags) {
+        tags.forEach(this::addTag);
+    }
+
+    public boolean isTagUnlocked(String tag) {
+        return this.tags.containsKey(tag);
+    }
+
+    public Set<String> getTags() {
+        return new HashSet<>(this.tags.keySet());
     }
 }

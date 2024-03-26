@@ -91,12 +91,12 @@ public class PlayerObjectHandler extends ObjectHandler {
 
         try {
             List<Tag> tags = database.get(Tag.class, "uuid", player.getUniqueId());
-            player.getTags().addAll(tags);
+            player.addAllTags(tags);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        player.getTags().setActive(player.getStatValue("tag").getAsString());
+        player.setActiveTag(player.getStatValue("tag").getAsString());
     }
     
     @Override
