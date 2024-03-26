@@ -6,6 +6,7 @@ import com.thenexusreborn.api.network.netty.model.NexusPacket;
 
 import java.util.*;
 
+@SuppressWarnings("EmptyMethod")
 public class NetworkManager {
     
     private final Map<String, NetworkCommand> commandMap = new HashMap<>();

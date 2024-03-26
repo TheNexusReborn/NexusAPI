@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
 
+@SuppressWarnings("ComparatorMethodParameterNotUsed")
 @TableName(value = "statchanges")
 public class StatChange implements Comparable<StatChange> {
     

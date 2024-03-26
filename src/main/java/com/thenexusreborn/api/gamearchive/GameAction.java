@@ -4,6 +4,7 @@ import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.Objects;
 
+@SuppressWarnings("ComparatorMethodParameterNotUsed")
 @TableName("gameactions")
 public class GameAction implements Comparable<GameAction> {
     private long id;

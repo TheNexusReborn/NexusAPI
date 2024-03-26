@@ -31,7 +31,7 @@ public class RanksCodec implements SqlCodec<PlayerRanks> {
     @Override
     public PlayerRanks decode(String encoded) {
         PlayerRanks playerRanks = new PlayerRanks(null);
-        if (encoded == null || encoded.equals("")) {
+        if (encoded == null || encoded.isEmpty()) {
             return playerRanks;
         }
     

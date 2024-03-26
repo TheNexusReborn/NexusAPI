@@ -17,7 +17,7 @@ public class AcknowledgeInfoCodec implements SqlCodec<AcknowledgeInfo> {
     @Override
     public AcknowledgeInfo decode(String encoded) {
         AcknowledgeInfo acknowledgeInfo = null;
-        if (encoded != null && !encoded.equals("")) {
+        if (encoded != null && !encoded.isEmpty()) {
             String[] piSplit = encoded.split(",");
             long ackTime = 0;
             String ackCode = "";
