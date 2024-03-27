@@ -1,8 +1,6 @@
 package com.thenexusreborn.api.util;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.network.NetworkManager;
-import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.NexusPlayer;
 import com.thenexusreborn.api.player.Rank;
 
@@ -29,11 +27,9 @@ public final class StaffChat {
     Report: Base feature not implemented
      */
     
-    private static final NetworkManager NETWORK = NexusAPI.getApi().getNetworkManager();
-    
     public static final String PREFIX = "&2&l[&aSTAFF&2&l]";
     
-    public static void handleIncoming(NetworkCommand cmd, String origin, String[] args) {
+    public static void handleIncoming(String origin, String[] args) {
         String event = args[0];
         String format = "";
         String displayName = "";
@@ -61,10 +57,5 @@ public final class StaffChat {
                 }
             }
         }
-    }
-    
-    public static void sendAnticheat(NexusPlayer player, String hack, int violation) {
-        String[] args = {"anticheat", player.getUniqueId().toString(), player.getRank().name(), hack, violation + ""};
-        NETWORK.send("staffchat", args);
     }
 }

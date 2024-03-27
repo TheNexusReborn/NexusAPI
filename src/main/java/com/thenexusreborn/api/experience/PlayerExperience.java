@@ -1,14 +1,15 @@
 package com.thenexusreborn.api.experience;
 
 import com.thenexusreborn.api.NexusAPI;
-import me.firestar311.starsql.api.annotations.column.PrimaryKey;
-import me.firestar311.starsql.api.annotations.table.TableName;
+import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
 
 import java.util.UUID;
 
 @TableName("experience")
 public class PlayerExperience {
-    @PrimaryKey private UUID uniqueId;
+    @PrimaryKey
+    private UUID uniqueId;
     private int level;
     private double levelXp;
 

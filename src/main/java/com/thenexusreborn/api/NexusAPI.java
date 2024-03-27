@@ -2,29 +2,27 @@ package com.thenexusreborn.api;
 
 import com.stardevllc.starclock.ClockManager;
 import com.stardevllc.starlib.task.TaskFactory;
+import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
-import com.thenexusreborn.api.experience.LevelManager;
-import com.thenexusreborn.api.network.NetworkContext;
-import com.thenexusreborn.api.network.NetworkManager;
-import com.thenexusreborn.api.network.cmd.NetworkCommand;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentManager;
-import com.thenexusreborn.api.registry.DatabaseRegistry;
-import com.thenexusreborn.api.registry.NetworkCommandRegistry;
 import com.thenexusreborn.api.registry.StatRegistry;
 import com.thenexusreborn.api.registry.ToggleRegistry;
 import com.thenexusreborn.api.server.*;
-import com.thenexusreborn.api.stats.*;
-import com.thenexusreborn.api.storage.codec.RanksCodec;
+import com.thenexusreborn.api.sql.DatabaseRegistry;
+import com.thenexusreborn.api.sql.objects.Row;
+import com.thenexusreborn.api.sql.objects.SQLDatabase;
+import com.thenexusreborn.api.stats.Stat;
+import com.thenexusreborn.api.stats.StatChange;
+import com.thenexusreborn.api.stats.StatHelper;
+import com.thenexusreborn.api.stats.StatType;
+import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
-import me.firestar311.starsql.api.objects.Row;
-import me.firestar311.starsql.api.objects.SQLDatabase;
-import me.firestar311.starsql.api.objects.typehandlers.ValueHandler;
 
 import java.io.*;
 import java.net.URL;
@@ -54,7 +52,6 @@ public abstract class NexusAPI {
     protected final PlayerManager playerManager;
     protected final ServerManager serverManager;
     protected final Environment environment;
-    protected final NetworkManager networkManager;
     protected final PunishmentManager punishmentManager;
     protected final LevelManager levelManager;
     protected ClockManager clockManager;
@@ -68,10 +65,9 @@ public abstract class NexusAPI {
 
     protected SQLDatabase primaryDatabase;
 
-    public NexusAPI(Environment environment, NetworkContext context, Logger logger, PlayerManager playerManager, TaskFactory scheduler, ServerManager serverManager) {
+    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler, ServerManager serverManager) {
         this.logger = logger;
         this.environment = environment;
-        this.networkManager = new NetworkManager(context);
         this.playerManager = playerManager;
         this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
@@ -98,81 +94,6 @@ public abstract class NexusAPI {
 
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
-
-        NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
-        registerNetworkCommands(networkCommandRegistry);
-        networkCommandRegistry.register("updaterank", new NetworkCommand("updaterank", (cmd, origin, args) -> {
-            UUID uuid = UUID.fromString(args[0]);
-            String action = args[1];
-            Rank rank = Rank.parseRank(args[2]);
-            long expire = args.length > 3 ? Long.parseLong(args[3]) : -1;
-            PlayerRanks playerRanks = playerManager.getUuidRankMap().get(uuid);
-
-            NexusPlayer player = getPlayerManager().getNexusPlayer(uuid);
-
-            if (player != null) {
-                switch (action) {
-                    case "add" -> {
-                        player.addRank(rank, expire);
-                        playerRanks.add(rank, expire);
-                    }
-                    case "remove" -> {
-                        player.removeRank(rank);
-                        playerRanks.add(rank, expire);
-                    }
-                    case "set" -> {
-                        player.setRank(rank, expire);
-                        playerRanks.add(rank, expire);
-                    }
-                }
-            }
-        }));
-
-        networkCommandRegistry.register("updatetag", new NetworkCommand("updatetag", (cmd, origin, args) -> {
-            UUID uuid = UUID.fromString(args[0]);
-            String action = args[1];
-            String tag = args.length > 2 ? args[2] : "";
-            NexusPlayer player = playerManager.getNexusPlayer(uuid);
-            if (action.equalsIgnoreCase("reset")) {
-                if (player != null) {
-                    player.setActiveTag(null);
-                }
-            } else if (action.equalsIgnoreCase("set")) {
-                if (player != null) {
-                    player.setActiveTag(tag);
-                }
-            } else {
-                if (player == null) {
-                    return;
-                }
-
-                if (action.equalsIgnoreCase("unlock")) {
-                    long timestamp = Long.parseLong(args[3]);
-                    player.addTag(new Tag(player.getUniqueId(), tag, timestamp));
-                } else if (action.equalsIgnoreCase("remove")) {
-                    player.getTags().remove(tag);
-                }
-            }
-        }));
-
-        networkCommandRegistry.register("updatestat", new NetworkCommand("updatestat", (cmd, origin, args) -> {
-            if (getServerManager().getCurrentServer().getName().equalsIgnoreCase(origin)) {
-                return;
-            }
-            UUID uuid = UUID.fromString(args[0]);
-            Stat.Info info = StatHelper.getInfo(args[1]);
-            StatOperator operator = StatOperator.valueOf(args[2]);
-            Object value = new ValueHandler().getDeserializer().deserialize(null, args[3]);
-            NexusPlayer player = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
-            StatChange statChange = new StatChange(info, uuid, value, operator, System.currentTimeMillis());
-            player.addStatChange(statChange);
-        }));
-
-        networkManager.init("localhost", 3408);
-        for (NetworkCommand netCmd : networkCommandRegistry.getObjects().values()) {
-            networkManager.addCommand(netCmd);
-        }
-        getLogger().info("Loaded the Networking System");
 
         databaseRegistry = new DatabaseRegistry(logger);
 
@@ -422,8 +343,6 @@ public abstract class NexusAPI {
 
     public abstract void registerStats(StatRegistry registry);
 
-    public abstract void registerNetworkCommands(NetworkCommandRegistry registry);
-
     public abstract void registerToggles(ToggleRegistry registry);
 
     public Version getVersion() {
@@ -449,10 +368,6 @@ public abstract class NexusAPI {
 
     public ServerManager getServerManager() {
         return serverManager;
-    }
-
-    public NetworkManager getNetworkManager() {
-        return this.networkManager;
     }
 
     public PunishmentManager getPunishmentManager() {

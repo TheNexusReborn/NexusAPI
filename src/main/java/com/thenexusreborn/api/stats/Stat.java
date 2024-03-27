@@ -1,8 +1,8 @@
 package com.thenexusreborn.api.stats;
 
 import com.stardevllc.starlib.Value;
-import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
-import me.firestar311.starsql.api.annotations.table.TableName;
+import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
 
 import java.util.Objects;
 import java.util.UUID;

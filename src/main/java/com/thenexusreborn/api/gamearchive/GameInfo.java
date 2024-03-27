@@ -1,12 +1,12 @@
 package com.thenexusreborn.api.gamearchive;
 
-import com.thenexusreborn.api.storage.codec.StringArrayCodec;
-import com.thenexusreborn.api.storage.handler.GamesObjectHandler;
-import me.firestar311.starsql.api.annotations.column.ColumnCodec;
-import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
-import me.firestar311.starsql.api.annotations.column.ColumnType;
-import me.firestar311.starsql.api.annotations.table.TableHandler;
-import me.firestar311.starsql.api.annotations.table.TableName;
+import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
+import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
+import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.table.TableHandler;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
+import com.thenexusreborn.api.sql.objects.codecs.StringArrayCodec;
+import com.thenexusreborn.api.sql.objects.objecthandler.GamesObjectHandler;
 
 import java.util.*;
 

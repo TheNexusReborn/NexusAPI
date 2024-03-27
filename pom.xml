@@ -78,12 +78,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.Firestar311.StarSQL</groupId>
-            <artifactId>api</artifactId>
-            <version>42863fe3e2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.github.StarDevelopmentLLC</groupId>
             <artifactId>StarClock</artifactId>
             <version>1.0.0-alpha.2</version>

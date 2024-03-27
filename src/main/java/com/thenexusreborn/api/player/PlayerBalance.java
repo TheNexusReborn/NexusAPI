@@ -1,13 +1,14 @@
 package com.thenexusreborn.api.player;
 
-import me.firestar311.starsql.api.annotations.column.PrimaryKey;
-import me.firestar311.starsql.api.annotations.table.TableName;
+import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
 
 import java.util.UUID;
 
 @TableName("balances")
 public class PlayerBalance {
-    @PrimaryKey private UUID uniqueId;
+    @PrimaryKey
+    private UUID uniqueId;
     private double nexites, credits;
     
     private PlayerBalance() {}

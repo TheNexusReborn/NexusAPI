@@ -5,17 +5,17 @@ import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
+import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
+import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
+import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.table.TableHandler;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
 import com.thenexusreborn.api.stats.Stat;
 import com.thenexusreborn.api.stats.StatChange;
 import com.thenexusreborn.api.stats.StatOperator;
-import com.thenexusreborn.api.storage.codec.RanksCodec;
-import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
+import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
+import com.thenexusreborn.api.sql.objects.objecthandler.PlayerObjectHandler;
 import com.thenexusreborn.api.tags.Tag;
-import me.firestar311.starsql.api.annotations.column.ColumnCodec;
-import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
-import me.firestar311.starsql.api.annotations.column.ColumnType;
-import me.firestar311.starsql.api.annotations.table.TableHandler;
-import me.firestar311.starsql.api.annotations.table.TableName;
 
 import java.util.*;
 
