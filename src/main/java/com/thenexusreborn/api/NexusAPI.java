@@ -306,6 +306,8 @@ public abstract class NexusAPI {
                     } else if (statName.equalsIgnoreCase("nexites")) {
                         playerBalance.setNexites(Double.parseDouble(value));
                     }
+                    NexusPlayer player = playerManager.getNexusPlayer(uuid);
+                    player.getStats().clear();
                 }
 
                 for (PlayerExperience exp : playerExperiences.values()) {

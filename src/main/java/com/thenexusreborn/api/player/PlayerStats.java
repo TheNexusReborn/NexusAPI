@@ -105,4 +105,8 @@ public class PlayerStats {
     public void setUniqueId(UUID uniqueId) {
         this.uniqueId = uniqueId;
     }
+
+    public void clear() {
+        this.stats.clear();
+    }
 }
