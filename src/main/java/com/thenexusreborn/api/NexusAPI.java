@@ -307,7 +307,9 @@ public abstract class NexusAPI {
                         playerBalance.setNexites(Double.parseDouble(value));
                     }
                     NexusPlayer player = playerManager.getNexusPlayer(uuid);
-                    player.getStats().clear();
+                    if (player != null) {
+                        player.getStats().clear();
+                    }
                 }
 
                 for (PlayerExperience exp : playerExperiences.values()) {
