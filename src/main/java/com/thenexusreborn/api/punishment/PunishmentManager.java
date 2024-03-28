@@ -48,7 +48,7 @@ public class PunishmentManager {
                     }
                 }
     
-                if (sharedIps.size() > 0) {
+                if (!sharedIps.isEmpty()) {
                     punishments.add(punishment);
                 }
             }

@@ -1,12 +1,12 @@
 package com.thenexusreborn.api.player;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.storage.codec.ToggleInfoCodec;
-import me.firestar311.starsql.api.annotations.column.ColumnCodec;
-import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
-import me.firestar311.starsql.api.annotations.column.ColumnName;
-import me.firestar311.starsql.api.annotations.column.ColumnType;
-import me.firestar311.starsql.api.annotations.table.TableName;
+import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
+import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
+import com.thenexusreborn.api.sql.annotations.column.ColumnName;
+import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
+import com.thenexusreborn.api.sql.objects.codecs.ToggleInfoCodec;
 
 import java.util.*;
 
@@ -130,7 +130,15 @@ public class Toggle {
         public void setHandler(Handler handler) {
             this.handler = handler;
         }
-    
+
+        public void setMinRank(Rank minRank) {
+            this.minRank = minRank;
+        }
+
+        public void setDefaultValue(boolean defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {

@@ -1,13 +1,11 @@
 package com.thenexusreborn.api.util;
 
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.network.NetworkManager;
-import com.thenexusreborn.api.network.cmd.NetworkCommand;
-import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.punishment.*;
+import com.thenexusreborn.api.player.NexusPlayer;
+import com.thenexusreborn.api.player.Rank;
 
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 public final class StaffChat {
     /*
@@ -29,11 +27,9 @@ public final class StaffChat {
     Report: Base feature not implemented
      */
     
-    private static final NetworkManager NETWORK = NexusAPI.getApi().getNetworkManager();
-    
     public static final String PREFIX = "&2&l[&aSTAFF&2&l]";
     
-    public static void handleIncoming(NetworkCommand cmd, String origin, String[] args) {
+    public static void handleIncoming(String origin, String[] args) {
         String event = args[0];
         String format = "";
         String displayName = "";
@@ -43,72 +39,13 @@ public final class StaffChat {
             String name = NexusAPI.getApi().getPlayerManager().getNameFromUUID(uuid);
     
             displayName = rank.getColor() + name;
-            switch (event) {
-                case "chat" -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 2; i < args.length; i++) {
-                        sb.append(args[i]).append(" ");
-                    }
-                    String message = sb.toString().trim();
-                    format = "{prefix} {displayName}&8: &f" + message;
-                    displayName = rank.getPrefix() + rank.getColor() + " " + name;
-                }
-                case "join" -> format = "{prefix} {displayName} &7&l-> &6{origin}";
-                case "disconnect" -> format = "{prefix} {displayName} &7disconnected";
-                case "anticheat" -> {
-                    String hack = args[2];
-                    int violation = Integer.parseInt(args[3]);
-                    format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
-                }
+            if (event.equals("anticheat")) {
+                String hack = args[2];
+                int violation = Integer.parseInt(args[3]);
+                format = "{prefix} &8[&9PMR&8] &8[&6{origin}&8] &r{displayName} &7is using &e" + hack + " &bVL:" + violation;
             }
         } catch (Exception e) {
-            if (event.contains("punishment")) {
-                int id = Integer.parseInt(args[1]);
-                format = "{prefix} &6({origin}) &d{target} &fwas {type} &fby &b{actor} &ffor &3{reason}{length}";
-                
-                Punishment punishment = NexusAPI.getApi().getPunishmentManager().getPunishment(id);
-                if (punishment == null) {
-                    try {
-                        punishment = NexusAPI.getApi().getPrimaryDatabase().get(Punishment.class, "id", id).get(0);
-                        NexusAPI.getApi().getPunishmentManager().addPunishment(punishment);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                
-                if (event.startsWith("remove")) {
-                    if (punishment.getPardonInfo() == null) {
-                        try {
-                            punishment = NexusAPI.getApi().getPrimaryDatabase().get(Punishment.class, "id", id).get(0);
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }
-                        NexusAPI.getApi().getPunishmentManager().addPunishment(punishment);
-                    }
-                }
-                
-                if (punishment == null) {
-                    NexusAPI.getApi().getLogger().severe("Received staff chat incoming message for punishment " + id + " but none could be found.");
-                    return;
-                }
-                
-                if (event.startsWith("remove")) {
-                    format = format.replace("{type}", punishment.getType().getColor() + "un" + punishment.getType().getVerb());
-                    format = format.replace("{length}", "");
-                    format = format.replace("{reason}", punishment.getPardonInfo().getReason());
-                    format = format.replace("{actor}", punishment.getPardonInfo().getActorNameCache());
-                } else {
-                    format = format.replace("{type}", punishment.getType().getColor() + punishment.getType().getVerb());
-                    if (punishment.getType() != PunishmentType.WARN) {
-                        format = format.replace("{length}", " &c(" + punishment.formatTimeLeft() + ")");
-                    } else {
-                        format = format.replace("{length}", "");
-                    }
-                    format = format.replace("{reason}", punishment.getReason());
-                    format = format.replace("{actor}", punishment.getActorNameCache());
-                }
-                format = format.replace("{target}", punishment.getTargetNameCache());
-            }
+            
         }
         
         format = format.replace("{prefix}", PREFIX).replace("{displayName}", displayName).replace("{origin}", origin);
@@ -120,39 +57,5 @@ public final class StaffChat {
                 }
             }
         }
-    }
-    
-    public static void sendPunishment(Punishment punishment) {
-        NETWORK.send("staffchat", "punishment", punishment.getId() + "");
-    }
-    
-    public static void sendPunishmentRemoval(Punishment punishment) {
-        NETWORK.send("staffchat", "removepunishment", punishment.getId() + "");
-    }
-    
-    public static void sendChat(NexusPlayer nexusPlayer, String message) {
-        String[] msgSplit = message.split(" ");
-        
-        String[] args = new String[msgSplit.length + 3];
-        args[0] = "chat";
-        args[1] = nexusPlayer.getUniqueId().toString();
-        args[2] = nexusPlayer.getRank().name();
-        System.arraycopy(msgSplit, 0, args, 3, msgSplit.length);
-        NETWORK.send("staffchat", args);
-    }
-    
-    public static void sendJoin(NexusPlayer nexusPlayer) {
-        String[] args = {"join", nexusPlayer.getUniqueId().toString(), nexusPlayer.getRank().name()};
-        NETWORK.send("staffchat", args);
-    }
-    
-    public static void sendDisconnect(NexusPlayer nexusPlayer) {
-        String[] args = {"disconnect", nexusPlayer.getUniqueId().toString(), nexusPlayer.getRank().name()};
-        NETWORK.send("staffchat", args);
-    }
-    
-    public static void sendAnticheat(NexusPlayer player, String hack, int violation) {
-        String[] args = {"anticheat", player.getUniqueId().toString(), player.getRank().name(), hack, violation + ""};
-        NETWORK.send("staffchat", args);
     }
 }

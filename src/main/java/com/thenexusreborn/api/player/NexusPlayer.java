@@ -1,24 +1,19 @@
 package com.thenexusreborn.api.player;
 
-import com.stardevllc.starlib.Value;
 import com.thenexusreborn.api.NexusAPI;
-import com.thenexusreborn.api.levels.LevelManager;
-import com.thenexusreborn.api.levels.PlayerLevel;
+import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
-import com.thenexusreborn.api.stats.*;
-import com.thenexusreborn.api.storage.codec.RanksCodec;
-import com.thenexusreborn.api.storage.handler.PlayerObjectHandler;
-import me.firestar311.starsql.api.annotations.column.ColumnCodec;
-import me.firestar311.starsql.api.annotations.column.ColumnIgnored;
-import me.firestar311.starsql.api.annotations.column.ColumnType;
-import me.firestar311.starsql.api.annotations.table.TableHandler;
-import me.firestar311.starsql.api.annotations.table.TableName;
+import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
+import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
+import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.table.TableHandler;
+import com.thenexusreborn.api.sql.annotations.table.TableName;
+import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
+import com.thenexusreborn.api.sql.objects.objecthandler.PlayerObjectHandler;
+import com.thenexusreborn.api.tags.Tag;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @TableName("players")
 @TableHandler(PlayerObjectHandler.class)
@@ -27,17 +22,23 @@ public class NexusPlayer {
     protected long id;
     protected UUID uniqueId;
     protected String name;
+    
+    @ColumnIgnored
+    protected PlayerExperience experience;
+    
+    @ColumnIgnored
+    protected PlayerTime playerTime;
+    
+    @ColumnIgnored
+    protected PlayerBalance balance;
+    
     @ColumnIgnored
     protected Set<IPEntry> ipHistory = new HashSet<>();
     @ColumnType("varchar(1000)")
     @ColumnCodec(RanksCodec.class)
     protected PlayerRanks ranks;
     @ColumnIgnored
-    protected PlayerStats stats;
-    @ColumnIgnored
     protected PlayerToggles toggles;
-    @ColumnIgnored
-    protected PlayerTags tags;
     @ColumnIgnored
     protected NexusScoreboard scoreboard;
     @ColumnIgnored
@@ -50,6 +51,11 @@ public class NexusPlayer {
     protected PlayerProxy playerProxy;
     @ColumnIgnored
     protected Session session;
+    
+    @ColumnIgnored
+    private Map<String, Tag> tags = new HashMap<>();
+    
+    private String activeTag;
     
     protected NexusPlayer() {
         this(null);
@@ -64,9 +70,31 @@ public class NexusPlayer {
         this.name = name;
         this.uniqueId = uniqueId;
         this.toggles = new PlayerToggles();
-        this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
-        this.tags = new PlayerTags(uniqueId);
+        this.playerTime = new PlayerTime(uniqueId);
+        this.experience = new PlayerExperience(uniqueId);
+        this.balance = new PlayerBalance(uniqueId);
+    }
+
+    public PlayerBalance getBalance() {
+        if (balance.getUniqueId() == null) {
+            balance.setUniqueId(uniqueId);
+        }
+        return balance;
+    }
+
+    public PlayerExperience getExperience() {
+        if (this.experience.getUniqueId() == null) {
+            experience.setUniqueId(uniqueId);
+        }
+        return experience;
+    }
+
+    public PlayerTime getPlayerTime() {
+        if (this.playerTime.getUniqueId() == null) {
+            this.playerTime.setUniqueId(uniqueId);
+        }
+        return playerTime;
     }
 
     public NexusScoreboard getScoreboard() {
@@ -136,27 +164,20 @@ public class NexusPlayer {
         this.session = session;
     }
 
-    public boolean isOnline() {
-        if (getPlayer() != null) {
-            return getPlayer().isOnline();
-        }
-        return getStats().getValue("online").getAsBoolean();
-    }
-    
     public long getFirstJoined() {
-        return getStats().getValue("firstjoined").getAsLong();
+        return this.playerTime.getFirstJoined();
     }
     
     public void setFirstJoined(long firstJoined) {
-        getStats().change("firstjoined", firstJoined, StatOperator.SET).push();
+        this.playerTime.setFirstJoined(firstJoined);
     }
     
     public long getLastLogin() {
-        return getStats().getValue("lastlogin").getAsLong();
+        return this.playerTime.getLastLogin();
     }
     
     public void setLastLogin(long lastLogin) {
-        getStats().change("lastlogin", lastLogin, StatOperator.SET).push();
+        this.playerTime.setLastLogin(lastLogin);
     }
 
     public String getDisplayName() {
@@ -185,100 +206,30 @@ public class NexusPlayer {
     }
     
     public long getLastLogout() {
-        return getStats().getValue("lastlogout").getAsLong();
+        return this.playerTime.getLastLogout();
     }
     
     public void setLastLogout(long lastLogout) {
-        getStats().change("lastlogout", lastLogout, StatOperator.SET).push();
+        this.playerTime.setLastLogout(lastLogout);
     }
     
-    public boolean isPrealpha() {
-        return getStats().getValue("prealpha").getAsBoolean();
-    }
-    
-    public void setPrealpha(boolean prealpha) {
-        getStats().change("prealpha", prealpha, StatOperator.SET).push();
-    }
-    
-    public boolean isAlpha() {
-        return getStats().getValue("alpha").getAsBoolean();
-    }
-    
-    public void setAlpha(boolean alpha) {
-        getStats().change("alpha", alpha, StatOperator.SET).push();
-    }
-    
-    public boolean isBeta() {
-        return getStats().getValue("beta").getAsBoolean();
-    }
-    
-    public void setBeta(boolean beta) {
-        getStats().change("beta", beta, StatOperator.SET).push();
-    }
-    
-    public PlayerStats getStats() {
-        if (stats.getUniqueId() == null) {
-            stats.setUniqueId(uniqueId);
-        }
-        return stats;
-    }
-    
-    public Value getStatValue(String statName) {
-        return getStats().getValue(statName);
-    }
-    
-    public StatChange changeStat(String statName, Object value, StatOperator operator) {
-        return getStats().change(statName, value, operator);
-    }
-    
-    public void addStatChange(StatChange change) {
-        getStats().addChange(change);
-    }
-    
-    public Stat getStat(String statName) {
-        return getStats().get(statName);
-    }
-    
-    public void clearStatChanges() {
-        getStats().clearChanges();
-    }
-    
-    public void addStat(Stat stat) {
-        getStats().add(stat);
-    }
-
     public void addCredits(int credits) {
-        getStats().change("credits", credits, StatOperator.ADD).push();
+        this.balance.addCredits(credits);
     }
     
     public void addXp(double xp) {
-        double currentXp = getStatValue("xp").getAsDouble();
-        double newXp = currentXp + xp;
-        int currentLevel = getStatValue("level").getAsInt();
-        LevelManager levelManager = NexusAPI.getApi().getLevelManager();
-        PlayerLevel playerLevel = levelManager.getLevel(currentLevel);
-        PlayerLevel nextLevel = levelManager.getLevel(currentLevel + 1);
-        if (nextLevel == null) {
-            changeStat("xp", xp, StatOperator.ADD);
-            return;
-        }
+        boolean leveledUp = this.experience.addExperience(xp);
         
-        if (newXp >= nextLevel.getXpRequired()) {
-            double leftOverXp = nextLevel.getXpRequired() - newXp;
-            changeStat("level", 1, StatOperator.ADD);
-            changeStat("xp", leftOverXp, StatOperator.SET);
-            
+        if (leveledUp) {
             if (this.playerProxy != null) {
                 this.playerProxy.sendMessage("");
                 this.playerProxy.sendMessage("&a&lLEVEL UP!");
-                this.playerProxy.sendMessage("&e" + currentLevel + " &a-> &e" + nextLevel.getNumber());
+                this.playerProxy.sendMessage("&e" + (this.experience.getLevel() - 1) + " &a-> &e" + this.experience.getLevel());
                 this.playerProxy.sendMessage("");
-                for (Reward reward : nextLevel.getRewards()) {
+                for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(this.experience.getLevel()).getRewards()) {
                     reward.applyReward(this);
                 }
             }
-        } else {
-            changeStat("xp", xp, StatOperator.ADD);
         }
     }
     
@@ -337,18 +288,6 @@ public class NexusPlayer {
         return getRanks().contains(rank);
     }
     
-    public void setOnline(boolean online) {
-        getStats().change("online", online, StatOperator.SET).push();
-    }
-    
-    public String getServer() {
-        return getStats().getValue("server").getAsString();
-    }
-    
-    public void setServer(String server) {
-        getStats().change("server", server, StatOperator.SET).push();
-    }
-    
     public PlayerToggles getToggles() {
         if (toggles.getUniqueId() == null) {
             toggles.setUniqueId(this.uniqueId);
@@ -373,17 +312,56 @@ public class NexusPlayer {
     }
     
     public void removeCredits(int credits) {
-        getStats().change("credits", credits, StatOperator.SUBTRACT).push();
-    }
-
-    public PlayerTags getTags() {
-        if (tags.getUuid() == null) {
-            tags.setUuid(this.uniqueId);
-        }
-        return tags;
+        this.balance.addCredits(-credits);
     }
     
+    public boolean isOnline() {
+        PlayerProxy player = getPlayer();
+        if (player != null) {
+            return player.isOnline();
+        }
+        
+        return false;
+    }
+
     public void addToggle(Toggle toggle) {
         getToggles().add(toggle);
+    }
+
+    public Tag getActiveTag() {
+        return this.tags.get(activeTag);
+    }
+
+    public void setActiveTag(String active) {
+        if (active == null || active.equalsIgnoreCase("null")) {
+            this.activeTag = null;
+        }
+        if (this.tags.containsKey(active)) {
+            this.activeTag = active;
+        }
+    }
+
+    public boolean hasActiveTag() {
+        return activeTag != null && !activeTag.isEmpty() && !activeTag.equals("null");
+    }
+
+    public void addTag(Tag tag) {
+        this.tags.put(tag.getName(), tag);
+    }
+
+    public void removeTag(String tag) {
+        this.tags.remove(tag);
+    }
+
+    public void addAllTags(List<Tag> tags) {
+        tags.forEach(this::addTag);
+    }
+
+    public boolean isTagUnlocked(String tag) {
+        return this.tags.containsKey(tag);
+    }
+
+    public Set<String> getTags() {
+        return new HashSet<>(this.tags.keySet());
     }
 }
