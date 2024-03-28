@@ -6,7 +6,6 @@ import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.sql.objects.ObjectHandler;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
 import com.thenexusreborn.api.sql.objects.Table;
-import com.thenexusreborn.api.stats.*;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.sql.SQLException;
@@ -62,25 +61,6 @@ public class PlayerObjectHandler extends ObjectHandler {
         }
     
         try {
-            List<Stat> stats = new ArrayList<>(database.get(Stat.class, "uuid", player.getUniqueId()));
-            
-            for (Stat stat : stats) {
-                player.addStat(stat);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    
-        try {
-            List<StatChange> statChanges = database.get(StatChange.class, "uuid", player.getUniqueId());
-            for (StatChange statChange : statChanges) {
-                player.addStatChange(statChange);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    
-        try {
             List<IPEntry> ipEntries = database.get(IPEntry.class, "uuid", player.getUniqueId());
             for (IPEntry ipEntry : ipEntries) {
                 player.getIpHistory().add(ipEntry);
@@ -95,8 +75,6 @@ public class PlayerObjectHandler extends ObjectHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        player.setActiveTag(player.getStatValue("tag").getAsString());
     }
     
     @Override
@@ -109,14 +87,6 @@ public class PlayerObjectHandler extends ObjectHandler {
     
         for (Toggle toggle : player.getToggles().findAll()) {
             database.saveSilent(toggle);
-        }
-    
-        for (Stat stat : player.getStats().findAll()) {
-            database.saveSilent(stat);
-        }
-    
-        for (StatChange statChange : player.getStats().findAllChanges()) {
-            database.saveSilent(statChange);
         }
     
         for (IPEntry ipEntry : player.getIpHistory()) {

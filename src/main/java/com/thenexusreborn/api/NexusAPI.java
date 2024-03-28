@@ -10,16 +10,11 @@ import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentManager;
-import com.thenexusreborn.api.registry.StatRegistry;
 import com.thenexusreborn.api.registry.ToggleRegistry;
 import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
-import com.thenexusreborn.api.stats.Stat;
-import com.thenexusreborn.api.stats.StatChange;
-import com.thenexusreborn.api.stats.StatHelper;
-import com.thenexusreborn.api.stats.StatType;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
@@ -28,10 +23,9 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,7 +52,6 @@ public abstract class NexusAPI {
     protected Version version;
     protected TaskFactory scheduler;
 
-    protected StatRegistry statRegistry;
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
     protected DatabaseRegistry databaseRegistry;
@@ -106,8 +99,6 @@ public abstract class NexusAPI {
                 database.registerClass(PlayerTime.class);
                 database.registerClass(PlayerBalance.class);
                 database.registerClass(IPEntry.class);
-                database.registerClass(Stat.class);
-                database.registerClass(StatChange.class);
                 database.registerClass(Toggle.class);
                 database.registerClass(NexusPlayer.class);
                 database.registerClass(ServerInfo.class);
@@ -124,40 +115,8 @@ public abstract class NexusAPI {
             throw new SQLException("Could not find the primary database.");
         }
 
-        boolean migrate = false;
-        File migrationFile = new File("." + File.separator + "nexusmigration");
-        if (!migrationFile.exists()) {
-            migrate = true;
-            migrationFile.createNewFile();
-        } else {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(migrationFile)))) {
-                String line = br.readLine();
-                if (line == null || !line.equals("1.12-ALPHA")) {
-                    migrate = true;
-                }
-            }
-        }
-
         databaseRegistry.setup();
         getLogger().info("Successfully setup the database tables");
-
-        statRegistry = StatHelper.getRegistry();
-
-        statRegistry.register("xp", "Experience", StatType.DOUBLE, 0.0); //TODO Remove after migration
-        statRegistry.register("level", "Level", StatType.INTEGER, 0); //TODO Remove after migration
-        statRegistry.register("nexites", "Nexites", StatType.DOUBLE, 0.0); //TODO Remove after migration
-        statRegistry.register("credits", "Credits", StatType.DOUBLE, 0.0); //TODO Remove after migration
-        statRegistry.register("playtime", "Playtime", StatType.LONG, 0L); //TODO Remove after migration
-        statRegistry.register("firstjoined", "First Joined", StatType.LONG, 0L); //TODO Remove after migration
-        statRegistry.register("lastlogin", "Last Login", StatType.LONG, 0L); //TODO Remove after migration
-        statRegistry.register("lastlogout", "Last Logout", StatType.LONG, 0L); //TODO Remove after migration
-        statRegistry.register("tag", "Tag", StatType.STRING, "null"); //TODO Remove after migration
-
-        int initialStatSize = statRegistry.getObjects().size();
-        getLogger().info("Registered " + initialStatSize + " default stat types.");
-
-        registerStats(statRegistry);
-        getLogger().info("Registered " + (statRegistry.getObjects().size() - initialStatSize) + " additional default stat types from other plugins.");
 
         toggleRegistry = new ToggleRegistry();
 
@@ -201,149 +160,10 @@ public abstract class NexusAPI {
             playerManager.getUuidRankMap().put(uniqueId, playerRanks);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerManager.getUuidNameMap().size() + " total profiles.");
-
-        if (database.count(StatChange.class) > 0) {
-            getLogger().info("Found stat changes that have not been processed, processing them now...");
-
-            Set<String> rawUuids = new HashSet<>();
-
-            try (Connection connection = database.getConnection(); Statement statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery("select `uuid` from `statchanges`;");
-                while (resultSet.next()) {
-                    rawUuids.add(resultSet.getString("uuid"));
-                }
-            }
-
-            getLogger().info("  Found a total of " + rawUuids.size() + " players that need to have stats processed.");
-
-            int totalSize = rawUuids.size();
-
-            int tenDemonination;
-            if (totalSize < 10) {
-                tenDemonination = 10;
-            } else {
-                tenDemonination = Math.min(1, totalSize / 10);
-            }
-
-            int totalProcessed = 0, processed = 0;
-            for (String rawUuid : rawUuids) {
-                List<NexusPlayer> players = database.get(NexusPlayer.class, "uniqueid", UUID.fromString(rawUuid));
-                if (players.size() != 1) {
-                    continue;
-                }
-
-                NexusPlayer player = players.get(0);
-                StatHelper.consolidateStats(player);
-                player.clearStatChanges();
-                database.save(player);
-                totalProcessed++;
-                processed++;
-
-                if (processed >= tenDemonination) {
-                    getLogger().info("      Processed " + totalProcessed + " out of " + totalSize);
-                    processed = 0;
-                }
-            }
-
-            int leftOver = database.count(StatChange.class);
-            if (leftOver == 0) {
-                getLogger().info("Processing complete, all statchanges have been processed.");
-            } else {
-                getLogger().info("There are " + leftOver + " stat changes that were not processed.");
-            }
-        }
-
-        if (migrate) {
-            getLogger().info("Detected the need to migrate...");
-            try (Connection connection = this.primaryDatabase.getConnection(); Statement statement = connection.createStatement()) {
-                statement.execute("DROP TABLE IF EXISTS `nicknames`, `sggamesettings`, `sglobbysettings`, `sgsettinginfo`, `statinfo`, `toggleinfo`;");
-                getLogger().info("Dropped the nicknames, sggamesettings, sglobbysettings, sgsettinginfo, statinfo and toggleinfo tables.");
-                statement.execute("DELETE FROM `stats` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
-                getLogger().info("Cleared the stats table of unused stats.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
-                getLogger().info("Cleared the statchanges table of unused stats.");
-
-                Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
-                for (PlayerExperience exp : this.primaryDatabase.get(PlayerExperience.class)) {
-                    playerExperiences.put(exp.getUniqueId(), exp);
-                }
-
-                Map<UUID, PlayerTime> playerTimes = new HashMap<>();
-                for (PlayerTime pt : this.primaryDatabase.get(PlayerTime.class)) {
-                    playerTimes.put(pt.getUniqueId(), pt);
-                }
-                
-                Map<UUID, PlayerBalance> playerBalances = new HashMap<>();
-                for (PlayerBalance pb : this.primaryDatabase.get(PlayerBalance.class)) {
-                    playerBalances.put(pb.getUniqueId(), pb);
-                }
-
-                ResultSet statsSet = statement.executeQuery("SELECT `uuid`, `name`, `value` FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin' OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites';");
-                while (statsSet.next()) {
-                    UUID uuid = UUID.fromString(statsSet.getString("uuid"));
-                    PlayerExperience experience = playerExperiences.computeIfAbsent(uuid, PlayerExperience::new);
-                    PlayerTime playerTime = playerTimes.computeIfAbsent(uuid, PlayerTime::new);
-                    PlayerBalance playerBalance = playerBalances.computeIfAbsent(uuid, PlayerBalance::new);
-
-                    String statName = statsSet.getString("name");
-                    String value = statsSet.getString("value").split(":")[1];
-                    if (statName.equalsIgnoreCase("xp")) {
-                        experience.setLevelXp(Double.parseDouble(value));
-                    } else if (statName.equalsIgnoreCase("level")) {
-                        experience.setLevel(Integer.parseInt(value));
-                    } else if (statName.equalsIgnoreCase("playtime")) {
-                        playerTime.setPlaytime(Long.parseLong(value));
-                    } else if (statName.equalsIgnoreCase("firstjoined")) {
-                        playerTime.setFirstJoined(Long.parseLong(value));
-                    } else if (statName.equalsIgnoreCase("lastlogin")) {
-                        playerTime.setLastLogin(Long.parseLong(value));
-                    } else if (statName.equalsIgnoreCase("lastlogout")) {
-                        playerTime.setLastLogout(Long.parseLong(value));
-                    } else if (statName.equalsIgnoreCase("credits")) {
-                        playerBalance.setCredits(Double.parseDouble(value));
-                    } else if (statName.equalsIgnoreCase("nexites")) {
-                        playerBalance.setNexites(Double.parseDouble(value));
-                    }
-                    NexusPlayer player = playerManager.getNexusPlayer(uuid);
-                    if (player != null) {
-                        player.getStats().clear();
-                    }
-                }
-
-                for (PlayerExperience exp : playerExperiences.values()) {
-                    this.primaryDatabase.save(exp);
-                }
-                getLogger().info("Moved experience stats to the new experience table");
-
-                for (PlayerTime pt : playerTimes.values()) {
-                    this.primaryDatabase.save(pt);
-                }
-                getLogger().info("Moved the player time stats to the new playertimes table");
-
-                for (PlayerBalance pb : playerBalances.values()) {
-                    this.primaryDatabase.save(pb);
-                }
-                getLogger().info("Moved the player balance stats to the new balances table");
-
-                statement.execute("DELETE FROM `stats` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites' OR `name`='tag';");
-                getLogger().info("Cleared the stats table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits, nexites and tag stat types.");
-                statement.execute("DELETE FROM `statchanges` WHERE `name`='xp' OR `name`='level' OR `name`='playtime' OR `name`='firstjoined' OR `name`='lastlogin'  OR `name`='lastlogout' OR `name`='credits' OR `name`='nexites' OR `name`='tag';");
-                getLogger().info("Cleared the statchanges table of the xp, level, playtime, firstjoined, lastlogin, lastlogout, credits, nexites and tag stat types.");
-            }
-
-            try (FileWriter fileWriter = new FileWriter(migrationFile)) {
-                fileWriter.write(this.version.toString());
-                fileWriter.flush();
-            }
-            getLogger().info("Migration complete.");
-        }
-
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
 
     public abstract void registerDatabases(DatabaseRegistry registry);
-
-    public abstract void registerStats(StatRegistry registry);
 
     public abstract void registerToggles(ToggleRegistry registry);
 
@@ -390,10 +210,6 @@ public abstract class NexusAPI {
 
     public SQLDatabase getPrimaryDatabase() {
         return this.primaryDatabase;
-    }
-
-    public StatRegistry getStatRegistry() {
-        return statRegistry;
     }
 
     public ToggleRegistry getToggleRegistry() {

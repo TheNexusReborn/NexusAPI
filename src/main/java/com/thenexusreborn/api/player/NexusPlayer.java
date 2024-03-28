@@ -1,6 +1,5 @@
 package com.thenexusreborn.api.player;
 
-import com.stardevllc.starlib.Value;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
@@ -10,9 +9,6 @@ import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
 import com.thenexusreborn.api.sql.annotations.table.TableHandler;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
-import com.thenexusreborn.api.stats.Stat;
-import com.thenexusreborn.api.stats.StatChange;
-import com.thenexusreborn.api.stats.StatOperator;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.sql.objects.objecthandler.PlayerObjectHandler;
 import com.thenexusreborn.api.tags.Tag;
@@ -41,8 +37,6 @@ public class NexusPlayer {
     @ColumnType("varchar(1000)")
     @ColumnCodec(RanksCodec.class)
     protected PlayerRanks ranks;
-    @ColumnIgnored
-    protected PlayerStats stats;
     @ColumnIgnored
     protected PlayerToggles toggles;
     @ColumnIgnored
@@ -76,7 +70,6 @@ public class NexusPlayer {
         this.name = name;
         this.uniqueId = uniqueId;
         this.toggles = new PlayerToggles();
-        this.stats = new PlayerStats(uniqueId);
         this.ranks = new PlayerRanks(uniqueId);
         this.playerTime = new PlayerTime(uniqueId);
         this.experience = new PlayerExperience(uniqueId);
@@ -220,33 +213,6 @@ public class NexusPlayer {
         this.playerTime.setLastLogout(lastLogout);
     }
     
-    public PlayerStats getStats() {
-        if (stats.getUniqueId() == null) {
-            stats.setUniqueId(uniqueId);
-        }
-        return stats;
-    }
-    
-    public Value getStatValue(String statName) {
-        return getStats().getValue(statName);
-    }
-    
-    public StatChange changeStat(String statName, Object value, StatOperator operator) {
-        return getStats().change(statName, value, operator);
-    }
-    
-    public void addStatChange(StatChange change) {
-        getStats().addChange(change);
-    }
-    
-    public void clearStatChanges() {
-        getStats().clearChanges();
-    }
-    
-    public void addStat(Stat stat) {
-        getStats().add(stat);
-    }
-
     public void addCredits(int credits) {
         this.balance.addCredits(credits);
     }
