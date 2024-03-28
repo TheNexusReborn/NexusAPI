@@ -262,8 +262,6 @@ public abstract class NexusAPI {
                 getLogger().info("Cleared the stats table of unused stats.");
                 statement.execute("DELETE FROM `statchanges` WHERE `name`='prealpha' OR `name`='alpha' OR `name`='beta' OR `name`='online' OR `name`='server';");
                 getLogger().info("Cleared the statchanges table of unused stats.");
-                statement.execute("ALTER TABLE `players` ADD COLUMN `activetag` varchar(32);");
-                getLogger().info("Added the activetag column to the players table");
 
                 Map<UUID, PlayerExperience> playerExperiences = new HashMap<>();
                 for (PlayerExperience exp : this.primaryDatabase.get(PlayerExperience.class)) {
