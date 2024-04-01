@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 public abstract class NexusAPI {
     private static NexusAPI instance;
-    public static final Phase PHASE = Phase.PRIVATE_ALPHA;
     public static final NetworkType NETWORK_TYPE = NetworkType.SINGLE;
 
     public static void setApi(NexusAPI api) {
