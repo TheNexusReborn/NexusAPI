@@ -32,6 +32,12 @@ java {
     }
 }
 
+processResources {
+    filesMatching("*.txt") {
+        expand(project.properties)
+    }
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -39,3 +45,5 @@ publishing {
         }
     }
 }
+
+tasks.compileJava.dependsOn(clean)
