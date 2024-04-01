@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://www.jitpack.io')
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    compileOnly 'com.github.StarDevelopmentLLC:StarLib:1.0.0-alpha.3'
+    compileOnly 'com.github.StarDevelopmentLLC:StarClock:1.0.0-alpha.3'
+    compileOnly 'com.google.code.gson:gson:2.2.4'
+    compileOnly 'com.google.guava:guava:31.1-jre'
+}
+
+group = 'com.thenexusreborn'
+version = '1.12-ALPHA'
+description = 'NexusAPI'
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
