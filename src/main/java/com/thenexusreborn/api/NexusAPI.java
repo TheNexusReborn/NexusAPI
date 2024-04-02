@@ -11,13 +11,15 @@ import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentManager;
 import com.thenexusreborn.api.registry.ToggleRegistry;
-import com.thenexusreborn.api.server.*;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.tags.TagRegistry;
+import com.thenexusreborn.api.util.Environment;
+import com.thenexusreborn.api.util.NetworkType;
+import com.thenexusreborn.api.util.Version;
 
 import java.io.*;
 import java.net.URL;
@@ -43,7 +45,6 @@ public abstract class NexusAPI {
 
     protected final Logger logger;
     protected final PlayerManager playerManager;
-    protected final ServerManager serverManager;
     protected final Environment environment;
     protected final PunishmentManager punishmentManager;
     protected final LevelManager levelManager;
@@ -57,11 +58,10 @@ public abstract class NexusAPI {
 
     protected SQLDatabase primaryDatabase;
 
-    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler, ServerManager serverManager) {
+    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler) {
         this.logger = logger;
         this.environment = environment;
         this.playerManager = playerManager;
-        this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
         this.scheduler = scheduler;
@@ -100,7 +100,6 @@ public abstract class NexusAPI {
                 database.registerClass(IPEntry.class);
                 database.registerClass(Toggle.class);
                 database.registerClass(NexusPlayer.class);
-                database.registerClass(ServerInfo.class);
                 database.registerClass(GameInfo.class);
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
@@ -136,9 +135,6 @@ public abstract class NexusAPI {
             this.tagRegistry.register(dt, dt);
         }
         getLogger().info("Registered " + this.tagRegistry.getObjects().size() + " default tags.");
-
-        serverManager.setupCurrentServer();
-        getLogger().info("Set up the current server");
 
         for (Punishment punishment : getPrimaryDatabase().get(Punishment.class)) {
             punishmentManager.addPunishment(punishment);
@@ -185,10 +181,6 @@ public abstract class NexusAPI {
 
     public Logger getLogger() {
         return logger;
-    }
-
-    public ServerManager getServerManager() {
-        return serverManager;
     }
 
     public PunishmentManager getPunishmentManager() {
