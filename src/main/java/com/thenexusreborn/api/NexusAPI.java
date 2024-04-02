@@ -11,6 +11,8 @@ import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentManager;
 import com.thenexusreborn.api.registry.ToggleRegistry;
+import com.thenexusreborn.api.server.NexusServer;
+import com.thenexusreborn.api.server.ServerRegistry;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
@@ -51,7 +53,8 @@ public abstract class NexusAPI {
     protected ClockManager clockManager;
     protected Version version;
     protected TaskFactory scheduler;
-
+    
+    protected ServerRegistry<NexusServer> serverRegistry;
     protected ToggleRegistry toggleRegistry;
     protected TagRegistry tagRegistry;
     protected DatabaseRegistry databaseRegistry;
@@ -87,6 +90,7 @@ public abstract class NexusAPI {
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
 
+        serverRegistry = new ServerRegistry<>();
         databaseRegistry = new DatabaseRegistry(logger);
 
         registerDatabases(databaseRegistry);
@@ -225,5 +229,9 @@ public abstract class NexusAPI {
 
     public void setClockManager(ClockManager clockManager) {
         this.clockManager = clockManager;
+    }
+
+    public ServerRegistry<NexusServer> getServerRegistry() {
+        return serverRegistry;
     }
 }
