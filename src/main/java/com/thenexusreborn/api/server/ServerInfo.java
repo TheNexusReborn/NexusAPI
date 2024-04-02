@@ -6,21 +6,20 @@ import java.util.Objects;
 public class ServerInfo {
     private long id;
     private String ip, name;
-    private int port, multicraftId;
+    private int port;
     private int players, maxPlayers, hiddenPlayers;
     private String type, status, state;
     
     private ServerInfo() {}
     
-    public ServerInfo(int multicraftId, String ip, String name, int port) {
-        this(multicraftId, ip, name, port, 0, 0, 0, "", "offline", "none");
+    public ServerInfo(String ip, String name, int port) {
+        this(ip, name, port, 0, 0, 0, "", "offline", "none");
     }
     
-    public ServerInfo(int multicraftId, String ip, String name, int port, int players, int maxPlayers, int hiddenPlayers, String type, String status, String state) {
+    public ServerInfo(String ip, String name, int port, int players, int maxPlayers, int hiddenPlayers, String type, String status, String state) {
         this.ip = ip;
         this.name = name;
         this.port = port;
-        this.multicraftId = multicraftId;
         this.players = players;
         this.maxPlayers = maxPlayers;
         this.hiddenPlayers = hiddenPlayers;
@@ -35,10 +34,6 @@ public class ServerInfo {
     
     public int getPort() {
         return port;
-    }
-    
-    public int getMulticraftId() {
-        return multicraftId;
     }
     
     public int getPlayers() {
