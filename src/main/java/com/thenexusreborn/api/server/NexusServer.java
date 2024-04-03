@@ -1,10 +1,7 @@
 package com.thenexusreborn.api.server;
 
 import com.stardevllc.beans.collections.StarCollections;
-import com.stardevllc.beans.property.ReadOnlyIntegerProperty;
-import com.stardevllc.beans.property.ReadOnlyObjectProperty;
-import com.stardevllc.beans.property.ReadOnlyStringProperty;
-import com.stardevllc.beans.property.StringProperty;
+import com.stardevllc.beans.property.*;
 import com.stardevllc.starlib.observable.collections.set.ObservableSet;
 import com.thenexusreborn.api.player.NexusPlayer;
 
@@ -35,6 +32,10 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     
     public abstract void onStart();
     public abstract void onStop();
+    
+    public boolean recalculateVisibility(UUID player, UUID otherPlayer) {
+        return false;
+    }
 
     public String getName() {
         return name.get();
