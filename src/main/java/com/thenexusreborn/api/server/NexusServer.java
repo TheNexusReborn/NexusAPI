@@ -18,7 +18,7 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     protected final StringProperty state; //Format determined by plugin, different information about the server
     
     protected final ReadOnlyIntegerProperty maxPlayers; //Maximum of players allowed.
-    protected final ObservableSet<UUID> players = StarCollections.observableSet(); //Players currently in this server.
+    protected final ObservableSet<UUID> players; //Players currently in this server.
 
     public NexusServer(String name, ServerType type, String mode, int maxPlayers) {
         this.name = new ReadOnlyStringProperty(this, "name", name);
@@ -27,6 +27,7 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
         this.status = new StringProperty(this, "status", "");
         this.state = new StringProperty(this, "state", "");
         this.maxPlayers = new ReadOnlyIntegerProperty(this, "maxPlayers", maxPlayers);
+        this.players = StarCollections.observableSet();
     }
     
     public abstract void join(NexusPlayer player);
