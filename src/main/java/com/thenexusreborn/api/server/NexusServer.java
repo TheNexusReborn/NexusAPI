@@ -1,18 +1,32 @@
 package com.thenexusreborn.api.server;
 
+import com.stardevllc.beans.collections.StarCollections;
+import com.stardevllc.beans.property.ReadOnlyIntegerProperty;
+import com.stardevllc.beans.property.ReadOnlyObjectProperty;
+import com.stardevllc.beans.property.ReadOnlyStringProperty;
+import com.stardevllc.beans.property.StringProperty;
+import com.stardevllc.starlib.observable.collections.set.ObservableSet;
 import com.thenexusreborn.api.player.NexusPlayer;
 
-public abstract sealed class NexusServer permits ProxyServer, InstanceServer, VirtualServer {
-    protected String name; //Server Name
-    protected ServerType type; //Server Type
-    protected String mode; //Things like hub, sg or other gamemodes
-    protected String status; //Status like online, offline, error etc...
-    protected String state; //Format determined by plugin, different information about the server
+import java.util.UUID;
 
-    public NexusServer(String name, ServerType type, String mode) {
-        this.name = name;
-        this.type = type;
-        this.mode = mode;
+public abstract sealed class NexusServer permits ProxyServer, InstanceServer, VirtualServer {
+    protected final ReadOnlyStringProperty name; //Server Name
+    protected final ReadOnlyObjectProperty<ServerType> type; //Server Type, effectively final
+    protected final ReadOnlyStringProperty mode; //Things like hub, sg or other gamemodes, effectively final
+    protected final StringProperty status; //Status like online, offline, error etc...
+    protected final StringProperty state; //Format determined by plugin, different information about the server
+    
+    protected final ReadOnlyIntegerProperty maxPlayers; //Maximum of players allowed.
+    protected final ObservableSet<UUID> players = StarCollections.observableSet(); //Players currently in this server.
+
+    public NexusServer(String name, ServerType type, String mode, int maxPlayers) {
+        this.name = new ReadOnlyStringProperty(this, "name", name);
+        this.type = new ReadOnlyObjectProperty<>(this, "type", type);
+        this.mode = new ReadOnlyStringProperty(this, "mode", mode);
+        this.status = new StringProperty(this, "status", "");
+        this.state = new StringProperty(this, "state", "");
+        this.maxPlayers = new ReadOnlyIntegerProperty(this, "maxPlayers", maxPlayers);
     }
     
     public abstract void join(NexusPlayer player);
@@ -22,30 +36,58 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     public abstract void onStop();
 
     public String getName() {
-        return name;
+        return name.get();
     }
 
     public ServerType getType() {
-        return type;
+        return type.get();
     }
 
     public String getMode() {
-        return mode;
+        return mode.get();
     }
 
     public String getStatus() {
-        return status;
+        return status.get();
     }
 
     public String getState() {
-        return state;
+        return state.get();
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.status.set(status);
     }
 
     public void setState(String state) {
-        this.state = state;
+        this.state.set(state);
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers.get();
+    }
+
+    public ReadOnlyStringProperty nameProperty() {
+        return this.name;
+    }
+    
+    public ReadOnlyObjectProperty<ServerType> typeProperty() {
+        return this.type;
+    }
+    
+    public StringProperty statusProperty() {
+        return this.status;
+    }
+    
+    public StringProperty stateProperty() {
+        return state;
+    }
+    
+    public ReadOnlyIntegerProperty maxPlayersProperty() {
+        return maxPlayers;
+    }
+    
+    public ObservableSet<UUID> getPlayers() {
+        return players;
     }
 }
