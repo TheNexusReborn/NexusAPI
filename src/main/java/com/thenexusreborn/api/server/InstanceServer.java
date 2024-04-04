@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.server;
 
-import com.stardevllc.beans.property.ObjectProperty;
+import com.stardevllc.starlib.observable.property.ObjectProperty;
 
 public abstract non-sealed class InstanceServer extends NexusServer {
 

@@ -1,8 +1,11 @@
 package com.thenexusreborn.api.server;
 
-import com.stardevllc.beans.collections.StarCollections;
-import com.stardevllc.beans.property.*;
+import com.stardevllc.starlib.observable.collections.StarCollections;
 import com.stardevllc.starlib.observable.collections.set.ObservableSet;
+import com.stardevllc.starlib.observable.property.ReadOnlyIntegerProperty;
+import com.stardevllc.starlib.observable.property.ReadOnlyObjectProperty;
+import com.stardevllc.starlib.observable.property.ReadOnlyStringProperty;
+import com.stardevllc.starlib.observable.property.StringProperty;
 import com.thenexusreborn.api.player.NexusPlayer;
 
 import java.util.UUID;

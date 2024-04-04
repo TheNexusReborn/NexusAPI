@@ -15,9 +15,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.StarDevelopmentLLC:StarLib:1.0.0-alpha.4'
-    compileOnly 'com.github.StarDevelopmentLLC:StarClock:1.0.0-alpha.4'
-    compileOnly 'com.github.StarDevelopmentLLC:StarBeans:1.0.0-alpha.2'
+    compileOnly 'com.github.StarDevelopmentLLC:StarLib:1.0.0-alpha.5'
+    compileOnly 'com.github.StarDevelopmentLLC:StarClock:1.0.0-alpha.5'
     compileOnly 'com.google.code.gson:gson:2.2.4'
     compileOnly 'com.google.guava:guava:31.1-jre'
 }
