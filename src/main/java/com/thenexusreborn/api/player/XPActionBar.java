@@ -37,8 +37,8 @@ public class XPActionBar implements IActionBar {
         } else {
             return "";
         }
-        
-        ProgressBar progressBar = new ProgressBar(currentXp, nextLevelXp, 90, "|", "&a", "&c");
-        return "&aLVL " + level + "&8[" + progressBar.display() + "&8] &7" + currentXp + " XP&8/&7" + nextLevelXp + " XP";
+
+        ProgressBar progressBar = new ProgressBar(currentXp, nextLevelXp, 70, "|", "&a", "&c");
+        return "&aLVL " + level + " &8[" + progressBar.display() + "&8] &7" + currentXp + " XP&8/&7" + nextLevelXp + " XP";
     }
 }
