@@ -37,7 +37,7 @@ public class PlayerExperience {
         }
 
         if (newXp >= nextLevel.getXpRequired()) {
-            double leftOverXp = nextLevel.getXpRequired() - newXp;
+            double leftOverXp = newXp - nextLevel.getXpRequired();
             this.level++;
             this.levelXp = leftOverXp;
             return true;

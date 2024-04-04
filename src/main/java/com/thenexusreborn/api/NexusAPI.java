@@ -67,6 +67,7 @@ public abstract class NexusAPI {
         this.playerManager = playerManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
+        this.levelManager.init();
         this.scheduler = scheduler;
 
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");

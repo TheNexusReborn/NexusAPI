@@ -23,7 +23,7 @@ public class XPActionBar implements IActionBar {
     
     @Override
     public String getText() {
-        if (System.currentTimeMillis() >= this.time + 3000) {
+        if (System.currentTimeMillis() >= this.time + 5000) {
             player.setActionBar(previous);
             return "";
         }
@@ -38,7 +38,7 @@ public class XPActionBar implements IActionBar {
             return "";
         }
         
-        ProgressBar progressBar = new ProgressBar(currentXp, nextLevelXp, 100, "|", "&a", "&c");
+        ProgressBar progressBar = new ProgressBar(currentXp, nextLevelXp, 90, "|", "&a", "&c");
         return "&aLVL " + level + "&8[" + progressBar.display() + "&8] &7" + currentXp + " XP&8/&7" + nextLevelXp + " XP";
     }
 }
