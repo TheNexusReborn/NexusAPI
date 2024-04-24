@@ -376,4 +376,10 @@ public class NexusPlayer {
     public void setPlayTimeStopwatch(Stopwatch playTimeStopwatch) {
         this.playTimeStopwatch = playTimeStopwatch;
     }
+
+    public void showXPActionBar() {
+        if (this.playerProxy != null) {
+            this.playerProxy.showXPActionBar();
+        }
+    }
 }

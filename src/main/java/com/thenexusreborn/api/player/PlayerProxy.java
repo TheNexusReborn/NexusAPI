@@ -41,4 +41,8 @@ public abstract class PlayerProxy {
     public final UUID getUniqueId() {
         return uniqueId;
     }
+
+    public void showXPActionBar() {
+        
+    }
 }

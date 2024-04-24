@@ -2,7 +2,6 @@ package com.thenexusreborn.api.experience;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.NexusPlayer;
-import com.thenexusreborn.api.player.XPActionBar;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
 
@@ -47,7 +46,7 @@ public class PlayerExperience {
 
         NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(this.uniqueId);
         if (nexusPlayer != null) {
-            nexusPlayer.setActionBar(new XPActionBar(nexusPlayer, nexusPlayer.getActionBar(), System.currentTimeMillis()));
+            nexusPlayer.showXPActionBar();
         }
         
         return false;
