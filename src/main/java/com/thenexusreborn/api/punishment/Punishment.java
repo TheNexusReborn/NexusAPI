@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.punishment;
 
+import com.stardevllc.starlib.helper.StringHelper;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
@@ -7,7 +8,6 @@ import com.thenexusreborn.api.sql.annotations.column.ColumnType;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
 import com.thenexusreborn.api.sql.objects.codecs.AcknowledgeInfoCodec;
 import com.thenexusreborn.api.sql.objects.codecs.PardonInfoCodec;
-import com.thenexusreborn.api.helper.*;
 import com.thenexusreborn.api.util.Constants;
 
 import java.util.UUID;
@@ -196,7 +196,7 @@ public class Punishment implements Comparable<Punishment> {
     
     public String formatKick() {
         String message = Punishment.KICK_FORMAT;
-        message = message.replace("{type}", getType().getColor() + StringHelper.capitalizeEveryWord(getType().getVerb()));
+        message = message.replace("{type}", getType().getColor() + StringHelper.titlize(getType().getVerb()));
         message = message.replace("{actor}", getActorNameCache());
         message = message.replace("{reason}", getReason());
         message = message.replace("{expire}", formatTimeLeft());

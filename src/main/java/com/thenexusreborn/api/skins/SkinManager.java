@@ -1,9 +1,11 @@
 package com.thenexusreborn.api.skins;
 
 import com.google.gson.*;
-import com.thenexusreborn.api.helper.StringHelper;
-import com.thenexusreborn.api.http.*;
-import com.thenexusreborn.api.http.request.*;
+import com.stardevllc.starlib.helper.StringHelper;
+import com.stardevllc.starlib.http.HttpRequest;
+import com.stardevllc.starlib.http.HttpResponse;
+import com.stardevllc.starlib.http.request.HttpGetRequest;
+import com.stardevllc.starlib.http.request.HttpPostRequest;
 
 import java.io.IOException;
 import java.util.*;
