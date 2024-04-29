@@ -23,10 +23,12 @@ import com.thenexusreborn.api.util.Environment;
 import com.thenexusreborn.api.util.NetworkType;
 import com.thenexusreborn.api.util.Version;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -170,9 +172,6 @@ public abstract class NexusAPI {
     public Version getVersion() {
         return version;
     }
-
-    @Deprecated
-    public abstract Connection getConnection() throws SQLException;
 
     public abstract File getFolder();
 
