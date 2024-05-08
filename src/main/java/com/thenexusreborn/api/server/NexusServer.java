@@ -1,11 +1,11 @@
 package com.thenexusreborn.api.server;
 
-import com.stardevllc.starlib.observable.collections.StarCollections;
+import com.stardevllc.starlib.observable.collections.ObservableCollections;
 import com.stardevllc.starlib.observable.collections.set.ObservableSet;
-import com.stardevllc.starlib.observable.property.ReadOnlyIntegerProperty;
-import com.stardevllc.starlib.observable.property.ReadOnlyObjectProperty;
-import com.stardevllc.starlib.observable.property.ReadOnlyStringProperty;
-import com.stardevllc.starlib.observable.property.StringProperty;
+import com.stardevllc.starlib.observable.property.readonly.ReadOnlyIntegerProperty;
+import com.stardevllc.starlib.observable.property.readonly.ReadOnlyObjectProperty;
+import com.stardevllc.starlib.observable.property.readonly.ReadOnlyStringProperty;
+import com.stardevllc.starlib.observable.property.writable.StringProperty;
 import com.thenexusreborn.api.player.NexusPlayer;
 
 import java.util.UUID;
@@ -27,7 +27,7 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
         this.status = new StringProperty(this, "status", "");
         this.state = new StringProperty(this, "state", "");
         this.maxPlayers = new ReadOnlyIntegerProperty(this, "maxPlayers", maxPlayers);
-        this.players = StarCollections.observableSet();
+        this.players = ObservableCollections.observableSet();
     }
     
     public abstract void join(NexusPlayer player);

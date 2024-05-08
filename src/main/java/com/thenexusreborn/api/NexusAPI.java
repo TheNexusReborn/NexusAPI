@@ -1,6 +1,7 @@
 package com.thenexusreborn.api;
 
 import com.stardevllc.starclock.ClockManager;
+import com.stardevllc.starlib.registry.StringRegistry;
 import com.stardevllc.starlib.task.TaskFactory;
 import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
@@ -18,7 +19,6 @@ import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
-import com.thenexusreborn.api.tags.TagRegistry;
 import com.thenexusreborn.api.util.Environment;
 import com.thenexusreborn.api.util.NetworkType;
 import com.thenexusreborn.api.util.Version;
@@ -58,7 +58,7 @@ public abstract class NexusAPI {
     
     protected ServerRegistry<NexusServer> serverRegistry;
     protected ToggleRegistry toggleRegistry;
-    protected TagRegistry tagRegistry;
+    protected StringRegistry<String> tagRegistry;
     protected DatabaseRegistry databaseRegistry;
 
     protected SQLDatabase primaryDatabase;
@@ -136,7 +136,7 @@ public abstract class NexusAPI {
         getLogger().info("Registered " + (toggleRegistry.getObjects().size() - initialToggleSize) + " additional default toggle types.");
 
         getLogger().info("Registering and Setting up Tags");
-        this.tagRegistry = new TagRegistry();
+        this.tagRegistry = new StringRegistry<>();
         String[] defaultTags = {"thicc", "son", "e-girl", "god", "e-dater", "lord", "epic", "bacca", "benja", "milk man", "champion"};
         for (String dt : defaultTags) {
             this.tagRegistry.register(dt, dt);

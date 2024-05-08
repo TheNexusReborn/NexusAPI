@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.server;
 
 import com.stardevllc.starlib.observable.collections.set.SetChangeListener;
-import com.stardevllc.starlib.observable.property.ObjectProperty;
+import com.stardevllc.starlib.observable.property.writable.ObjectProperty;
 
 import java.util.UUID;
 
