@@ -1,17 +1,16 @@
 package com.thenexusreborn.api.server;
 
-import com.stardevllc.starlib.observable.collections.set.SetChangeListener;
-import com.stardevllc.starlib.observable.property.writable.ObjectProperty;
+import com.stardevllc.starlib.observable.property.writable.ReadWriteObjectProperty;
 
 import java.util.UUID;
 
 public abstract non-sealed class VirtualServer extends NexusServer {
     
-    protected final ObjectProperty<InstanceServer> parentServer;
+    protected final ReadWriteObjectProperty<InstanceServer> parentServer;
     
     public VirtualServer(InstanceServer parent, String name, String mode, int maxPlayers) {
         super(name, ServerType.VIRTUAL, mode, maxPlayers);
-        this.parentServer = new ObjectProperty<>(this, "parentServer", parent);
+        this.parentServer = new ReadWriteObjectProperty<>(this, "parentServer", parent);
         
         this.parentServer.addListener((observableValue, oldValue, newValue) -> {
             if (oldValue != null) {
@@ -27,7 +26,7 @@ public abstract non-sealed class VirtualServer extends NexusServer {
             }
         });
         
-        this.players.addListener((SetChangeListener<UUID>) change -> {
+        this.players.addListener(change -> {
             if (parentServer.get() == null) {
                 return;
             }

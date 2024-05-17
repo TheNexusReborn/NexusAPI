@@ -1,15 +1,15 @@
 package com.thenexusreborn.api.server;
 
-import com.stardevllc.starlib.observable.property.writable.ObjectProperty;
+import com.stardevllc.starlib.observable.property.writable.ReadWriteObjectProperty;
 
 public abstract non-sealed class InstanceServer extends NexusServer {
 
-    protected final ObjectProperty<VirtualServer> primaryVirtualServer;
+    protected final ReadWriteObjectProperty<VirtualServer> primaryVirtualServer;
     private final ServerRegistry<VirtualServer> childServers = new ServerRegistry<>();
     
     public InstanceServer(String name, String mode, int maxPlayers) {
         super(name, ServerType.INSTANCE, mode, maxPlayers);
-        this.primaryVirtualServer = new ObjectProperty<>(this, "primaryVirtualServer", null);
+        this.primaryVirtualServer = new ReadWriteObjectProperty<>(this, "primaryVirtualServer", null);
     }
 
     public ServerRegistry<VirtualServer> getChildServers() {

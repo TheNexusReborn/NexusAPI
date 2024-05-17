@@ -1,6 +1,6 @@
 package com.thenexusreborn.api;
 
-import com.stardevllc.starclock.ClockManager;
+import com.stardevllc.starlib.clock.ClockManager;
 import com.stardevllc.starlib.registry.StringRegistry;
 import com.stardevllc.starlib.task.TaskFactory;
 import com.thenexusreborn.api.experience.LevelManager;

@@ -5,7 +5,7 @@ import com.stardevllc.starlib.observable.collections.set.ObservableSet;
 import com.stardevllc.starlib.observable.property.readonly.ReadOnlyIntegerProperty;
 import com.stardevllc.starlib.observable.property.readonly.ReadOnlyObjectProperty;
 import com.stardevllc.starlib.observable.property.readonly.ReadOnlyStringProperty;
-import com.stardevllc.starlib.observable.property.writable.StringProperty;
+import com.stardevllc.starlib.observable.property.writable.ReadWriteStringProperty;
 import com.thenexusreborn.api.player.NexusPlayer;
 
 import java.util.UUID;
@@ -14,8 +14,8 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     protected final ReadOnlyStringProperty name; //Server Name
     protected final ReadOnlyObjectProperty<ServerType> type; //Server Type, effectively final
     protected final ReadOnlyStringProperty mode; //Things like hub, sg or other gamemodes, effectively final
-    protected final StringProperty status; //Status like online, offline, error etc...
-    protected final StringProperty state; //Format determined by plugin, different information about the server
+    protected final ReadWriteStringProperty status; //Status like online, offline, error etc...
+    protected final ReadWriteStringProperty state; //Format determined by plugin, different information about the server
     
     protected final ReadOnlyIntegerProperty maxPlayers; //Maximum of players allowed.
     protected final ObservableSet<UUID> players; //Players currently in this server.
@@ -24,8 +24,8 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
         this.name = new ReadOnlyStringProperty(this, "name", name);
         this.type = new ReadOnlyObjectProperty<>(this, "type", type);
         this.mode = new ReadOnlyStringProperty(this, "mode", mode);
-        this.status = new StringProperty(this, "status", "");
-        this.state = new StringProperty(this, "state", "");
+        this.status = new ReadWriteStringProperty(this, "status", "");
+        this.state = new ReadWriteStringProperty(this, "state", "");
         this.maxPlayers = new ReadOnlyIntegerProperty(this, "maxPlayers", maxPlayers);
         this.players = ObservableCollections.observableSet();
     }
@@ -80,11 +80,11 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
         return this.type;
     }
     
-    public StringProperty statusProperty() {
+    public ReadWriteStringProperty statusProperty() {
         return this.status;
     }
     
-    public StringProperty stateProperty() {
+    public ReadWriteStringProperty stateProperty() {
         return state;
     }
     

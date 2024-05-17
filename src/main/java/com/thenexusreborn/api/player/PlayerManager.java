@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.stardevllc.starlib.Pair;
+import com.stardevllc.starlib.misc.Pair;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentType;
