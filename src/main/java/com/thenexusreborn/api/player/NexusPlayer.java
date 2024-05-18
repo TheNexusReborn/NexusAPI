@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.player;
 
+import com.stardevllc.starlib.clock.clocks.Stopwatch;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
@@ -51,6 +52,9 @@ public class NexusPlayer {
     protected PlayerProxy playerProxy;
     @ColumnIgnored
     protected Session session;
+    
+    @ColumnIgnored
+    protected Stopwatch playTimeStopwatch;
     
     @ColumnIgnored
     private Map<String, Tag> tags = new HashMap<>();
@@ -223,8 +227,8 @@ public class NexusPlayer {
         if (leveledUp) {
             if (this.playerProxy != null) {
                 this.playerProxy.sendMessage("");
-                this.playerProxy.sendMessage("&a&lLEVEL UP!");
-                this.playerProxy.sendMessage("&e" + (this.experience.getLevel() - 1) + " &a-> &e" + this.experience.getLevel());
+                this.playerProxy.sendMessage("&6&l>> &a&lLEVEL UP!");
+                this.playerProxy.sendMessage("&6&l>> &e&l" + (this.experience.getLevel() - 1) + " &a-> &e&l" + this.experience.getLevel());
                 this.playerProxy.sendMessage("");
                 for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(this.experience.getLevel()).getRewards()) {
                     reward.applyReward(this);
@@ -363,5 +367,19 @@ public class NexusPlayer {
 
     public Set<String> getTags() {
         return new HashSet<>(this.tags.keySet());
+    }
+
+    public Stopwatch getPlayTimeStopwatch() {
+        return playTimeStopwatch;
+    }
+
+    public void setPlayTimeStopwatch(Stopwatch playTimeStopwatch) {
+        this.playTimeStopwatch = playTimeStopwatch;
+    }
+
+    public void showXPActionBar() {
+        if (this.playerProxy != null) {
+            this.playerProxy.showXPActionBar();
+        }
     }
 }

@@ -63,7 +63,7 @@ public class DatabaseRegistry extends StringRegistry<SQLDatabase> {
      * This does not pass any of the exceptions that can happen
      * @param object The object to register
      */
-    public void register(SQLDatabase object) {
+    public SQLDatabase register(SQLDatabase object) {
         super.register(object.getName(), object);
         if (!this.setup) {
             for (Table table : object.getTables()) {
@@ -76,6 +76,7 @@ public class DatabaseRegistry extends StringRegistry<SQLDatabase> {
         }
         
         object.setRegistry(this);
+        return object;
     }
     
     /**

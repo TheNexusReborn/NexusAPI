@@ -1,6 +1,7 @@
 package com.thenexusreborn.api;
 
-import com.stardevllc.starclock.ClockManager;
+import com.stardevllc.starlib.clock.ClockManager;
+import com.stardevllc.starlib.registry.StringRegistry;
 import com.stardevllc.starlib.task.TaskFactory;
 import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
@@ -11,18 +12,23 @@ import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentManager;
 import com.thenexusreborn.api.registry.ToggleRegistry;
-import com.thenexusreborn.api.server.*;
+import com.thenexusreborn.api.server.NexusServer;
+import com.thenexusreborn.api.server.ServerRegistry;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
-import com.thenexusreborn.api.tags.TagRegistry;
+import com.thenexusreborn.api.util.Environment;
+import com.thenexusreborn.api.util.NetworkType;
+import com.thenexusreborn.api.util.Version;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +37,6 @@ import java.util.logging.Logger;
 
 public abstract class NexusAPI {
     private static NexusAPI instance;
-    public static final Phase PHASE = Phase.PRIVATE_ALPHA;
     public static final NetworkType NETWORK_TYPE = NetworkType.SINGLE;
 
     public static void setApi(NexusAPI api) {
@@ -44,27 +49,27 @@ public abstract class NexusAPI {
 
     protected final Logger logger;
     protected final PlayerManager playerManager;
-    protected final ServerManager serverManager;
     protected final Environment environment;
     protected final PunishmentManager punishmentManager;
     protected final LevelManager levelManager;
     protected ClockManager clockManager;
     protected Version version;
     protected TaskFactory scheduler;
-
+    
+    protected ServerRegistry<NexusServer> serverRegistry;
     protected ToggleRegistry toggleRegistry;
-    protected TagRegistry tagRegistry;
+    protected StringRegistry<String> tagRegistry;
     protected DatabaseRegistry databaseRegistry;
 
     protected SQLDatabase primaryDatabase;
 
-    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler, ServerManager serverManager) {
+    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler) {
         this.logger = logger;
         this.environment = environment;
         this.playerManager = playerManager;
-        this.serverManager = serverManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
+        this.levelManager.init();
         this.scheduler = scheduler;
 
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
@@ -88,6 +93,7 @@ public abstract class NexusAPI {
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
 
+        serverRegistry = new ServerRegistry<>();
         databaseRegistry = new DatabaseRegistry(logger);
 
         registerDatabases(databaseRegistry);
@@ -101,7 +107,6 @@ public abstract class NexusAPI {
                 database.registerClass(IPEntry.class);
                 database.registerClass(Toggle.class);
                 database.registerClass(NexusPlayer.class);
-                database.registerClass(ServerInfo.class);
                 database.registerClass(GameInfo.class);
                 database.registerClass(GameAction.class);
                 database.registerClass(Punishment.class);
@@ -131,15 +136,12 @@ public abstract class NexusAPI {
         getLogger().info("Registered " + (toggleRegistry.getObjects().size() - initialToggleSize) + " additional default toggle types.");
 
         getLogger().info("Registering and Setting up Tags");
-        this.tagRegistry = new TagRegistry();
+        this.tagRegistry = new StringRegistry<>();
         String[] defaultTags = {"thicc", "son", "e-girl", "god", "e-dater", "lord", "epic", "bacca", "benja", "milk man", "champion"};
         for (String dt : defaultTags) {
             this.tagRegistry.register(dt, dt);
         }
         getLogger().info("Registered " + this.tagRegistry.getObjects().size() + " default tags.");
-
-        serverManager.setupCurrentServer();
-        getLogger().info("Set up the current server");
 
         for (Punishment punishment : getPrimaryDatabase().get(Punishment.class)) {
             punishmentManager.addPunishment(punishment);
@@ -171,9 +173,6 @@ public abstract class NexusAPI {
         return version;
     }
 
-    @Deprecated
-    public abstract Connection getConnection() throws SQLException;
-
     public abstract File getFolder();
 
     public PlayerManager getPlayerManager() {
@@ -186,10 +185,6 @@ public abstract class NexusAPI {
 
     public Logger getLogger() {
         return logger;
-    }
-
-    public ServerManager getServerManager() {
-        return serverManager;
     }
 
     public PunishmentManager getPunishmentManager() {
@@ -234,5 +229,9 @@ public abstract class NexusAPI {
 
     public void setClockManager(ClockManager clockManager) {
         this.clockManager = clockManager;
+    }
+
+    public ServerRegistry<NexusServer> getServerRegistry() {
+        return serverRegistry;
     }
 }
