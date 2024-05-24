@@ -15,13 +15,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.StarDevelopmentLLC:StarLib:1.0.0-alpha.20'
+    compileOnly 'com.github.StarDevelopmentLLC:StarLib:1.0.0-alpha.21'
     compileOnly 'com.google.code.gson:gson:2.2.4'
     compileOnly 'com.google.guava:guava:31.1-jre'
 }
 
 group = 'com.thenexusreborn'
-version = '1.13-ALPHA'
+version = '1.13.1-ALPHA'
 description = 'NexusAPI'
 
 java {
