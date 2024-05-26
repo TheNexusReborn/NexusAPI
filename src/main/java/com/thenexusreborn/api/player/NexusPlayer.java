@@ -61,6 +61,8 @@ public class NexusPlayer {
     
     private String activeTag;
     
+    private String discordId;
+    
     protected NexusPlayer() {
         this(null);
     }
@@ -375,6 +377,14 @@ public class NexusPlayer {
 
     public void setPlayTimeStopwatch(Stopwatch playTimeStopwatch) {
         this.playTimeStopwatch = playTimeStopwatch;
+    }
+
+    public String getDiscordId() {
+        return discordId;
+    }
+
+    public void setDiscordId(String discordId) {
+        this.discordId = discordId;
     }
 
     public void showXPActionBar() {
