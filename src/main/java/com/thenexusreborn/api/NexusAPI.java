@@ -7,6 +7,7 @@ import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
+import com.thenexusreborn.api.gamearchive.GameLogExporter;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
@@ -62,6 +63,7 @@ public abstract class NexusAPI {
     protected DatabaseRegistry databaseRegistry;
 
     protected SQLDatabase primaryDatabase;
+    protected GameLogExporter gameLogExporter;
 
     public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler) {
         this.logger = logger;
@@ -189,6 +191,14 @@ public abstract class NexusAPI {
 
     public PunishmentManager getPunishmentManager() {
         return punishmentManager;
+    }
+
+    public GameLogExporter getGameLogExporter() {
+        return gameLogExporter;
+    }
+
+    public void setGameLogExporter(GameLogExporter gameLogExporter) {
+        this.gameLogExporter = gameLogExporter;
     }
 
     public static void logMessage(Level level, String mainMessage, String... debug) {

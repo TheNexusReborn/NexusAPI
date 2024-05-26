@@ -21,7 +21,7 @@ dependencies {
 }
 
 group = 'com.thenexusreborn'
-version = '1.13.1-ALPHA'
+version = '1.13.2-ALPHA'
 description = 'NexusAPI'
 
 java {
