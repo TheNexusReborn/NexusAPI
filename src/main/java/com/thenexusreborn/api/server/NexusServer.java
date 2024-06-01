@@ -37,7 +37,7 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     public abstract void onStop();
     
     public boolean recalculateVisibility(UUID player, UUID otherPlayer) {
-        return false;
+        throw new UnsupportedOperationException("");
     }
 
     public String getName() {
