@@ -14,14 +14,14 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class GameLogExporter {
-    
+
     private static final String UUID_URL = "https://api.mojang.com/users/profiles/minecraft/{name}";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Logger LOGGER = NexusAPI.getApi().getLogger();
     private static final Map<String, UUID> nameToUUID = new HashMap<>();
     private static final String DATE_FORMAT = "MM/dd/yyyy HH:mm:ss:SSS";
     private static final TimeFormat TIME_FORMAT = new TimeFormat("%*#0h% %*#0m% %*#0s% %*#0ms%");
-    
+
     private File baseDir;
 
     public GameLogExporter(File baseDir) {
@@ -42,7 +42,7 @@ public class GameLogExporter {
             exportGameInfo(gameInfo);
         }
     }
-    
+
     public JsonObject getGameJson(int gameId) throws FileNotFoundException {
         File jsonFile = new File(baseDir, gameId + File.separator + gameId + ".json");
         if (!jsonFile.exists()) {
@@ -51,28 +51,28 @@ public class GameLogExporter {
 
         return new JsonParser().parse(new FileReader(jsonFile)).getAsJsonObject();
     }
-    
+
     public List<String> getGameTxt(int gameId) throws IOException {
         File txtFile = new File(baseDir, gameId + File.separator + gameId + ".txt");
         if (!txtFile.exists()) {
             return null;
         }
-        
+
         List<String> gameText = new LinkedList<>();
-        
+
         try (FileReader fr = new FileReader(txtFile); BufferedReader br = new BufferedReader(fr)) {
             String line;
             while ((line = br.readLine()) != null) {
                 gameText.add(line);
             }
         }
-        
+
         return gameText;
     }
-    
+
     public void exportGameInfo(GameInfo gameInfo) throws IOException {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-        
+
         File gameDir = new File(baseDir, gameInfo.getId() + "");
         if (!gameDir.exists()) {
             gameDir.mkdirs();
@@ -84,7 +84,7 @@ public class GameLogExporter {
         //LOGGER.info("Processing Game with ID " + gameInfo.getId() + " ...");
         JsonObject gameJson = new JsonObject();
         List<String> gameTxt = new LinkedList<>();
-        
+
         gameTxt.add("----Basic Game Info----");
 
         gameJson.addProperty("id", gameInfo.getId());
@@ -156,39 +156,22 @@ public class GameLogExporter {
         for (GameAction action : gameInfo.getActions()) {
             JsonObject actionObject = new JsonObject();
             actionObject.addProperty("timestamp", action.getTimestamp());
-            actionObject.addProperty("version", action.getVersion());
             String formattedTime = dateFormat.format(action.getTimestamp());
             actionObject.addProperty("type", action.getType());
-            actionObject.addProperty("text", action.getNiceValue());
+            //actionObject.addProperty("text", action.getNiceValue());
             if (action.getVersion() == 1) {
-                if (action.getType().equalsIgnoreCase("chat") || action.getType().equalsIgnoreCase("deadchat")) {
-                    JsonObject chatActionObject = new JsonObject();
-                    String[] value = action.getNiceValue().split(":");
-                    chatActionObject.addProperty("sender", value[0]);
-                    chatActionObject.addProperty("message", value[1]);
-                    actionObject.add("data", chatActionObject);
-                } else if (action.getType().equalsIgnoreCase("death")) {
-                    JsonObject deathObject = new JsonObject();
-                    deathObject.addProperty("deathmessage", action.getNiceValue()); //Going to need to change this maybe
-                    actionObject.add("data", deathObject);
-                } else if (action.getType().equalsIgnoreCase("mutation")) {
-                    JsonObject mutationObject = new JsonObject();
-                    String[] rawValue = action.getNiceValue().split(" ");
-                    mutationObject.addProperty("mutator", rawValue[0]);
-                    mutationObject.addProperty("target", rawValue[3]);
-                    actionObject.add("data", mutationObject);
-                } else if (action.getType().equalsIgnoreCase("assist")) {
-                    JsonObject assistObject = new JsonObject();
-                    String[] rawValue = action.getNiceValue().split(" ");
-                    assistObject.addProperty("assistor", rawValue[0]);
-                    assistObject.addProperty("deadplayer", rawValue[5]);
-                    actionObject.add("data", assistObject);
+                action.convertFromV1toV2();
+                try {
+                    NexusAPI.getApi().getPrimaryDatabase().save(action);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } else {
-                JsonObject dataObject = new JsonObject();
-                action.getValueData().forEach(dataObject::addProperty);
-                actionObject.add("data", dataObject);
             }
+            actionObject.addProperty("version", action.getVersion());
+            JsonObject dataObject = new JsonObject();
+            action.getValueData().forEach(dataObject::addProperty);
+            actionObject.add("data", dataObject);
+            
             gameTxt.add(formattedTime + " " + action.getType() + " " + action.getNiceValue());
             actionsJson.add(actionObject);
         }
@@ -216,20 +199,20 @@ public class GameLogExporter {
             }
         }
     }
-    
+
     public UUID getUUID(String name) {
         UUID uuid = null;
-        
+
         if (nameToUUID.containsKey(name)) {
             uuid = nameToUUID.get(name);
         }
-        
+
         if (uuid != null) {
             return uuid;
         }
-        
+
         uuid = NexusAPI.getApi().getPlayerManager().getUUIDFromName(name);
-        
+
         if (uuid != null) {
             nameToUUID.put(name, uuid);
             return uuid;

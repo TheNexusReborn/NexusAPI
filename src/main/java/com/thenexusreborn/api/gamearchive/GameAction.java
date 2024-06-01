@@ -38,6 +38,63 @@ public class GameAction implements Comparable<GameAction> {
         this.niceValue = niceValue;
     }
     
+    public void convertFromV1toV2() {
+        valueData.clear();
+        if (getType().equalsIgnoreCase("chat") || getType().equalsIgnoreCase("deadchat")) {
+            String[] value = niceValue.split(":");
+            valueData.put("sender", value[0]);
+            StringBuilder msg = new StringBuilder();
+            for (int i = 1; i < value.length; i++) {
+                msg.append(value[i]);
+            }
+            valueData.put("message", msg.toString());
+        } else if (getType().equalsIgnoreCase("mutation")) {
+            String[] rawValue = niceValue.split(" ");
+            valueData.put("mutator", rawValue[0]);
+            valueData.put("target", rawValue[3]);
+            if (rawValue.length > 6) {
+                StringBuilder typeBuilder = new StringBuilder();
+                for (int i = 6; i < rawValue.length; i++) {
+                    typeBuilder.append(rawValue[i]).append(" ");
+                }
+                valueData.put("type", typeBuilder.toString().trim().toLowerCase().replace(" ", "_"));
+            }
+        } else if (getType().equalsIgnoreCase("assist")) {
+            String[] rawValue = getNiceValue().split(" ");
+            valueData.put("assistor", rawValue[0]);
+            valueData.put("deadplayer", rawValue[5]);
+        } else if (getType().equalsIgnoreCase("admincommand")) {
+            String[] rawValue = getNiceValue().split(" ");
+            if (niceValue.contains(" ran the ")) {
+                valueData.put("sender", rawValue[0]);
+                valueData.put("command", rawValue[3]);
+            } else if (niceValue.contains(" gave <")) {
+                this.type = "giveitem";
+                valueData.put("sender", rawValue[0]);
+                valueData.put("target", rawValue[2]);
+                StringBuilder item = new StringBuilder();
+                for (int i = 3; i < rawValue.length; i++) {
+                    item.append(rawValue[i]).append(" ");
+                }
+                valueData.put("item", item.toString().trim().toLowerCase().replace(" ", "_"));
+            } else if (niceValue.contains(" gave all players ")) {
+                this.type = "givealll";
+                valueData.put("sender", rawValue[0]);
+                StringBuilder item = new StringBuilder();
+                for (int i = 4; i < rawValue.length; i++) {
+                    item.append(rawValue[i]).append(" ");
+                }
+                valueData.put("item", item.toString().trim().toLowerCase().replace(" ", "_"));
+            }
+        } else if (getType().equalsIgnoreCase("death")) {
+            valueData.put("deathmessage", this.niceValue);
+        } else {
+            valueData.put("nicevalue", this.niceValue);
+        }
+
+        this.version = 2;
+    }
+    
     public GameAction addValueData(String key, Object value) {
         valueData.put(key, value.toString());
         return this;
