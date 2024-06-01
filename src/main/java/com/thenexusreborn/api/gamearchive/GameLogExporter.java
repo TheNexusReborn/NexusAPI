@@ -84,7 +84,7 @@ public class GameLogExporter {
         //LOGGER.info("Processing Game with ID " + gameInfo.getId() + " ...");
         JsonObject gameJson = new JsonObject();
         List<String> gameTxt = new LinkedList<>();
-
+        
         gameTxt.add("----Basic Game Info----");
 
         gameJson.addProperty("id", gameInfo.getId());
@@ -156,34 +156,40 @@ public class GameLogExporter {
         for (GameAction action : gameInfo.getActions()) {
             JsonObject actionObject = new JsonObject();
             actionObject.addProperty("timestamp", action.getTimestamp());
+            actionObject.addProperty("version", action.getVersion());
             String formattedTime = dateFormat.format(action.getTimestamp());
             actionObject.addProperty("type", action.getType());
-            if (action.getType().equalsIgnoreCase("chat") || action.getType().equalsIgnoreCase("deadchat")) {
-                JsonObject chatActionObject = new JsonObject();
-                String[] value = action.getValue().split(":");
-                chatActionObject.addProperty("sender", value[0]);
-                chatActionObject.addProperty("message", value[1]);
-                actionObject.add("value", chatActionObject);
-            } else if (action.getType().equalsIgnoreCase("death")) {
-                JsonObject deathObject = new JsonObject();
-                deathObject.addProperty("deathmessage", action.getValue()); //Going to need to change this maybe
-                actionObject.add("value", deathObject);
-            }  else if (action.getType().equalsIgnoreCase("mutation")) {
-                JsonObject mutationObject = new JsonObject();
-                String[] rawValue = action.getValue().split(" ");
-                mutationObject.addProperty("mutator", rawValue[0]);
-                mutationObject.addProperty("target", rawValue[3]);
-                actionObject.add("value", mutationObject);
-            } else if (action.getType().equalsIgnoreCase("assist")) {
-                JsonObject assistObject = new JsonObject();
-                String[] rawValue = action.getValue().split(" ");
-                assistObject.addProperty("assistor", rawValue[0]);
-                assistObject.addProperty("deadplayer", rawValue[5]);
-                actionObject.add("value", assistObject);
+            actionObject.addProperty("text", action.getNiceValue());
+            if (action.getVersion() == 1) {
+                if (action.getType().equalsIgnoreCase("chat") || action.getType().equalsIgnoreCase("deadchat")) {
+                    JsonObject chatActionObject = new JsonObject();
+                    String[] value = action.getNiceValue().split(":");
+                    chatActionObject.addProperty("sender", value[0]);
+                    chatActionObject.addProperty("message", value[1]);
+                    actionObject.add("data", chatActionObject);
+                } else if (action.getType().equalsIgnoreCase("death")) {
+                    JsonObject deathObject = new JsonObject();
+                    deathObject.addProperty("deathmessage", action.getNiceValue()); //Going to need to change this maybe
+                    actionObject.add("data", deathObject);
+                } else if (action.getType().equalsIgnoreCase("mutation")) {
+                    JsonObject mutationObject = new JsonObject();
+                    String[] rawValue = action.getNiceValue().split(" ");
+                    mutationObject.addProperty("mutator", rawValue[0]);
+                    mutationObject.addProperty("target", rawValue[3]);
+                    actionObject.add("data", mutationObject);
+                } else if (action.getType().equalsIgnoreCase("assist")) {
+                    JsonObject assistObject = new JsonObject();
+                    String[] rawValue = action.getNiceValue().split(" ");
+                    assistObject.addProperty("assistor", rawValue[0]);
+                    assistObject.addProperty("deadplayer", rawValue[5]);
+                    actionObject.add("data", assistObject);
+                }
             } else {
-                actionObject.addProperty("value", action.getValue());
+                JsonObject dataObject = new JsonObject();
+                action.getValueData().forEach(dataObject::addProperty);
+                actionObject.add("data", dataObject);
             }
-            gameTxt.add(formattedTime + " " + action.getType() + " " + action.getValue());
+            gameTxt.add(formattedTime + " " + action.getType() + " " + action.getNiceValue());
             actionsJson.add(actionObject);
         }
         gameJson.add("actions", actionsJson);
