@@ -102,8 +102,10 @@ public class GameAction implements Comparable<GameAction> {
             }
         } else if (getType().equalsIgnoreCase("death")) {
             valueData.put("deathmessage", this.niceValue);
+        } else if (getType().equalsIgnoreCase("statechange")) {
+            valueData.put("newvalue", this.niceValue);
         } else {
-            valueData.put("nicevalue", this.niceValue);
+            valueData.put("value", this.niceValue);
         }
 
         this.version = 2;
