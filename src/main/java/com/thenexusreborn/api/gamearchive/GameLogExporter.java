@@ -44,24 +44,6 @@ public class GameLogExporter {
         return new JsonParser().parse(new FileReader(jsonFile)).getAsJsonObject();
     }
 
-    public List<String> getGameTxt(int gameId) throws IOException {
-        File txtFile = new File(baseDir, gameId + File.separator + gameId + ".txt");
-        if (!txtFile.exists()) {
-            return null;
-        }
-
-        List<String> gameText = new LinkedList<>();
-
-        try (FileReader fr = new FileReader(txtFile); BufferedReader br = new BufferedReader(fr)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                gameText.add(line);
-            }
-        }
-
-        return gameText;
-    }
-
     public void exportGameInfo(GameInfo gameInfo) throws IOException {
         File gameDir = new File(baseDir, gameInfo.getId() + "");
         if (!gameDir.exists()) {
