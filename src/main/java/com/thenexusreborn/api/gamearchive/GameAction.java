@@ -26,18 +26,16 @@ public class GameAction implements Comparable<GameAction> {
     
     private GameAction() {}
     
-    public GameAction(long gameId, long timestamp, String type, String niceValue) {
+    public GameAction(long gameId, long timestamp, String type) {
         this.gameId = gameId;
         this.timestamp = timestamp;
         this.type = type;
-        this.niceValue = niceValue;
         this.scope = "normal";
     }
     
-    public GameAction(long timestamp, String type, String niceValue) {
+    public GameAction(long timestamp, String type) {
         this.timestamp = timestamp;
         this.type = type;
-        this.niceValue = niceValue;
         this.scope = "normal";
     }
 
@@ -48,6 +46,10 @@ public class GameAction implements Comparable<GameAction> {
     public GameAction setScope(String scope) {
         this.scope = scope;
         return this;
+    }
+
+    public String getNiceValue() {
+        return niceValue;
     }
 
     public void convertFromV1toV2() {
@@ -72,11 +74,11 @@ public class GameAction implements Comparable<GameAction> {
                 valueData.put("type", typeBuilder.toString().trim().toLowerCase().replace(" ", "_"));
             }
         } else if (getType().equalsIgnoreCase("assist")) {
-            String[] rawValue = getNiceValue().split(" ");
+            String[] rawValue = niceValue.split(" ");
             valueData.put("assistor", rawValue[0]);
             valueData.put("deadplayer", rawValue[5]);
         } else if (getType().equalsIgnoreCase("admincommand")) {
-            String[] rawValue = getNiceValue().split(" ");
+            String[] rawValue = niceValue.split(" ");
             if (niceValue.contains(" ran the ")) {
                 valueData.put("sender", rawValue[0]);
                 valueData.put("command", rawValue[3]);
@@ -130,10 +132,6 @@ public class GameAction implements Comparable<GameAction> {
     
     public String getType() {
         return type;
-    }
-    
-    public String getNiceValue() {
-        return niceValue;
     }
     
     public void setGameId(long gameId) {
