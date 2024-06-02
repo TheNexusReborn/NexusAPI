@@ -45,13 +45,6 @@ public class GameLogExporter {
     }
 
     public void exportGameInfo(GameInfo gameInfo) throws IOException {
-        File gameDir = new File(baseDir, gameInfo.getId() + "");
-        if (!gameDir.exists()) {
-            gameDir.mkdirs();
-        } else {
-            return;
-        }
-
         JsonObject gameJson = new JsonObject();
 
         gameJson.addProperty("id", gameInfo.getId());
@@ -61,7 +54,7 @@ public class GameLogExporter {
         gameJson.addProperty("map", gameInfo.getMapName());
         gameJson.addProperty("playercount", gameInfo.getPlayerCount());
         gameJson.addProperty("length", gameInfo.getLength());
-
+        
         JsonObject playersObject = new JsonObject();
 
         for (String playerName : gameInfo.getPlayers()) {
@@ -94,7 +87,7 @@ public class GameLogExporter {
             }
         }
 
-        JsonArray actionsJson = new JsonArray();
+        JsonObject actionsJson = new JsonObject();
         for (GameAction action : gameInfo.getActions()) {
             JsonObject actionObject = new JsonObject();
             actionObject.addProperty("timestamp", action.getTimestamp());
@@ -112,11 +105,11 @@ public class GameLogExporter {
             action.getValueData().forEach(dataObject::addProperty);
             actionObject.add("data", dataObject);
             
-            actionsJson.add(actionObject);
+            actionsJson.add(String.valueOf(action.getTimestamp()), actionObject);
         }
         gameJson.add("actions", actionsJson);
 
-        File jsonFile = new File(gameDir, gameInfo.getId() + ".json");
+        File jsonFile = new File(baseDir, gameInfo.getId() + ".json");
         if (!jsonFile.exists()) {
             jsonFile.createNewFile();
         }
