@@ -22,6 +22,7 @@ public class GameAction implements Comparable<GameAction> {
     @ColumnCodec(ValueDataCodec.class)
     @ColumnType("varchar(10000)")
     private Map<String, String> valueData = new LinkedHashMap<>();
+    private String scope;
     
     private GameAction() {}
     
@@ -30,14 +31,25 @@ public class GameAction implements Comparable<GameAction> {
         this.timestamp = timestamp;
         this.type = type;
         this.niceValue = niceValue;
+        this.scope = "normal";
     }
     
     public GameAction(long timestamp, String type, String niceValue) {
         this.timestamp = timestamp;
         this.type = type;
         this.niceValue = niceValue;
+        this.scope = "normal";
     }
-    
+
+    public String getScope() {
+        return scope;
+    }
+
+    public GameAction setScope(String scope) {
+        this.scope = scope;
+        return this;
+    }
+
     public void convertFromV1toV2() {
         valueData.clear();
         if (getType().equalsIgnoreCase("chat") || getType().equalsIgnoreCase("deadchat")) {
