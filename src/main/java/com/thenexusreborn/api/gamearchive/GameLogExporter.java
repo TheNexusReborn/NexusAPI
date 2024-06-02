@@ -2,14 +2,12 @@ package com.thenexusreborn.api.gamearchive;
 
 import com.google.gson.*;
 import com.stardevllc.starlib.helper.StringHelper;
-import com.stardevllc.starlib.time.TimeFormat;
 import com.thenexusreborn.api.NexusAPI;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -19,8 +17,6 @@ public class GameLogExporter {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Logger LOGGER = NexusAPI.getApi().getLogger();
     private static final Map<String, UUID> nameToUUID = new HashMap<>();
-    private static final String DATE_FORMAT = "MM/dd/yyyy HH:mm:ss:SSS";
-    private static final TimeFormat TIME_FORMAT = new TimeFormat("%*#0h% %*#0m% %*#0s% %*#0ms%");
 
     private File baseDir;
 
@@ -32,11 +28,7 @@ public class GameLogExporter {
     }
 
     public void exportGames() throws SQLException, IOException {
-        //LOGGER.info("Starting game export.");
-
-        //LOGGER.info("Retrieving games from database...");
         List<GameInfo> gameInfos = NexusAPI.getApi().getPrimaryDatabase().get(GameInfo.class);
-        //LOGGER.info("Retrieved " + gameInfos.size() + " games from database.");
 
         for (GameInfo gameInfo : gameInfos) {
             exportGameInfo(gameInfo);
@@ -44,7 +36,7 @@ public class GameLogExporter {
     }
 
     public JsonObject getGameJson(int gameId) throws FileNotFoundException {
-        File jsonFile = new File(baseDir, gameId + File.separator + gameId + ".json");
+        File jsonFile = new File(baseDir, gameId + ".json");
         if (!jsonFile.exists()) {
             return null;
         }
@@ -71,50 +63,26 @@ public class GameLogExporter {
     }
 
     public void exportGameInfo(GameInfo gameInfo) throws IOException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-
         File gameDir = new File(baseDir, gameInfo.getId() + "");
         if (!gameDir.exists()) {
             gameDir.mkdirs();
         } else {
-            //LOGGER.info("Game " + gameInfo.getId() + " has already been exported.");
             return;
         }
 
-        //LOGGER.info("Processing Game with ID " + gameInfo.getId() + " ...");
         JsonObject gameJson = new JsonObject();
-        List<String> gameTxt = new LinkedList<>();
-
-        gameTxt.add("----Basic Game Info----");
 
         gameJson.addProperty("id", gameInfo.getId());
-        gameTxt.add("Game ID: " + gameInfo.getId());
-
         gameJson.addProperty("start", gameInfo.getGameStart());
-        gameTxt.add("Start: " + dateFormat.format(gameInfo.getGameStart()));
-
         gameJson.addProperty("end", gameInfo.getGameEnd());
-        gameTxt.add("End: " + dateFormat.format(gameInfo.getGameEnd()));
-
         gameJson.addProperty("server", gameInfo.getServerName());
-        gameTxt.add("Server Name: " + gameInfo.getServerName());
-
         gameJson.addProperty("map", gameInfo.getMapName());
-        gameTxt.add("Map Name: " + gameInfo.getMapName().replace("''", "'"));
-
         gameJson.addProperty("playercount", gameInfo.getPlayerCount());
-        gameTxt.add("Player Count: " + gameInfo.getPlayerCount());
-
         gameJson.addProperty("length", gameInfo.getLength());
-        gameTxt.add("Length: " + TIME_FORMAT.format(gameInfo.getLength()));
 
         JsonObject playersObject = new JsonObject();
-        StringBuilder playersTxtBuilder = new StringBuilder();
 
-        //LOGGER.info("Processing Players for Game " + gameInfo.getId());
         for (String playerName : gameInfo.getPlayers()) {
-            //LOGGER.info("Processing Player " + playerName + " for game " + gameInfo.getId());
-
             UUID uuid = getUUID(playerName);
 
             if (uuid == null) {
@@ -122,12 +90,9 @@ public class GameLogExporter {
             } else {
                 playersObject.addProperty(playerName, uuid.toString());
             }
-
-            playersTxtBuilder.append(playerName).append(",");
         }
 
         gameJson.add("players", playersObject);
-        gameTxt.add("Players: " + playersTxtBuilder.substring(0, playersTxtBuilder.length() - 1));
 
         if (!StringHelper.isEmpty(gameInfo.getWinner())) {
             UUID uuid = nameToUUID.get(gameInfo.getWinner());
@@ -136,7 +101,6 @@ public class GameLogExporter {
             } else {
                 gameJson.addProperty("winner", gameInfo.getWinner());
             }
-            gameTxt.add("Winner: " + gameInfo.getWinner());
         }
 
         if (!StringHelper.isEmpty(gameInfo.getFirstBlood())) {
@@ -146,19 +110,13 @@ public class GameLogExporter {
             } else {
                 gameJson.addProperty("firstblood", gameInfo.getFirstBlood());
             }
-            gameTxt.add("First Blood: " + gameInfo.getFirstBlood());
         }
 
-        gameTxt.add(" ");
-        gameTxt.add("----Actions----");
-        //LOGGER.info("Processing actions for game " + gameInfo.getId());
         JsonArray actionsJson = new JsonArray();
         for (GameAction action : gameInfo.getActions()) {
             JsonObject actionObject = new JsonObject();
             actionObject.addProperty("timestamp", action.getTimestamp());
-            String formattedTime = dateFormat.format(action.getTimestamp());
             actionObject.addProperty("type", action.getType());
-            //actionObject.addProperty("text", action.getNiceValue());
             if (action.getVersion() == 1) {
                 action.convertFromV1toV2();
                 try {
@@ -172,12 +130,9 @@ public class GameLogExporter {
             action.getValueData().forEach(dataObject::addProperty);
             actionObject.add("data", dataObject);
             
-            gameTxt.add(formattedTime + " " + action.getType() + " " + action.getNiceValue());
             actionsJson.add(actionObject);
         }
         gameJson.add("actions", actionsJson);
-
-        //LOGGER.info("Saving " + gameInfo.getId() + " to the files.");
 
         File jsonFile = new File(gameDir, gameInfo.getId() + ".json");
         if (!jsonFile.exists()) {
@@ -186,17 +141,6 @@ public class GameLogExporter {
 
         try (FileWriter writer = new FileWriter(jsonFile)) {
             writer.write(GSON.toJson(gameJson));
-        }
-
-        File txtFile = new File(gameDir, gameInfo.getId() + ".txt");
-        if (!txtFile.exists()) {
-            txtFile.createNewFile();
-        }
-
-        try (FileWriter writer = new FileWriter(txtFile)) {
-            for (String gameLine : gameTxt) {
-                writer.write(gameLine + "\n");
-            }
         }
     }
 
