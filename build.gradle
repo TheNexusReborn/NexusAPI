@@ -4,10 +4,11 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     maven {
         url = uri('https://www.jitpack.io')
     }
+    mavenLocal()
+    
 
     maven {
         url = uri('https://repo.maven.apache.org/maven2/')
@@ -15,18 +16,18 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.StarDevelopmentLLC:StarLib:1.0.0-alpha.21'
+    compileOnly 'com.github.StarDevelopmentLLC.StarLib:all:1.0.0-alpha.25'
     compileOnly 'com.google.code.gson:gson:2.2.4'
     compileOnly 'com.google.guava:guava:31.1-jre'
 }
 
 group = 'com.thenexusreborn'
-version = '1.14-ALPHA'
+version = '1.14.1-ALPHA'
 description = 'NexusAPI'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
