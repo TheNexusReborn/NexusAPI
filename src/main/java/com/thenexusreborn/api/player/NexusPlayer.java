@@ -1,6 +1,6 @@
 package com.thenexusreborn.api.player;
 
-import com.stardevllc.starlib.clock.clocks.Stopwatch;
+import com.stardevllc.clock.clocks.Stopwatch;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;

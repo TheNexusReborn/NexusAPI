@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.stardevllc.starlib.misc.Pair;
+import com.stardevllc.helper.Pair;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentType;
@@ -107,10 +107,6 @@ public abstract class PlayerManager {
         return new Pair<>(uniqueID, name);
     }
 
-    public void saveToMySQLAsync(NexusPlayer player) {
-        NexusAPI.getApi().getScheduler().runTaskAsynchronously(() -> NexusAPI.getApi().getPrimaryDatabase().saveSilent(player));
-    }
-
     public NexusPlayer createPlayerData(UUID uniqueId, String name) {
         NexusPlayer nexusPlayer = new NexusPlayer(uniqueId);
         if (name != null && !name.equalsIgnoreCase("")) {
@@ -183,7 +179,7 @@ public abstract class PlayerManager {
 
         if (getUuidNameMap().containsKey(uuid)) {
             try {
-                player = NexusAPI.getApi().getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uuid.toString()).get(0);
+                player = NexusAPI.getApi().getPrimaryDatabase().get(NexusPlayer.class, "uniqueId", uuid.toString()).getFirst();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

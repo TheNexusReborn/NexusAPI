@@ -4,19 +4,20 @@ plugins {
 }
 
 repositories {
-    maven {
-        url = uri('https://www.jitpack.io')
-    }
+    maven { url 'https://jitpack.io' }
     mavenLocal()
-    
-
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
+    mavenCentral()
 }
 
 dependencies {
-    compileOnly 'com.github.StarDevelopmentLLC.StarLib:all:1.0.0-alpha.25'
+    api('com.github.StarDevelopmentLLC:clock:0.1.2')
+    api('com.github.StarDevelopmentLLC:time:0.1.0')
+    api('com.github.StarDevelopmentLLC:registry:0.1.0')
+    api('com.github.StarDevelopmentLLC:helper:0.1.1')
+    api('com.github.StarDevelopmentLLC:property:0.1.4')
+    api('com.github.StarDevelopmentLLC:observable:0.1.2')
+    api('com.github.StarDevelopmentLLC:eventbus:0.1.1')
+    api('com.github.StarDevelopmentLLC:actors:0.1.1')
     compileOnly 'com.google.code.gson:gson:2.2.4'
     compileOnly 'com.google.guava:guava:31.1-jre'
 }

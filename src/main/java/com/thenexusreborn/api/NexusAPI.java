@@ -1,8 +1,7 @@
 package com.thenexusreborn.api;
 
-import com.stardevllc.starlib.clock.ClockManager;
-import com.stardevllc.starlib.registry.StringRegistry;
-import com.stardevllc.starlib.task.TaskFactory;
+import com.stardevllc.clock.ClockManager;
+import com.stardevllc.registry.StringRegistry;
 import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.GameAction;
@@ -55,7 +54,6 @@ public abstract class NexusAPI {
     protected final LevelManager levelManager;
     protected ClockManager clockManager;
     protected Version version;
-    protected TaskFactory scheduler;
     
     protected ServerRegistry<NexusServer> serverRegistry;
     protected ToggleRegistry toggleRegistry;
@@ -65,14 +63,13 @@ public abstract class NexusAPI {
     protected SQLDatabase primaryDatabase;
     protected GameLogExporter gameLogExporter;
 
-    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager, TaskFactory scheduler) {
+    public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager) {
         this.logger = logger;
         this.environment = environment;
         this.playerManager = playerManager;
         this.punishmentManager = new PunishmentManager();
         this.levelManager = new LevelManager();
         this.levelManager.init();
-        this.scheduler = scheduler;
 
         URL url = NexusAPI.class.getClassLoader().getResource("nexusapi-version.txt");
         try (InputStream in = url.openStream()) {
@@ -179,10 +176,6 @@ public abstract class NexusAPI {
 
     public PlayerManager getPlayerManager() {
         return playerManager;
-    }
-
-    public TaskFactory getScheduler() {
-        return scheduler;
     }
 
     public Logger getLogger() {

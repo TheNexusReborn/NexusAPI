@@ -99,7 +99,7 @@ public abstract class SQLDatabase implements SQLDB {
                 return null;
             }
 
-            return objects.get(0);
+            return objects.getFirst();
         }
 
         return null;
@@ -795,7 +795,7 @@ public abstract class SQLDatabase implements SQLDB {
     @Override
     public Set<TypeHandler> getTypeHandlers() {
         Set<TypeHandler> typeHandlers = new HashSet<>(this.typeHandlers);
-        typeHandlers.addAll(Set.of(new BooleanHandler(), new DoubleHandler(), new EnumHandler(), new FloatHandler(), new IntegerHandler(), new LongHandler(), new StringHandler(), new UUIDHander(), new ValueHandler()));
+        typeHandlers.addAll(Set.of(new BooleanHandler(), new DoubleHandler(), new EnumHandler(), new FloatHandler(), new IntegerHandler(), new LongHandler(), new StringHandler(), new UUIDHander()));
         if (registry != null) {
             typeHandlers.addAll(registry.getTypeHandlers());
         }
