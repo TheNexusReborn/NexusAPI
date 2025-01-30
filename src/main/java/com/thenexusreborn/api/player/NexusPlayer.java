@@ -5,6 +5,7 @@ import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
+import com.thenexusreborn.api.server.NexusServer;
 import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
@@ -52,6 +53,8 @@ public class NexusPlayer {
     protected PlayerProxy playerProxy;
     @ColumnIgnored
     protected Session session;
+    @ColumnIgnored
+    protected NexusServer server;
     
     @ColumnIgnored
     protected Stopwatch playTimeStopwatch;
@@ -80,6 +83,14 @@ public class NexusPlayer {
         this.playerTime = new PlayerTime(uniqueId);
         this.experience = new PlayerExperience(uniqueId);
         this.balance = new PlayerBalance(uniqueId);
+    }
+
+    public NexusServer getServer() {
+        return server;
+    }
+
+    public void setServer(NexusServer server) {
+        this.server = server;
     }
 
     public PlayerBalance getBalance() {
