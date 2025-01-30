@@ -102,4 +102,8 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     public Set<UUID> getPlayers() {
         return players;
     }
+    
+    public void teleportToSpawn(UUID uuid) {
+        
+    }
 }
