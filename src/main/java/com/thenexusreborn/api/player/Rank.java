@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public enum Rank {
     NEXUS("&4", true, 10), 
+    CONSOLE("&4", false, 0),
     ADMIN("&c", true, 10),
     HEAD_MOD("&5", true, "HEAD MOD", 9),
     SR_MOD("&5", true, "SR MOD", 8.5),
@@ -84,5 +85,9 @@ public enum Rank {
         }
         
         return null;
+    }
+
+    public boolean isBold() {
+        return bold;
     }
 }
