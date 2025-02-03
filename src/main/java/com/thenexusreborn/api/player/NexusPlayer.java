@@ -352,9 +352,8 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     public void setActiveTag(String active) {
         if (active == null || active.equalsIgnoreCase("null")) {
             this.activeTag = null;
-        }
-        if (this.tags.containsKey(active)) {
-            this.activeTag = active;
+        } else if (this.tags.containsKey(active.toUpperCase())) {
+            this.activeTag = active.toUpperCase();
         }
     }
 
@@ -363,11 +362,11 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public void addTag(Tag tag) {
-        this.tags.put(tag.getName(), tag);
+        this.tags.put(tag.getName().toUpperCase(), tag);
     }
 
     public void removeTag(String tag) {
-        this.tags.remove(tag);
+        this.tags.remove(tag.toUpperCase());
     }
 
     public void addAllTags(List<Tag> tags) {
@@ -375,7 +374,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public boolean isTagUnlocked(String tag) {
-        return this.tags.containsKey(tag);
+        return this.tags.containsKey(tag.toUpperCase());
     }
 
     public Set<String> getTags() {
