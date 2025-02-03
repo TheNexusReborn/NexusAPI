@@ -66,7 +66,11 @@ public abstract class PlayerManager {
     }
 
     public String getNameFromUUID(UUID uuid) {
-        return this.uuidNameMap.get(uuid).name;
+        Name name = this.uuidNameMap.get(uuid);
+        if (name == null) {
+            return null;
+        }
+        return name.name;
     }
     
     public Rank getPlayerRank(UUID uuid) {
