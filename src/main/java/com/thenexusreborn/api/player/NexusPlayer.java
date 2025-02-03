@@ -19,7 +19,7 @@ import java.util.*;
 
 @TableName("players")
 @TableHandler(PlayerObjectHandler.class)
-public class NexusPlayer {
+public class NexusPlayer implements Comparable<NexusPlayer> {
     
     protected long id;
     protected UUID uniqueId;
@@ -402,5 +402,10 @@ public class NexusPlayer {
         if (this.playerProxy != null) {
             this.playerProxy.showXPActionBar();
         }
+    }
+
+    @Override
+    public int compareTo(NexusPlayer o) {
+        return Long.compare(this.id, o.id);
     }
 }
