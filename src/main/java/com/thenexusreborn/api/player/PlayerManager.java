@@ -4,17 +4,27 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.stardevllc.helper.Pair;
+import com.stardevllc.helper.StringHelper;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentType;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public abstract class PlayerManager {
 
+    private static final String UUID_URL = "https://api.mojang.com/users/profiles/minecraft/{name}";
+    
     public static final Set<UUID> NEXUS_TEAM = Set.of(UUID.fromString("3f7891ce-5a73-4d52-a2ba-299839053fdc"), UUID.fromString("fc6a3e38-c1c0-40a6-b7b9-152ffdadc053"), UUID.fromString("84c55f0c-2f09-4cf6-9924-57f536eb2228"));
 
     protected final Map<UUID, NexusPlayer> players = new HashMap<>(); //Online players
@@ -62,7 +72,22 @@ public abstract class PlayerManager {
     }
 
     public UUID getUUIDFromName(String rawName) {
-        return getUuidNameMap().inverse().get(new Name(rawName));
+        UUID uuid = getUuidNameMap().inverse().get(new Name(rawName));
+        
+        if (uuid == null) {
+            try {
+                URL url = new URI(UUID_URL.replace("{name}", rawName)).toURL();
+                URLConnection request = url.openConnection();
+                request.connect();
+
+                JsonObject jsonResponse = new JsonParser().parse(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
+                String rawId = jsonResponse.get("id").getAsString();
+                uuid = StringHelper.toUUID(rawId);
+                this.uuidNameMap.put(uuid, new Name(rawName));
+            } catch (Exception e) {}
+        }
+        
+        return uuid;
     }
 
     public String getNameFromUUID(UUID uuid) {
