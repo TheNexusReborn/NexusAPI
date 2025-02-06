@@ -1,5 +1,10 @@
 package com.thenexusreborn.api.gamearchive;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.stardevllc.helper.StringHelper;
+import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.player.PlayerManager;
 import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
@@ -26,6 +31,91 @@ public class GameInfo implements Comparable<GameInfo> {
     private final Set<GameAction> actions = new TreeSet<>();
     
     public GameInfo() {
+    }
+    
+    public GameInfo(JsonObject json) {
+        this.id = json.get("id").getAsLong();
+        this.gameStart = json.get("start").getAsLong();
+        this.gameEnd = json.get("end").getAsLong();
+        this.serverName = json.get("server").getAsString();
+        this.mapName = json.get("map").getAsString();
+        this.playerCount = json.get("playercount").getAsInt();
+        this.length = json.get("length").getAsLong();
+        
+        JsonObject playersObject = json.getAsJsonObject("players");
+        this.players = new String[playerCount];
+        int counter = 0;
+        for (Map.Entry<String, JsonElement> playerEntry : playersObject.entrySet()) {
+            this.players[counter] = playerEntry.getKey();
+            counter++;
+        }
+        
+        PlayerManager playerManager = NexusAPI.getApi().getPlayerManager();
+        
+        UUID winnerUUID = UUID.fromString(json.get("winner").getAsString());
+        this.winner = playerManager.getNameFromUUID(winnerUUID);
+        
+        UUID firstBloodUUID = UUID.fromString(json.get("firstblood").getAsString());
+        this.firstBlood = playerManager.getNameFromUUID(firstBloodUUID);
+        
+        JsonObject actionsObject = json.getAsJsonObject("actions");
+        for (Map.Entry<String, JsonElement> actionEntry : actionsObject.entrySet()) {
+            GameAction gameAction = new GameAction(actionEntry.getValue().getAsJsonObject());
+            this.actions.add(gameAction);
+        }
+    }
+    
+    public JsonObject toJson() {
+        JsonObject gameJson = new JsonObject();
+
+        gameJson.addProperty("id", getId());
+        gameJson.addProperty("start", getGameStart());
+        gameJson.addProperty("end", getGameEnd());
+        gameJson.addProperty("server", getServerName());
+        gameJson.addProperty("map", getMapName());
+        gameJson.addProperty("playercount", getPlayerCount());
+        gameJson.addProperty("length", getLength());
+
+        JsonObject playersObject = new JsonObject();
+
+        PlayerManager playerManager = NexusAPI.getApi().getPlayerManager();
+
+        for (String playerName : getPlayers()) {
+            UUID uuid = playerManager.getUUIDFromName(playerName);
+
+            if (uuid == null) {
+                playersObject.addProperty(playerName, "Could not get UUID.");
+            } else {
+                playersObject.addProperty(playerName, uuid.toString());
+            }
+        }
+
+        gameJson.add("players", playersObject);
+
+        if (!StringHelper.isEmpty(getWinner())) {
+            UUID uuid = playerManager.getUUIDFromName(getWinner());
+            if (uuid != null) {
+                gameJson.addProperty("winner", uuid.toString());
+            } else {
+                gameJson.addProperty("winner", getWinner());
+            }
+        }
+
+        if (!StringHelper.isEmpty(getFirstBlood())) {
+            UUID uuid = playerManager.getUUIDFromName(getFirstBlood());
+            if (uuid != null) {
+                gameJson.addProperty("firstblood", uuid.toString());
+            } else {
+                gameJson.addProperty("firstblood", getFirstBlood());
+            }
+        }
+
+        JsonObject actionsJson = new JsonObject();
+        for (GameAction action : getActions()) {
+            actionsJson.add(String.valueOf(action.getTimestamp()), action.toJson());
+        }
+        gameJson.add("actions", actionsJson);
+        return gameJson;
     }
     
     public GameInfo(long id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {

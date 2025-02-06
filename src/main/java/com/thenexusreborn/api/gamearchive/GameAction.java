@@ -1,5 +1,8 @@
 package com.thenexusreborn.api.gamearchive;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
@@ -37,6 +40,38 @@ public class GameAction implements Comparable<GameAction> {
         this.timestamp = timestamp;
         this.type = type;
         this.scope = "normal";
+    }
+    
+    public GameAction(JsonObject json) {
+        this.id = json.get("id").getAsLong();
+        this.timestamp = json.get("timestamp").getAsLong();
+        this.type = json.get("type").getAsString();
+        this.version = json.get("version").getAsInt();
+        
+        JsonObject dataObject = json.getAsJsonObject("data");
+        for (Map.Entry<String, JsonElement> dataEntry : dataObject.entrySet()) {
+            this.valueData.put(dataEntry.getKey(), dataEntry.getValue().getAsString());
+        }
+    }
+    
+    public JsonObject toJson() {
+        JsonObject actionObject = new JsonObject();
+        actionObject.addProperty("id", this.id);
+        actionObject.addProperty("timestamp", getTimestamp());
+        actionObject.addProperty("type", getType());
+        if (getVersion() == 1) {
+            convertFromV1toV2();
+            try {
+                NexusAPI.getApi().getPrimaryDatabase().save(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        actionObject.addProperty("version", getVersion());
+        JsonObject dataObject = new JsonObject();
+        getValueData().forEach(dataObject::addProperty);
+        actionObject.add("data", dataObject);
+        return actionObject;
     }
 
     public String getScope() {
