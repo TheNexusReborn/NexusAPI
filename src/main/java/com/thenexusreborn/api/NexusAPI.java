@@ -157,6 +157,7 @@ public abstract class NexusAPI {
             UUID uniqueId = (UUID) row.getObject("uniqueId");
             String name = row.getString("name");
             PlayerRanks playerRanks = new RanksCodec().decode(row.getString("ranks"));
+            playerRanks.setUniqueId(uniqueId);
             playerManager.getUuidNameMap().put(uniqueId, new Name(name));
             playerManager.getUuidRankMap().put(uniqueId, playerRanks);
         }
