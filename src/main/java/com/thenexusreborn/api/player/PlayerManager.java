@@ -32,6 +32,8 @@ public abstract class PlayerManager {
     protected final BiMap<UUID, Name> uuidNameMap = HashBiMap.create();
     protected final Map<UUID, PlayerRanks> uuidRankMap = new HashMap<>();
     protected final Set<IPEntry> ipHistory = new HashSet<>();
+    protected final Map<UUID, Set<String>> ipsUsedByPlayers = new HashMap<>();
+    protected final Map<String, Set<UUID>> playersByIP = new HashMap<>();
     
     public static class Name {
         private String name;
@@ -99,7 +101,20 @@ public abstract class PlayerManager {
     }
     
     public Rank getPlayerRank(UUID uuid) {
-        return this.uuidRankMap.get(uuid).get();
+        PlayerRanks playerRanks = this.uuidRankMap.get(uuid);
+        if (playerRanks == null) {
+            if (NEXUS_TEAM.contains(uuid)) {
+                return Rank.NEXUS;
+            } else {
+                return Rank.MEMBER;
+            }
+        }
+        
+        if (playerRanks.getUniqueId() == null) {
+            playerRanks.setUniqueId(uuid);
+        }
+        
+        return playerRanks.get();
     }
     
     public PlayerRanks getPlayerRanks(UUID uuid) {
@@ -147,20 +162,40 @@ public abstract class PlayerManager {
         NexusAPI.getApi().getPrimaryDatabase().saveSilent(nexusPlayer);
         return nexusPlayer;
     }
+    
+    public Set<String> getIPsUsedByPlayer(UUID uuid) {
+        if (this.ipsUsedByPlayers.containsKey(uuid)) {
+            return new HashSet<>(this.ipsUsedByPlayers.get(uuid));
+        }
+        
+        Set<String> ips = new HashSet<>();
+        
+        for (IPEntry ipEntry : this.ipHistory) {
+            UUID ipId = ipEntry.getUuid();
+            if (ipId.equals(uuid)) {
+                ips.add(ipEntry.getIp());
+            }
+        }
+        
+        this.ipsUsedByPlayers.put(uuid, ips);
+        
+        return ips;
+    }
 
     public Set<UUID> getPlayersByIp(String ip) {
-        Set<IPEntry> allIps = new HashSet<>();
+        if (this.playersByIP.containsKey(ip)) {
+            return new HashSet<>(this.playersByIP.get(ip));
+        }
+        
         Set<UUID> players = new HashSet<>();
-        for (IPEntry ipEntry : getIpHistory()) {
-            if (ipEntry.getIp().equalsIgnoreCase(ip)) {
-                allIps.add(ipEntry);
+
+        for (IPEntry ipEntry : this.ipHistory) {
+            if (ipEntry.getIp().equals(ip)) {
                 players.add(ipEntry.getUuid());
             }
         }
-
-        for (IPEntry ipEntry : allIps) {
-            players.add(ipEntry.getUuid());
-        }
+        
+        this.playersByIP.put(ip, players);
 
         return players;
     }
@@ -198,6 +233,17 @@ public abstract class PlayerManager {
         IPEntry ipEntry = new IPEntry(hostName, uniqueId);
         NexusAPI.getApi().getPrimaryDatabase().saveSilent(ipEntry);
         playerManager.getIpHistory().add(ipEntry);
+        if (this.playersByIP.containsKey(hostName)) {
+            this.playersByIP.get(hostName).add(uniqueId);
+        } else {
+            this.playersByIP.put(hostName, new HashSet<>(Set.of(uniqueId)));
+        }
+        
+        if (this.ipsUsedByPlayers.containsKey(uniqueId)) {
+            this.ipsUsedByPlayers.get(uniqueId).add(hostName);
+        } else {
+            this.ipsUsedByPlayers.put(uniqueId, new HashSet<>(Set.of(hostName)));
+        }
     }
 
     public NexusPlayer getOrLoadNexusPlayer(UUID uuid) {
