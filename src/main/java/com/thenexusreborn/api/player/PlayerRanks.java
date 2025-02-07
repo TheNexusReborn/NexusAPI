@@ -13,6 +13,10 @@ public class PlayerRanks {
     }
     
     public Rank get() {
+        if (this.uniqueId == null) {
+            return Rank.MEMBER;
+        }
+        
         if (this.uniqueId.toString().equals("3f7891ce-5a73-4d52-a2ba-299839053fdc")) {
             return Rank.NEXUS;
         }
