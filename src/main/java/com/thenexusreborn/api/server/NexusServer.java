@@ -3,6 +3,7 @@ package com.thenexusreborn.api.server;
 import com.stardevllc.property.IntegerProperty;
 import com.stardevllc.property.ObjectProperty;
 import com.stardevllc.property.StringProperty;
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.NexusPlayer;
 
 import java.util.HashSet;
@@ -31,6 +32,33 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
     
     public abstract void join(NexusPlayer player);
     public abstract void quit(NexusPlayer player);
+    
+    public void join(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        
+        NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+        if (nexusPlayer == null) {
+            return;
+        }
+        
+        join(nexusPlayer);
+    }
+    
+    public void quit(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        
+        NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+        if (nexusPlayer == null) {
+            this.players.remove(uuid);
+            return;
+        }
+        
+        quit(nexusPlayer);
+    }
     
     public abstract void onStart();
     public abstract void onStop();
