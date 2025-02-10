@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.sql.objects;
 
 import com.stardevllc.helper.ReflectionHelper;
+import com.stardevllc.observable.Property;
 import com.thenexusreborn.api.sql.annotations.ID;
 import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
@@ -71,7 +72,9 @@ public class Table implements Comparable<Table> {
                 continue;
             }
             
-            if (Modifier.isFinal(field.getModifiers())) {
+            boolean isProperty = Property.class.isAssignableFrom(field.getType());
+            
+            if (Modifier.isFinal(field.getModifiers()) && !isProperty) {
                 continue;
             }
     

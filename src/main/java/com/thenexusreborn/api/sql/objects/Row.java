@@ -1,5 +1,7 @@
 package com.thenexusreborn.api.sql.objects;
 
+import com.thenexusreborn.api.sql.objects.typehandlers.PropertyTypeHandler;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -33,6 +35,8 @@ public class Row {
                 
                 if (rs.getObject(i) == null) {
                     this.data.put(columnName, null);
+                } else if (column.getTypeHandler() instanceof PropertyTypeHandler) {
+                    this.data.put(columnName, rs.getObject(i));  
                 } else if (column.getCodec() != null) {
                     data.put(columnName, column.getCodec().decode(rs.getString(i)));
                 } else if (column.getTypeHandler() != null) {

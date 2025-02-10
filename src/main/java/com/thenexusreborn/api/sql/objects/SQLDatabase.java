@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.sql.objects;
 
+import com.stardevllc.observable.Property;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.interfaces.SQLDB;
 import com.thenexusreborn.api.sql.objects.typehandlers.*;
@@ -31,9 +32,11 @@ public abstract class SQLDatabase implements SQLDB {
     protected final LinkedList<Object> queue = new LinkedList<>();
 
     protected SQLDatabase() {
+        this.typeHandlers.addAll(Set.of(new BooleanHandler(), new DoubleHandler(), new EnumHandler(), new FloatHandler(), new IntegerHandler(), new LongHandler(), new StringHandler(), new UUIDHander()));
     }
 
     public SQLDatabase(Logger logger, SQLProperties properties) {
+        this();
         this.logger = logger;
         this.name = properties.getDatabaseName();
         this.user = properties.getUsername();
@@ -160,10 +163,28 @@ public abstract class SQLDatabase implements SQLDB {
                     continue;
                 }
 
-                column.getField().setAccessible(true);
-                column.getField().set(object, data);
+                Field field = column.getField();
+                field.setAccessible(true);
+
+                if (Property.class.isAssignableFrom(field.getType())) {
+                    Object fieldValue = field.get(object);
+                    Property<Object> property = (Property<Object>) fieldValue;
+                    System.out.println(property.getTypeClass());
+                    System.out.println(this.typeHandlers.size());
+                    for (TypeHandler typeHandler : this.typeHandlers) {
+                        if (typeHandler.matches(property.getTypeClass())) {
+                            System.out.println("Found type handler: " + typeHandler.getClass().getSimpleName());
+                            data = typeHandler.deserializer.deserialize(column, data);
+                            break;
+                        }
+                    }
+                    property.setValue(data);
+                } else {
+                    field.set(object, data);
+                }
             } catch (Exception e) {
-                logger.severe("Error while retrieving data from database: " + e.getMessage());
+                logger.severe("Error while retrieving data from database: ");
+                e.printStackTrace();
             }
         }
 
@@ -488,7 +509,7 @@ public abstract class SQLDatabase implements SQLDB {
     @Override
     public int deleteSilent(Object object) {
         try {
-           return delete(object);
+            return delete(object);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -550,7 +571,7 @@ public abstract class SQLDatabase implements SQLDB {
             return statement.executeUpdate("delete from `" + table.getName() + "` where `" + primaryColumn.getName() + "`='" + id + "';");
         }
     }
-    
+
     public int count(Class<?> clazz) throws SQLException {
         Table table = getTable(clazz);
         if (table == null) {
@@ -656,6 +677,9 @@ public abstract class SQLDatabase implements SQLDB {
     public void execute(String sql) throws SQLException {
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
+        } catch (SQLException e) {
+            System.out.println(sql);
+            throw e;
         }
     }
 

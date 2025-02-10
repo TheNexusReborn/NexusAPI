@@ -29,6 +29,9 @@ public class EnumHandler extends TypeHandler {
     
     @Override
     public boolean matches(Class<?> clazz) {
+        if (clazz == null) {
+            return false;
+        }
         return Enum.class.isAssignableFrom(clazz);
     }
 }

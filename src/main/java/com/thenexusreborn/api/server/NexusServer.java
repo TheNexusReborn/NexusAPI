@@ -22,7 +22,7 @@ public abstract sealed class NexusServer permits ProxyServer, InstanceServer, Vi
 
     public NexusServer(String name, ServerType type, String mode, int maxPlayers) {
         this.name = new StringProperty(this, "name", name);
-        this.type = new ObjectProperty<>(this, "type", type);
+        this.type = new ObjectProperty<>(ServerType.class, this, "type", type);
         this.mode = new StringProperty(this, "mode", mode);
         this.status = new StringProperty(this, "status", "");
         this.state = new StringProperty(this, "state", "");
