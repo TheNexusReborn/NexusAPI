@@ -1,7 +1,9 @@
 package com.thenexusreborn.api.sql.objects;
 
+import com.stardevllc.observable.Property;
 import com.thenexusreborn.api.sql.annotations.ID;
 import com.thenexusreborn.api.sql.annotations.column.*;
+import com.thenexusreborn.api.sql.objects.typehandlers.PropertyTypeHandler;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -69,6 +71,11 @@ public class Column implements Comparable<Column> {
             }
     
             type = codecType;
+        }
+        
+        if (Property.class.isAssignableFrom(field.getType())) {
+            type = "varchar(1000)";
+            typeHandler = new PropertyTypeHandler();
         }
         
         primaryKey = field.isAnnotationPresent(PrimaryKey.class);

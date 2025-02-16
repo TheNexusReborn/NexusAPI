@@ -13,7 +13,7 @@ public abstract non-sealed class InstanceServer extends NexusServer {
     
     public InstanceServer(String name, String mode, int maxPlayers) {
         super(name, ServerType.INSTANCE, mode, maxPlayers);
-        this.primaryVirtualServer = new ObjectProperty<>(this, "primaryVirtualServer", null);
+        this.primaryVirtualServer = new ObjectProperty<>(VirtualServer.class, this, "primaryVirtualServer", null);
     }
 
     public ServerRegistry<VirtualServer> getChildServers() {

@@ -147,6 +147,11 @@ public class GameAction implements Comparable<GameAction> {
     }
     
     public GameAction addValueData(String key, Object value) {
+        if (value == null) {
+            System.out.println("Null data for key " + key + " while adding value data to Game Action");
+            return null;
+        }
+        
         valueData.put(key, value.toString());
         return this;
     }

@@ -10,7 +10,7 @@ public abstract non-sealed class VirtualServer extends NexusServer {
     
     public VirtualServer(InstanceServer parent, String name, String mode, int maxPlayers) {
         super(name, ServerType.VIRTUAL, mode, maxPlayers);
-        this.parentServer = new ObjectProperty<>(this, "parentServer", parent);
+        this.parentServer = new ObjectProperty<>(InstanceServer.class, this, "parentServer", parent);
         
         this.parentServer.addListener(e -> {
             if (e.oldValue() != null) {
