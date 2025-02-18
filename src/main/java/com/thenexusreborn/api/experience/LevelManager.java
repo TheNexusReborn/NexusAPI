@@ -8,13 +8,8 @@ public class LevelManager {
 
     public void init() {
         addLevel(new ExperienceLevel(0, 0));
-        for (int i = 1; i <= 100; i++) {
-            ExperienceLevel playerLevel;
-            if (i <= 5) {
-                playerLevel = new ExperienceLevel(i, i * 1000);
-            } else {
-                playerLevel = new ExperienceLevel(i, 5000);
-            }
+        for (int i = 1; i <= 1000; i++) {
+            ExperienceLevel playerLevel = new ExperienceLevel(i, i * 1000);
             playerLevel.addReward(new CreditReward(i * 100));
             addLevel(playerLevel);
         }
