@@ -3,6 +3,7 @@ package com.thenexusreborn.api.player;
 import com.stardevllc.clock.clocks.Stopwatch;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
+import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.server.NexusServer;
@@ -62,6 +63,9 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     @ColumnIgnored
     private Map<String, Tag> tags = new HashMap<>();
     
+    @ColumnIgnored
+    protected Nickname nickname;
+    
     private String activeTag;
     
     private String discordId;
@@ -99,12 +103,20 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         }
         return balance;
     }
-
-    public PlayerExperience getExperience() {
+    
+    public PlayerExperience getTrueExperience() {
         if (this.experience.getUniqueId() == null) {
             experience.setUniqueId(uniqueId);
         }
         return experience;
+    }
+
+    public PlayerExperience getExperience() {
+        if (getNickname() != null && getNickname().getFakeExperience() != null) {
+            return getNickname().getFakeExperience();
+        }
+        
+        return getTrueExperience();
     }
 
     public PlayerTime getPlayerTime() {
@@ -127,7 +139,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public String getTablistName() {
-        if (getRank() == Rank.MEMBER) {
+        if (getEffectiveRank() == Rank.MEMBER) {
             return Rank.MEMBER.getColor() + getName();
         } else {
             return "&f" + getName();
@@ -140,7 +152,15 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         }
         return this.playerProxy;
     }
-
+    
+    public void setNickname(Nickname nickname) {
+        this.nickname = nickname;
+    }
+    
+    public Nickname getNickname() {
+        return nickname;
+    }
+    
     public NexusPlayer getLastMessage() {
         return NexusAPI.getApi().getPlayerManager().getNexusPlayer(this.lastMessage);
     }
@@ -196,12 +216,32 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     public void setLastLogin(long lastLogin) {
         this.playerTime.setLastLogin(lastLogin);
     }
+    
+    public Rank getEffectiveRank() {
+        if (getNickname() != null) {
+            return nickname.getRank();
+        } else {
+            return getRank();
+        }
+    }
+    
+    public String getTrueDisplayName() {
+        Rank rank = getRank();
+        
+        if (rank != Rank.MEMBER) {
+            return rank.getPrefix() + " &f" + getTrueName();
+        } else {
+            return rank.getPrefix() + getTrueName();
+        }
+    }
 
     public String getDisplayName() {
-        if (getRank() != Rank.MEMBER) {
-            return getRank().getPrefix() + " &f" + getName();
+        Rank rank = getEffectiveRank();
+        
+        if (rank != Rank.MEMBER) {
+            return rank.getPrefix() + " &f" + getName();
         } else {
-            return getRank().getPrefix() + getName();
+            return rank.getPrefix() + getName();
         }
     }
     
@@ -267,6 +307,26 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public String getName() {
+        if (getNickname() != null) {
+            return nickname.getName();
+        }
+        
+        if (getPlayer() != null) {
+            if (getPlayer().getName() != null) {
+                return getPlayer().getName();
+            }
+            
+            return getPlayer().getName();
+        }
+                
+        return name;
+    }
+    
+    public String getTrueName() {
+        if (nickname != null) {
+            return nickname.getTrueName();
+        }
+        
         return name;
     }
     
@@ -325,7 +385,11 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public String getColoredName() {
-        return getRank().getColor() + getName();
+        return getEffectiveRank().getColor() + getName();
+    }
+    
+    public String getTrueColoredName() {
+        return getRank().getColor() + getTrueName();
     }
     
     public void removeCredits(int credits) {

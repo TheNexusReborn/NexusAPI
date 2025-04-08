@@ -2,6 +2,7 @@ package com.thenexusreborn.api.sql.objects.objecthandler;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
+import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.sql.objects.ObjectHandler;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
@@ -22,7 +23,7 @@ public class PlayerObjectHandler extends ObjectHandler {
         player.setPlayerProxy(PlayerProxy.of(player.getUniqueId()));
         
         try {
-            PlayerExperience experience = database.get(PlayerExperience.class, "uniqueid", player.getUniqueId().toString()).get(0);
+            PlayerExperience experience = database.get(PlayerExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
             player.getExperience().setLevel(experience.getLevel());
             player.getExperience().setLevelXp(experience.getLevelXp());
         } catch (Exception e) {
@@ -32,7 +33,7 @@ public class PlayerObjectHandler extends ObjectHandler {
         }
 
         try {
-            PlayerTime playerTime = database.get(PlayerTime.class, "uniqueid", player.getUniqueId().toString()).get(0);
+            PlayerTime playerTime = database.get(PlayerTime.class, "uniqueid", player.getUniqueId().toString()).getFirst();
             player.getPlayerTime().setFirstJoined(playerTime.getFirstJoined());
             player.getPlayerTime().setLastLogin(playerTime.getLastLogin());
             player.getPlayerTime().setLastLogout(playerTime.getLastLogout());
@@ -44,9 +45,20 @@ public class PlayerObjectHandler extends ObjectHandler {
         }
 
         try {
-            PlayerBalance balance = database.get(PlayerBalance.class, "uniqueid", player.getUniqueId().toString()).get(0);
+            PlayerBalance balance = database.get(PlayerBalance.class, "uniqueid", player.getUniqueId().toString()).getFirst();
             player.getBalance().setCredits(balance.getCredits());
             player.getBalance().setNexites(balance.getNexites());
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
+            }
+        }
+        
+        try {
+            Nickname nickname = database.get(Nickname.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+            if (nickname != null) {
+                player.setNickname(nickname);
+            }
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 e.printStackTrace();
@@ -92,6 +104,12 @@ public class PlayerObjectHandler extends ObjectHandler {
         for (IPEntry ipEntry : player.getIpHistory()) {
             database.saveSilent(ipEntry);
             NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);
+        }
+        
+        if (player.getNickname() != null) {
+            database.saveSilent(player.getNickname());
+        } else {
+            database.deleteSilent(Nickname.class, player.getUniqueId().toString());
         }
     }
 }
