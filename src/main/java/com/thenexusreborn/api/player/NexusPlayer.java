@@ -96,12 +96,20 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     public void setServer(NexusServer server) {
         this.server = server;
     }
-
-    public PlayerBalance getBalance() {
+    
+    public PlayerBalance getTrueBalance() {
         if (balance.getUniqueId() == null) {
             balance.setUniqueId(uniqueId);
         }
         return balance;
+    }
+
+    public PlayerBalance getBalance() {
+        if (getNickname() != null && getNickname().getFakeBalance() != null) {
+            return getNickname().getFakeBalance();
+        }
+        
+        return getTrueBalance();
     }
     
     public PlayerExperience getTrueExperience() {
@@ -118,12 +126,20 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         
         return getTrueExperience();
     }
-
-    public PlayerTime getPlayerTime() {
+    
+    public PlayerTime getTrueTime() {
         if (this.playerTime.getUniqueId() == null) {
             this.playerTime.setUniqueId(uniqueId);
         }
         return playerTime;
+    }
+
+    public PlayerTime getPlayerTime() {
+        if (getNickname() != null && getNickname().getFakeTime() != null) {
+            return getNickname().getFakeTime();
+        }
+        
+        return getTrueTime();
     }
 
     public NexusScoreboard getScoreboard() {
@@ -263,27 +279,27 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public long getLastLogout() {
-        return this.playerTime.getLastLogout();
+        return getPlayerTime().getLastLogout();
     }
     
     public void setLastLogout(long lastLogout) {
-        this.playerTime.setLastLogout(lastLogout);
+        getPlayerTime().setLastLogout(lastLogout);
     }
     
     public void addCredits(int credits) {
-        this.balance.addCredits(credits);
+        getBalance().addCredits(credits);
     }
     
     public void addXp(double xp) {
-        boolean leveledUp = this.experience.addExperience(xp);
+        boolean leveledUp = getExperience().addExperience(xp);
         
         if (leveledUp) {
             if (this.playerProxy != null) {
                 this.playerProxy.sendMessage("");
                 this.playerProxy.sendMessage("&6&l>> &a&lLEVEL UP!");
-                this.playerProxy.sendMessage("&6&l>> &e&l" + (this.experience.getLevel() - 1) + " &a-> &e&l" + this.experience.getLevel());
+                this.playerProxy.sendMessage("&6&l>> &e&l" + (getExperience().getLevel() - 1) + " &a-> &e&l" + getExperience().getLevel());
                 this.playerProxy.sendMessage("");
-                for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(this.experience.getLevel()).getRewards()) {
+                for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(getExperience().getLevel()).getRewards()) {
                     reward.applyReward(this);
                 }
             }

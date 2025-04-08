@@ -2,8 +2,7 @@ package com.thenexusreborn.api.sql.objects.objecthandler;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
-import com.thenexusreborn.api.nickname.NickExperience;
-import com.thenexusreborn.api.nickname.Nickname;
+import com.thenexusreborn.api.nickname.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.sql.objects.*;
 import com.thenexusreborn.api.tags.Tag;
@@ -71,7 +70,32 @@ public class PlayerObjectHandler extends ObjectHandler {
             try {
                 NickExperience nickExperience = database.get(NickExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
                 if (nickExperience != null) {
+                    nickExperience.setTrueExperience(player.getTrueExperience());
                     player.getNickname().setFakeExperience(nickExperience);
+                }
+            } catch (Exception e) {
+                if (e instanceof SQLException) {
+                    e.printStackTrace();
+                }
+            }
+            
+            try {
+                NickBalance nickBalance = database.get(NickBalance.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+                if (nickBalance != null) {
+                    nickBalance.setTrueBalance(player.getTrueBalance());
+                    player.getNickname().setFakeBalance(nickBalance);
+                }
+            } catch (Exception e) {
+                if (e instanceof SQLException) {
+                    e.printStackTrace();
+                }
+            }
+            
+            try {
+                NickTime nickTime = database.get(NickTime.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+                if (nickTime != null) {
+                    nickTime.setTrueTime(player.getTrueTime());
+                    player.getNickname().setFakeTime(nickTime);
                 }
             } catch (Exception e) {
                 if (e instanceof SQLException) {
@@ -124,9 +148,13 @@ public class PlayerObjectHandler extends ObjectHandler {
         if (player.getNickname() != null) {
             database.saveSilent(player.getNickname());
             database.saveSilent(player.getNickname().getFakeExperience());
+            database.saveSilent(player.getNickname().getFakeBalance());
+            database.saveSilent(player.getNickname().getFakeTime());
         } else {
             database.deleteSilent(Nickname.class, player.getUniqueId().toString());
             database.deleteSilent(NickExperience.class, player.getUniqueId().toString());
+            database.deleteSilent(NickBalance.class, player.getUniqueId().toString());
+            database.deleteSilent(NickTime.class, player.getUniqueId().toString());
         }
     }
 }

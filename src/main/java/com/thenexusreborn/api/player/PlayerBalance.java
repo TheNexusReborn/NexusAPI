@@ -9,9 +9,9 @@ import java.util.UUID;
 public class PlayerBalance {
     @PrimaryKey
     private UUID uniqueId;
-    private double nexites, credits;
+    protected double nexites, credits;
     
-    private PlayerBalance() {}
+    protected PlayerBalance() {}
 
     public PlayerBalance(UUID uniqueId) {
         this.uniqueId = uniqueId;

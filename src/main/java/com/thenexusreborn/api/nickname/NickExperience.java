@@ -10,31 +10,39 @@ import java.util.UUID;
 public class NickExperience extends PlayerExperience {
     
     @ColumnIgnored
-    private PlayerExperience mainExperience;
+    private PlayerExperience trueExperience;
     
-    public NickExperience(UUID uniqueId, int level, PlayerExperience mainExperience) {
+    public NickExperience(UUID uniqueId) {
+        super(uniqueId);
+    }
+    
+    public NickExperience(UUID uniqueId, int level, PlayerExperience trueExperience) {
         super(uniqueId);
         this.level = level;
-        this.mainExperience = mainExperience;
+        this.trueExperience = trueExperience;
     }
     
     @Override
     public boolean addExperience(double xp) {
-        mainExperience.addExperience(xp);
-        return super.addExperience(xp);
+        super.addExperience(xp);
+        return trueExperience.addExperience(xp);
     }
     
     @Override
     public void setLevel(int level) {
-        mainExperience.setLevel(level);
+        trueExperience.setLevel(level);
         super.setLevel(level);
     }
     
     @Override
     public void setLevelXp(double levelXp) {
-        mainExperience.setLevelXp(levelXp);
+        trueExperience.setLevelXp(levelXp);
         super.setLevelXp(levelXp);
     }
     
     protected NickExperience() {}
+    
+    public void setTrueExperience(PlayerExperience trueExperience) {
+        this.trueExperience = trueExperience;
+    }
 }

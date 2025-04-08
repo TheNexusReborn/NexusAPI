@@ -1,7 +1,7 @@
 package com.thenexusreborn.api.nickname;
 
 import com.thenexusreborn.api.experience.PlayerExperience;
-import com.thenexusreborn.api.player.Rank;
+import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
@@ -20,15 +20,23 @@ public class Nickname {
     @ColumnIgnored
     private PlayerExperience fakeExperience;
     
+    @ColumnIgnored
+    private PlayerBalance fakeBalance;
+    
+    @ColumnIgnored
+    private PlayerTime fakeTime;
+    
     private Nickname() {}
     
-    public Nickname(UUID uniqueId, String name, String trueName, String skin, Rank rank, PlayerExperience fakeExperience) {
+    public Nickname(UUID uniqueId, String name, String trueName, String skin, Rank rank) {
         this.uniqueId = uniqueId;
         this.name = name;
         this.trueName = trueName;
         this.skin = skin;
         this.rank = rank;
-        this.fakeExperience = fakeExperience;
+        this.fakeExperience = new NickExperience(uniqueId);
+        this.fakeBalance = new NickBalance(uniqueId);
+        this.fakeTime = new NickTime(uniqueId);
     }
     
     public UUID getUniqueId() {
@@ -55,7 +63,23 @@ public class Nickname {
         return fakeExperience;
     }
     
+    public PlayerBalance getFakeBalance() {
+        return fakeBalance;
+    }
+    
+    public PlayerTime getFakeTime() {
+        return fakeTime;
+    }
+    
     public void setFakeExperience(PlayerExperience fakeExperience) {
         this.fakeExperience = fakeExperience;
+    }
+    
+    public void setFakeBalance(PlayerBalance fakeBalance) {
+        this.fakeBalance = fakeBalance;
+    }
+    
+    public void setFakeTime(PlayerTime fakeTime) {
+        this.fakeTime = fakeTime;
     }
 }

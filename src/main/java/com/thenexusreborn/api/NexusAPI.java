@@ -7,8 +7,7 @@ import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
 import com.thenexusreborn.api.gamearchive.GameLogExporter;
-import com.thenexusreborn.api.nickname.NickExperience;
-import com.thenexusreborn.api.nickname.Nickname;
+import com.thenexusreborn.api.nickname.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
@@ -106,6 +105,8 @@ public abstract class NexusAPI {
                 database.registerClass(PlayerTime.class);
                 database.registerClass(PlayerBalance.class);
                 database.registerClass(NickExperience.class);
+                database.registerClass(NickBalance.class);
+                database.registerClass(NickTime.class);
                 database.registerClass(Nickname.class);
                 database.registerClass(IPEntry.class);
                 database.registerClass(Toggle.class);
