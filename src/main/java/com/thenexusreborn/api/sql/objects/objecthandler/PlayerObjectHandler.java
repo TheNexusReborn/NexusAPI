@@ -2,6 +2,7 @@ package com.thenexusreborn.api.sql.objects.objecthandler;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
+import com.thenexusreborn.api.nickname.NickExperience;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.sql.objects.ObjectHandler;
@@ -108,8 +109,10 @@ public class PlayerObjectHandler extends ObjectHandler {
         
         if (player.getNickname() != null) {
             database.saveSilent(player.getNickname());
+            database.saveSilent(player.getNickname().getFakeExperience());
         } else {
             database.deleteSilent(Nickname.class, player.getUniqueId().toString());
+            database.deleteSilent(NickExperience.class, player.getUniqueId().toString());
         }
     }
 }
