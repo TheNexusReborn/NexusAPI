@@ -39,6 +39,15 @@ public class Nickname {
         this.fakeTime = new NickTime(uniqueId);
     }
     
+    public void copyFrom(Nickname nickname) {
+        this.name = nickname.getName();
+        this.skin = nickname.getSkin();
+        this.rank = nickname.getRank();
+        this.fakeExperience = nickname.getFakeExperience();
+        this.fakeBalance = nickname.getFakeBalance();
+        this.fakeTime = nickname.getFakeTime();
+    }
+    
     public UUID getUniqueId() {
         return uniqueId;
     }

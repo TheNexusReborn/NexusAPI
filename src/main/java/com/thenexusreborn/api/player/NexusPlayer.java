@@ -170,7 +170,11 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public void setNickname(Nickname nickname) {
-        this.nickname = nickname;
+        if (this.nickname != null) {
+            this.nickname.copyFrom(nickname);
+        } else {
+            this.nickname = nickname;
+        }
     }
     
     public Nickname getNickname() {
