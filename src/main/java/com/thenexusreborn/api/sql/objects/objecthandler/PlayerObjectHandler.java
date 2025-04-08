@@ -5,13 +5,11 @@ import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.nickname.NickExperience;
 import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.player.*;
-import com.thenexusreborn.api.sql.objects.ObjectHandler;
-import com.thenexusreborn.api.sql.objects.SQLDatabase;
-import com.thenexusreborn.api.sql.objects.Table;
+import com.thenexusreborn.api.sql.objects.*;
 import com.thenexusreborn.api.tags.Tag;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
 
 public class PlayerObjectHandler extends ObjectHandler {
     public PlayerObjectHandler(Object object, SQLDatabase database, Table table) {
@@ -32,7 +30,7 @@ public class PlayerObjectHandler extends ObjectHandler {
                 e.printStackTrace();
             }
         }
-
+        
         try {
             PlayerTime playerTime = database.get(PlayerTime.class, "uniqueid", player.getUniqueId().toString()).getFirst();
             player.getPlayerTime().setFirstJoined(playerTime.getFirstJoined());
@@ -44,7 +42,7 @@ public class PlayerObjectHandler extends ObjectHandler {
                 e.printStackTrace();
             }
         }
-
+        
         try {
             PlayerBalance balance = database.get(PlayerBalance.class, "uniqueid", player.getUniqueId().toString()).getFirst();
             player.getBalance().setCredits(balance.getCredits());
@@ -60,19 +58,35 @@ public class PlayerObjectHandler extends ObjectHandler {
             if (nickname != null) {
                 player.setNickname(nickname);
             }
+            
+            NickExperience nickExperience = database.get(NickExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+            nickname.setFakeExperience(nickExperience);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 e.printStackTrace();
             }
         }
-    
+        
+        if (player.getNickname() != null) {
+            try {
+                NickExperience nickExperience = database.get(NickExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+                if (nickExperience != null) {
+                    player.getNickname().setFakeExperience(nickExperience);
+                }
+            } catch (Exception e) {
+                if (e instanceof SQLException) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
         try {
             List<Toggle> toggles = database.get(Toggle.class, "uuid", player.getUniqueId());
             player.getToggles().setAll(toggles);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+        
         try {
             List<IPEntry> ipEntries = database.get(IPEntry.class, "uuid", player.getUniqueId());
             for (IPEntry ipEntry : ipEntries) {
@@ -81,7 +95,7 @@ public class PlayerObjectHandler extends ObjectHandler {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        
         try {
             List<Tag> tags = database.get(Tag.class, "uuid", player.getUniqueId());
             player.addAllTags(tags);
@@ -97,11 +111,11 @@ public class PlayerObjectHandler extends ObjectHandler {
         if (player.getExperience() != null) {
             database.saveSilent(player.getExperience());
         }
-    
+        
         for (Toggle toggle : player.getToggles().findAll()) {
             database.saveSilent(toggle);
         }
-    
+        
         for (IPEntry ipEntry : player.getIpHistory()) {
             database.saveSilent(ipEntry);
             NexusAPI.getApi().getPlayerManager().getIpHistory().add(ipEntry);

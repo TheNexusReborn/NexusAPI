@@ -54,4 +54,8 @@ public class Nickname {
     public PlayerExperience getFakeExperience() {
         return fakeExperience;
     }
+    
+    public void setFakeExperience(PlayerExperience fakeExperience) {
+        this.fakeExperience = fakeExperience;
+    }
 }
