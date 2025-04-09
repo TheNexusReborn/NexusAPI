@@ -2,6 +2,7 @@ package com.thenexusreborn.api.punishment;
 
 import com.stardevllc.helper.StringHelper;
 import com.thenexusreborn.api.NexusAPI;
+import com.thenexusreborn.api.player.NexusPlayer;
 import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
@@ -155,12 +156,13 @@ public class Punishment implements Comparable<Punishment> {
         if (targetNameCache == null) {
             try {
                 UUID uuid = UUID.fromString(getTarget());
-                targetNameCache = NexusAPI.getApi().getPlayerManager().getNameFromUUID(uuid);
+                NexusPlayer nexusPlayer = NexusAPI.getApi().getPlayerManager().getNexusPlayer(uuid);
+                targetNameCache = nexusPlayer.getName();
                 if (targetNameCache == null) {
-                    targetNameCache = actor;
+                    targetNameCache = target;
                 }
             } catch (Exception e) {
-                this.targetNameCache = actor;
+                this.targetNameCache = target;
             }
         }
         return targetNameCache;
