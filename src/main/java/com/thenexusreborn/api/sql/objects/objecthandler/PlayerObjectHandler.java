@@ -152,9 +152,9 @@ public class PlayerObjectHandler extends ObjectHandler {
             database.saveSilent(player.getNickname().getFakeTime());
         } else {
             database.deleteSilent(Nickname.class, player.getUniqueId().toString());
-            database.deleteSilent(NickExperience.class, player.getUniqueId().toString());
-            database.deleteSilent(NickBalance.class, player.getUniqueId().toString());
-            database.deleteSilent(NickTime.class, player.getUniqueId().toString());
+            database.deleteSilent(NickExperience.class, player.getUniqueId().toString(), new Object[]{"persist"}, new Object[]{false});
+            database.deleteSilent(NickBalance.class, player.getUniqueId().toString(), new Object[]{"persist"}, new Object[]{false});
+            database.deleteSilent(NickTime.class, player.getUniqueId().toString(), new Object[]{"persist"}, new Object[]{false});
         }
     }
 }

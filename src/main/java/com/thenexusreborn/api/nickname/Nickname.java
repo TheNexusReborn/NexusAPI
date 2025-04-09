@@ -1,7 +1,6 @@
 package com.thenexusreborn.api.nickname;
 
-import com.thenexusreborn.api.experience.PlayerExperience;
-import com.thenexusreborn.api.player.*;
+import com.thenexusreborn.api.player.Rank;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
@@ -15,16 +14,18 @@ public class Nickname {
     private String name; //The name of the nickname
     private String trueName; //The true name of the player
     private String skin; //The identifier of the Skin. This must be compatible with the StarCore SkinManager
-    private Rank rank; //The rank displayed
+    private Rank rank; //The rank displayed'
+    
+    private boolean persist = false;
     
     @ColumnIgnored
-    private PlayerExperience fakeExperience;
+    private NickExperience fakeExperience;
     
     @ColumnIgnored
-    private PlayerBalance fakeBalance;
+    private NickBalance fakeBalance;
     
     @ColumnIgnored
-    private PlayerTime fakeTime;
+    private NickTime fakeTime;
     
     private Nickname() {}
     
@@ -46,6 +47,18 @@ public class Nickname {
         this.fakeExperience = nickname.getFakeExperience();
         this.fakeBalance = nickname.getFakeBalance();
         this.fakeTime = nickname.getFakeTime();
+        this.persist = nickname.persist;
+    }
+    
+    public boolean isPersist() {
+        return persist;
+    }
+    
+    public void setPersist(boolean persist) {
+        this.persist = persist;
+        this.fakeExperience.setPersist(persist);
+        this.fakeBalance.setPersist(persist);
+        this.fakeTime.setPersist(persist);
     }
     
     public UUID getUniqueId() {
@@ -68,27 +81,30 @@ public class Nickname {
         return rank;
     }
     
-    public PlayerExperience getFakeExperience() {
+    public NickExperience getFakeExperience() {
         return fakeExperience;
     }
     
-    public PlayerBalance getFakeBalance() {
+    public NickBalance getFakeBalance() {
         return fakeBalance;
     }
     
-    public PlayerTime getFakeTime() {
+    public NickTime getFakeTime() {
         return fakeTime;
     }
     
-    public void setFakeExperience(PlayerExperience fakeExperience) {
+    public void setFakeExperience(NickExperience fakeExperience) {
         this.fakeExperience = fakeExperience;
+        this.fakeExperience.setPersist(persist);
     }
     
-    public void setFakeBalance(PlayerBalance fakeBalance) {
+    public void setFakeBalance(NickBalance fakeBalance) {
         this.fakeBalance = fakeBalance;
+        this.fakeBalance.setPersist(persist);
     }
     
-    public void setFakeTime(PlayerTime fakeTime) {
+    public void setFakeTime(NickTime fakeTime) {
         this.fakeTime = fakeTime;
+        this.fakeTime.setPersist(persist);
     }
 }

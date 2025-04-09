@@ -9,6 +9,8 @@ import java.util.UUID;
 @TableName("nicktimes")
 public class NickTime extends PlayerTime {
     
+    private boolean persist;
+    
     @ColumnIgnored
     private PlayerTime trueTime;
     
@@ -24,6 +26,14 @@ public class NickTime extends PlayerTime {
         this.playtime = playTime;
         this.firstJoined = System.currentTimeMillis() - playtime;
         this.trueTime = trueTime;
+    }
+    
+    public void setPersist(boolean persist) {
+        this.persist = persist;
+    }
+    
+    public boolean isPersist() {
+        return persist;
     }
     
     @Override

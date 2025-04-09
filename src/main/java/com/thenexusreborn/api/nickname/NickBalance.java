@@ -9,6 +9,8 @@ import java.util.UUID;
 @TableName("nickbalances")
 public class NickBalance extends PlayerBalance {
     
+    private boolean persist;
+    
     @ColumnIgnored
     private PlayerBalance trueBalance;
     
@@ -24,6 +26,14 @@ public class NickBalance extends PlayerBalance {
     }
     
     protected NickBalance() {}
+    
+    public void setPersist(boolean persist) {
+        this.persist = persist;
+    }
+    
+    public boolean isPersist() {
+        return persist;
+    }
     
     @Override
     public double addNexites(double nexites) {

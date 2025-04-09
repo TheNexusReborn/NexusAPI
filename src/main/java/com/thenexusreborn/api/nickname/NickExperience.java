@@ -9,6 +9,8 @@ import java.util.UUID;
 @TableName("nickexperience")
 public class NickExperience extends PlayerExperience {
     
+    private boolean persist;
+    
     @ColumnIgnored
     private PlayerExperience trueExperience;
     
@@ -20,6 +22,14 @@ public class NickExperience extends PlayerExperience {
         super(uniqueId);
         this.level = level;
         this.trueExperience = trueExperience;
+    }
+    
+    public boolean isPersist() {
+        return persist;
+    }
+    
+    public void setPersist(boolean persist) {
+        this.persist = persist;
     }
     
     @Override
