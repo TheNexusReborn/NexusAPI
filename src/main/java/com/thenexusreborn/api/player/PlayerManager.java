@@ -77,14 +77,6 @@ public abstract class PlayerManager {
         UUID uuid = getUuidNameMap().inverse().get(new Name(rawName));
         
         if (uuid == null) {
-            for (NexusPlayer p : this.players.values()) {
-                if (p.isNicked()) {
-                    if (p.getNickname().getName().equalsIgnoreCase(rawName)) {
-                        return p.getUniqueId();
-                    }
-                }
-            }
-            
             try {
                 URL url = new URI(UUID_URL.replace("{name}", rawName)).toURL();
                 URLConnection request = url.openConnection();

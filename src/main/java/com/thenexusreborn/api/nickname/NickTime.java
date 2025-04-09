@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.nickname;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.PlayerTime;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
@@ -38,11 +39,15 @@ public class NickTime extends PlayerTime {
     
     @Override
     public long addPlaytime(long playtime) {
-        trueTime.addPlaytime(playtime);
+        getTrueTime().addPlaytime(playtime);
         return super.addPlaytime(playtime);
     }
     
     public PlayerTime getTrueTime() {
+        if (this.trueTime == null) {
+            this.trueTime = NexusAPI.getApi().getPlayerManager().getNexusPlayer(this.getUniqueId()).getTrueTime();
+        }
+        
         return trueTime;
     }
     

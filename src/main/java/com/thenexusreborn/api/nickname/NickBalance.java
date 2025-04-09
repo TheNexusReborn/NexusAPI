@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.nickname;
 
+import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.PlayerBalance;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
@@ -37,17 +38,25 @@ public class NickBalance extends PlayerBalance {
     
     @Override
     public double addNexites(double nexites) {
-        this.trueBalance.addNexites(nexites);
+        this.getTrueBalance().addNexites(nexites);
         return super.addNexites(nexites);
     }
     
     @Override
     public double addCredits(double credits) {
-        this.trueBalance.addCredits(credits);
+        this.getTrueBalance().addCredits(credits);
         return super.addCredits(credits);
     }
     
     public void setTrueBalance(PlayerBalance trueBalance) {
         this.trueBalance = trueBalance;
+    }
+    
+    public PlayerBalance getTrueBalance() {
+        if (this.trueBalance == null) {
+            this.trueBalance = NexusAPI.getApi().getPlayerManager().getNexusPlayer(this.getUniqueId()).getTrueBalance();
+        }
+        
+        return trueBalance;
     }
 }
