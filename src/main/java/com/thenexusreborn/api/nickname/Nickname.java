@@ -14,7 +14,8 @@ public class Nickname {
     private String name; //The name of the nickname
     private String trueName; //The true name of the player
     private String skin; //The identifier of the Skin. This must be compatible with the StarCore SkinManager
-    private Rank rank; //The rank displayed'
+    private Rank rank; //The rank displayed
+    private boolean active;
     
     private boolean persist = false;
     
@@ -47,11 +48,32 @@ public class Nickname {
         this.fakeExperience = nickname.getFakeExperience();
         this.fakeBalance = nickname.getFakeBalance();
         this.fakeTime = nickname.getFakeTime();
-        this.persist = nickname.persist;
+        this.persist = nickname.isPersist();
+        this.active = nickname.isActive();
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setSkin(String skin) {
+        this.skin = skin;
+    }
+    
+    public void setRank(Rank rank) {
+        this.rank = rank;
     }
     
     public boolean isPersist() {
         return persist;
+    }
+    
+    public boolean isActive() {
+        return active;
+    }
+    
+    public void setActive(boolean active) {
+        this.active = active;
     }
     
     public void setPersist(boolean persist) {

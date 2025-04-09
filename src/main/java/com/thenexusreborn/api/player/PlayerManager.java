@@ -78,7 +78,7 @@ public abstract class PlayerManager {
         
         if (uuid == null) {
             for (NexusPlayer p : this.players.values()) {
-                if (p.getNickname() != null) {
+                if (p.isNicked()) {
                     if (p.getNickname().getName().equalsIgnoreCase(rawName)) {
                         return p.getUniqueId();
                     }

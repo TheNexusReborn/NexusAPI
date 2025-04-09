@@ -105,7 +105,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public PlayerBalance getBalance() {
-        if (getNickname() != null && getNickname().getFakeBalance() != null) {
+        if (isNicked() && getNickname().getFakeBalance() != null) {
             return getNickname().getFakeBalance();
         }
         
@@ -120,7 +120,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public PlayerExperience getExperience() {
-        if (getNickname() != null && getNickname().getFakeExperience() != null) {
+        if (isNicked() && getNickname().getFakeExperience() != null) {
             return getNickname().getFakeExperience();
         }
         
@@ -135,7 +135,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public PlayerTime getPlayerTime() {
-        if (getNickname() != null && getNickname().getFakeTime() != null) {
+        if (isNicked() && getNickname().getFakeTime() != null) {
             return getNickname().getFakeTime();
         }
         
@@ -179,6 +179,10 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     
     public Nickname getNickname() {
         return nickname;
+    }
+    
+    public boolean isNicked() {
+        return nickname != null && nickname.isActive();
     }
     
     public NexusPlayer getLastMessage() {
@@ -238,7 +242,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public Rank getEffectiveRank() {
-        if (getNickname() != null) {
+        if (isNicked()) {
             return nickname.getRank();
         } else {
             return getRank();
@@ -327,7 +331,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public String getName() {
-        if (getNickname() != null) {
+        if (isNicked()) {
             return nickname.getName();
         }
         

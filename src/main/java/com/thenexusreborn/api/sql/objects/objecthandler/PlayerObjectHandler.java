@@ -58,49 +58,57 @@ public class PlayerObjectHandler extends ObjectHandler {
                 player.setNickname(nickname);
             }
             
-            NickExperience nickExperience = database.get(NickExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
-            nickname.setFakeExperience(nickExperience);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 e.printStackTrace();
             }
         }
         
-        if (player.getNickname() != null) {
-            try {
-                NickExperience nickExperience = database.get(NickExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
-                if (nickExperience != null) {
-                    nickExperience.setTrueExperience(player.getTrueExperience());
-                    player.getNickname().setFakeExperience(nickExperience);
+        try {
+            NickExperience nickExperience = database.get(NickExperience.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+            if (nickExperience != null) {
+                nickExperience.setTrueExperience(player.getTrueExperience());
+                if (player.getNickname() == null) {
+                    player.setNickname(new Nickname(player.getUniqueId(), null, player.getTrueName(), null, null));
                 }
-            } catch (Exception e) {
-                if (e instanceof SQLException) {
-                    e.printStackTrace();
-                }
+                
+                player.getNickname().setFakeExperience(nickExperience);
             }
-            
-            try {
-                NickBalance nickBalance = database.get(NickBalance.class, "uniqueid", player.getUniqueId().toString()).getFirst();
-                if (nickBalance != null) {
-                    nickBalance.setTrueBalance(player.getTrueBalance());
-                    player.getNickname().setFakeBalance(nickBalance);
-                }
-            } catch (Exception e) {
-                if (e instanceof SQLException) {
-                    e.printStackTrace();
-                }
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
             }
-            
-            try {
-                NickTime nickTime = database.get(NickTime.class, "uniqueid", player.getUniqueId().toString()).getFirst();
-                if (nickTime != null) {
-                    nickTime.setTrueTime(player.getTrueTime());
-                    player.getNickname().setFakeTime(nickTime);
+        }
+        
+        try {
+            NickBalance nickBalance = database.get(NickBalance.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+            if (nickBalance != null) {
+                nickBalance.setTrueBalance(player.getTrueBalance());
+                if (player.getNickname() == null) {
+                    player.setNickname(new Nickname(player.getUniqueId(), null, player.getTrueName(), null, null));
                 }
-            } catch (Exception e) {
-                if (e instanceof SQLException) {
-                    e.printStackTrace();
+                
+                player.getNickname().setFakeBalance(nickBalance);
+            }
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
+            }
+        }
+        
+        try {
+            NickTime nickTime = database.get(NickTime.class, "uniqueid", player.getUniqueId().toString()).getFirst();
+            if (nickTime != null) {
+                nickTime.setTrueTime(player.getTrueTime());
+                if (player.getNickname() == null) {
+                    player.setNickname(new Nickname(player.getUniqueId(), null, player.getTrueName(), null, null));
                 }
+                
+                player.getNickname().setFakeTime(nickTime);
+            }
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                e.printStackTrace();
             }
         }
         

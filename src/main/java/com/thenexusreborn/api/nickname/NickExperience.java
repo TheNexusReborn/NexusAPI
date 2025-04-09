@@ -38,18 +38,6 @@ public class NickExperience extends PlayerExperience {
         return trueExperience.addExperience(xp);
     }
     
-    @Override
-    public void setLevel(int level) {
-        trueExperience.setLevel(level);
-        super.setLevel(level);
-    }
-    
-    @Override
-    public void setLevelXp(double levelXp) {
-        trueExperience.setLevelXp(levelXp);
-        super.setLevelXp(levelXp);
-    }
-    
     protected NickExperience() {}
     
     public void setTrueExperience(PlayerExperience trueExperience) {

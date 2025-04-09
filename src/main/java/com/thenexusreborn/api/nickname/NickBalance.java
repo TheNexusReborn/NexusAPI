@@ -47,18 +47,6 @@ public class NickBalance extends PlayerBalance {
         return super.addCredits(credits);
     }
     
-    @Override
-    public void setNexites(double nexites) {
-        this.trueBalance.setNexites(nexites);
-        super.setNexites(nexites);
-    }
-    
-    @Override
-    public void setCredits(double credits) {
-        this.trueBalance.setCredits(credits);
-        super.setCredits(credits);
-    }
-    
     public void setTrueBalance(PlayerBalance trueBalance) {
         this.trueBalance = trueBalance;
     }
