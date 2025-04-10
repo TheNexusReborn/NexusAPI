@@ -22,6 +22,11 @@ public class NickTime extends PlayerTime {
         super(uniqueId);
     }
     
+    public NickTime(UUID uniqueId, PlayerTime trueTime) {
+        super(uniqueId);
+        this.trueTime = trueTime;
+    }
+    
     public NickTime(UUID uniqueId, long playTime, PlayerTime trueTime) {
         super(uniqueId);
         this.playtime = playTime;

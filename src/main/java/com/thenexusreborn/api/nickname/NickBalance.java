@@ -19,6 +19,11 @@ public class NickBalance extends PlayerBalance {
         super(uniqueId);
     }
     
+    public NickBalance(UUID uniqueId, PlayerBalance trueBalance) {
+        super(uniqueId);
+        this.trueBalance = trueBalance;
+    }
+    
     public NickBalance(UUID uniqueId, double credits, double nexites, PlayerBalance trueBalance) {
         super(uniqueId);
         this.credits = credits;

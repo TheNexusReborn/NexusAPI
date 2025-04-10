@@ -74,6 +74,12 @@ public class Nickname {
     
     public void setActive(boolean active) {
         this.active = active;
+        
+        if (!active && !persist) {
+            this.fakeTime = new NickTime(uniqueId, this.fakeTime.getTrueTime());
+            this.fakeBalance = new NickBalance(uniqueId, this.fakeBalance.getTrueBalance());
+            this.fakeExperience = new NickExperience(uniqueId, this.fakeExperience.getTrueExperience());
+        }
     }
     
     public void setPersist(boolean persist) {

@@ -19,6 +19,11 @@ public class NickExperience extends PlayerExperience {
         super(uniqueId);
     }
     
+    public NickExperience(UUID uniqueId, PlayerExperience trueExperience) {
+        super(uniqueId);
+        this.trueExperience = trueExperience;
+    }
+    
     public NickExperience(UUID uniqueId, int level, PlayerExperience trueExperience) {
         super(uniqueId);
         this.level = level;
