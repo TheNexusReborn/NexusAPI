@@ -1,6 +1,7 @@
 package com.thenexusreborn.api.player;
 
 import com.stardevllc.clock.clocks.Stopwatch;
+import com.stardevllc.mojang.MojangProfile;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.nickname.Nickname;
@@ -64,6 +65,9 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     private Map<String, Tag> tags = new HashMap<>();
     
     @ColumnIgnored
+    private MojangProfile mojangProfile;
+    
+    @ColumnIgnored
     protected Nickname nickname;
     
     private String activeTag;
@@ -88,7 +92,15 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         this.experience = new PlayerExperience(uniqueId);
         this.balance = new PlayerBalance(uniqueId);
     }
-
+    
+    public MojangProfile getMojangProfile() {
+        return mojangProfile;
+    }
+    
+    public void setMojangProfile(MojangProfile mojangProfile) {
+        this.mojangProfile = mojangProfile;
+    }
+    
     public NexusServer getServer() {
         return server;
     }
@@ -335,18 +347,24 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
             return nickname.getName();
         }
         
+        if (mojangProfile != null) {
+            return mojangProfile.getName();
+        }
+        
         if (getPlayer() != null) {
             if (getPlayer().getName() != null) {
                 return getPlayer().getName();
             }
-            
-            return getPlayer().getName();
         }
                 
         return name;
     }
     
     public String getTrueName() {
+        if (mojangProfile != null) {
+            return mojangProfile.getName();
+        }
+        
         if (nickname != null) {
             return nickname.getTrueName();
         }
