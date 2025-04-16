@@ -1,12 +1,12 @@
 package com.thenexusreborn.api;
 
 import com.stardevllc.clock.ClockManager;
+import com.stardevllc.observable.collections.ObservableHashSet;
+import com.stardevllc.observable.collections.ObservableSet;
 import com.stardevllc.registry.StringRegistry;
 import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
-import com.thenexusreborn.api.gamearchive.GameAction;
-import com.thenexusreborn.api.gamearchive.GameInfo;
-import com.thenexusreborn.api.gamearchive.GameLogManager;
+import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.nickname.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
@@ -20,9 +20,7 @@ import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
-import com.thenexusreborn.api.util.Environment;
-import com.thenexusreborn.api.util.NetworkType;
-import com.thenexusreborn.api.util.Version;
+import com.thenexusreborn.api.util.*;
 
 import java.io.*;
 import java.net.URL;
@@ -60,6 +58,8 @@ public abstract class NexusAPI {
 
     protected SQLDatabase primaryDatabase;
     protected GameLogManager gameLogManager;
+    
+    protected final ObservableSet<String> nicknameBlacklist = new ObservableHashSet<>();
 
     public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager) {
         this.logger = logger;
@@ -140,6 +140,7 @@ public abstract class NexusAPI {
                 database.registerClass(Punishment.class);
                 database.registerClass(Tag.class);
                 database.registerClass(Session.class);
+                database.registerClass(NameBlacklistEntry.class);
                 this.primaryDatabase = database;
             }
         }
@@ -167,6 +168,19 @@ public abstract class NexusAPI {
                 getLogger().info("Game import complete");
             }
         }
+        
+        List<NameBlacklistEntry> nicknameBlacklistEntries = primaryDatabase.get(NameBlacklistEntry.class);
+        for (NameBlacklistEntry entry : nicknameBlacklistEntries) {
+            this.nicknameBlacklist.add(entry.getName());
+        }
+        
+        this.nicknameBlacklist.addListener(e -> {
+            if (e.added() != null) {
+                getPrimaryDatabase().saveSilent(new NameBlacklistEntry((String) e.added()));
+            } else if (e.removed() != null) {
+                getPrimaryDatabase().deleteSilent(NameBlacklistEntry.class, e.removed());
+            }
+        });
         
         toggleRegistry = new ToggleRegistry();
 
@@ -219,7 +233,11 @@ public abstract class NexusAPI {
     public abstract void registerDatabases(DatabaseRegistry registry);
 
     public abstract void registerToggles(ToggleRegistry registry);
-
+    
+    public ObservableSet<String> getNicknameBlacklist() {
+        return nicknameBlacklist;
+    }
+    
     public Version getVersion() {
         return version;
     }
