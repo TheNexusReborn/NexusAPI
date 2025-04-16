@@ -33,17 +33,21 @@ public class Row {
                     continue;
                 }
                 
-                if (rs.getObject(i) == null) {
-                    this.data.put(columnName, null);
-                } else if (column.getTypeHandler() instanceof PropertyTypeHandler) {
-                    this.data.put(columnName, rs.getObject(i));  
-                } else if (column.getCodec() != null) {
-                    data.put(columnName, column.getCodec().decode(rs.getString(i)));
-                } else if (column.getTypeHandler() != null) {
-                    Object object = column.getTypeHandler().getDeserializer().deserialize(column, rs.getObject(i));
-                    this.data.put(columnName, object);
-                } else {
-                    this.data.put(columnName, rs.getObject(i));
+                try {
+                    if (rs.getObject(i) == null) {
+                        this.data.put(columnName, null);
+                    } else if (column.getTypeHandler() instanceof PropertyTypeHandler) {
+                        this.data.put(columnName, rs.getObject(i));
+                    } else if (column.getCodec() != null) {
+                        data.put(columnName, column.getCodec().decode(rs.getString(i)));
+                    } else if (column.getTypeHandler() != null) {
+                        Object object = column.getTypeHandler().getDeserializer().deserialize(column, rs.getObject(i));
+                        this.data.put(columnName, object);
+                    } else {
+                        this.data.put(columnName, rs.getObject(i));
+                    }
+                } catch (Throwable t) {
+//                    System.err.println("Error while parsing row from " + table.getName() + '.' + columnName + ": " + t.getMessage());
                 }
             }
         } catch (SQLException e) {

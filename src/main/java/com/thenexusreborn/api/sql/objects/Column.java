@@ -63,14 +63,7 @@ public class Column implements Comparable<Column> {
         }
         
         if (field.isAnnotationPresent(ColumnType.class)) {
-            String codecType = field.getAnnotation(ColumnType.class).value();
-            if (this.codec != null) {
-                if (!codecType.toLowerCase().startsWith("varchar")) {
-                    throw new IllegalArgumentException("Field " + field.getName() + " in class " + table.getModelClass().getName() + " is annotated with the ColumnType annotation and specifies a non-varchar value. This is not allowed by this library.");
-                }
-            }
-    
-            type = codecType;
+            type = field.getAnnotation(ColumnType.class).value();
         }
         
         if (Property.class.isAssignableFrom(field.getType())) {

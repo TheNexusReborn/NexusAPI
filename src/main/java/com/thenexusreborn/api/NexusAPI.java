@@ -6,7 +6,7 @@ import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.GameAction;
 import com.thenexusreborn.api.gamearchive.GameInfo;
-import com.thenexusreborn.api.gamearchive.GameLogExporter;
+import com.thenexusreborn.api.gamearchive.GameLogManager;
 import com.thenexusreborn.api.nickname.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
@@ -24,10 +24,7 @@ import com.thenexusreborn.api.util.Environment;
 import com.thenexusreborn.api.util.NetworkType;
 import com.thenexusreborn.api.util.Version;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
@@ -62,7 +59,7 @@ public abstract class NexusAPI {
     protected DatabaseRegistry databaseRegistry;
 
     protected SQLDatabase primaryDatabase;
-    protected GameLogExporter gameLogExporter;
+    protected GameLogManager gameLogManager;
 
     public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager) {
         this.logger = logger;
@@ -92,7 +89,34 @@ public abstract class NexusAPI {
 
     public final void init() throws Exception {
         getLogger().info("Loading NexusAPI Version v" + this.version);
-
+        
+        Version migrationVersion = null;
+        File migrationFile = new File("nexusmigration");
+        if (!migrationFile.exists()) {
+            migrationFile.createNewFile();
+        }
+        
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(migrationFile))) {
+            String rawVersion = bufferedReader.readLine();
+            if (rawVersion != null && !rawVersion.isBlank()) {
+                migrationVersion = new Version(rawVersion);
+            }
+        }
+        
+        getLogger().info("Last Migration: " + migrationVersion);
+        
+        boolean needToMigrate = migrationVersion == null || this.version.compareTo(migrationVersion) < 0;
+        
+        if (needToMigrate) {
+            getLogger().info("Converting old GameInfo Json into the new GameInfo Json");
+            List<GameInfo> importedGames = this.gameLogManager.importGames();
+            for (GameInfo ig : importedGames) {
+                this.gameLogManager.exportGameInfo(ig);
+            }
+            
+            getLogger().info("Conversion complete");
+        }
+        
         serverRegistry = new ServerRegistry<>();
         databaseRegistry = new DatabaseRegistry(logger);
 
@@ -126,7 +150,24 @@ public abstract class NexusAPI {
 
         databaseRegistry.setup();
         getLogger().info("Successfully setup the database tables");
-
+        
+        if (needToMigrate) {
+            List<GameAction> gameActions = primaryDatabase.get(GameAction.class);
+            if (gameActions.isEmpty()) {
+                getLogger().info("Importing games from JSON Files...");
+                List<GameInfo> games = this.gameLogManager.importGames();
+                System.out.println("Loaded from json files");
+                for (GameInfo game : games) {
+                    primaryDatabase.queue(game);
+                }
+                
+                System.out.println("Saving to database...");
+                primaryDatabase.flush();
+                
+                getLogger().info("Game import complete");
+            }
+        }
+        
         toggleRegistry = new ToggleRegistry();
 
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
@@ -167,6 +208,11 @@ public abstract class NexusAPI {
             playerManager.getUuidRankMap().put(uniqueId, playerRanks);
         }
         getLogger().info("Loaded basic player data (database IDs, Unique IDs and Names) - " + playerManager.getUuidNameMap().size() + " total profiles.");
+        
+        try (FileWriter fileWriter = new FileWriter(migrationFile)) {
+            fileWriter.write(this.version.toString());
+        }
+        
         getLogger().info("NexusAPI v" + this.version + " load complete.");
     }
 
@@ -192,12 +238,12 @@ public abstract class NexusAPI {
         return punishmentManager;
     }
 
-    public GameLogExporter getGameLogExporter() {
-        return gameLogExporter;
+    public GameLogManager getGameLogManager() {
+        return gameLogManager;
     }
 
-    public void setGameLogExporter(GameLogExporter gameLogExporter) {
-        this.gameLogExporter = gameLogExporter;
+    public void setGameLogManager(GameLogManager gameLogManager) {
+        this.gameLogManager = gameLogManager;
     }
 
     public static void logMessage(Level level, String mainMessage, String... debug) {
