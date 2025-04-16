@@ -1,8 +1,9 @@
 package com.thenexusreborn.api.sql.interfaces;
 
+import com.thenexusreborn.api.sql.DatabaseRegistry;
+
 import java.util.List;
 import java.util.logging.Logger;
-import com.thenexusreborn.api.sql.DatabaseRegistry;
 
 public interface Database {
     //Credentials
@@ -31,8 +32,10 @@ public interface Database {
     //Deleting
     int deleteSilent(Class<?> clazz, Object id);
     int deleteSilent(Object object);
+    int deleteSilent(Class<?> clazz, Object id, Object[] columns, Object[] values);
     int delete(Object object) throws Exception;
     int delete(Class<?> clazz, Object id) throws Exception;
+    int delete(Class<?> clazz, Object id, Object[] columns, Object[] values) throws Exception;
     
     //Queue Related
     void queue(Object object);

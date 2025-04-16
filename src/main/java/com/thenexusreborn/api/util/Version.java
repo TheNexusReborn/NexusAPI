@@ -5,7 +5,6 @@ import com.thenexusreborn.api.NexusAPI;
 import java.util.Objects;
 import java.util.logging.Level;
 
-@SuppressWarnings("ComparatorMethodParameterNotUsed")
 public class Version implements Comparable<Version> {
     private int major, minor, patch;
     private Stage stage;
@@ -119,7 +118,7 @@ public class Version implements Comparable<Version> {
             return Integer.compare(this.patch, o.patch);
         }
         
-        return -1;
+        return 0;
     }
     
     public enum Stage {

@@ -1,14 +1,14 @@
 package com.thenexusreborn.api.player;
 
 import com.stardevllc.clock.clocks.Stopwatch;
+import com.stardevllc.mojang.MojangProfile;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
+import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.server.NexusServer;
-import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
-import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
-import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.column.*;
 import com.thenexusreborn.api.sql.annotations.table.TableHandler;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
@@ -21,7 +21,7 @@ import java.util.*;
 @TableHandler(PlayerObjectHandler.class)
 public class NexusPlayer implements Comparable<NexusPlayer> {
     
-    protected long id;
+    @PrimaryKey
     protected UUID uniqueId;
     protected String name;
     
@@ -62,6 +62,12 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     @ColumnIgnored
     private Map<String, Tag> tags = new HashMap<>();
     
+    @ColumnIgnored
+    private MojangProfile mojangProfile;
+    
+    @ColumnIgnored
+    protected Nickname nickname;
+    
     private String activeTag;
     
     private String discordId;
@@ -75,7 +81,6 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public NexusPlayer(long id, UUID uniqueId, String name) {
-        this.id = id;
         this.name = name;
         this.uniqueId = uniqueId;
         this.toggles = new PlayerToggles();
@@ -84,7 +89,15 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         this.experience = new PlayerExperience(uniqueId);
         this.balance = new PlayerBalance(uniqueId);
     }
-
+    
+    public MojangProfile getMojangProfile() {
+        return mojangProfile;
+    }
+    
+    public void setMojangProfile(MojangProfile mojangProfile) {
+        this.mojangProfile = mojangProfile;
+    }
+    
     public NexusServer getServer() {
         return server;
     }
@@ -92,26 +105,50 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     public void setServer(NexusServer server) {
         this.server = server;
     }
-
-    public PlayerBalance getBalance() {
+    
+    public PlayerBalance getTrueBalance() {
         if (balance.getUniqueId() == null) {
             balance.setUniqueId(uniqueId);
         }
         return balance;
     }
 
-    public PlayerExperience getExperience() {
+    public PlayerBalance getBalance() {
+        if (isNicked() && getNickname().getFakeBalance() != null) {
+            return getNickname().getFakeBalance();
+        }
+        
+        return getTrueBalance();
+    }
+    
+    public PlayerExperience getTrueExperience() {
         if (this.experience.getUniqueId() == null) {
             experience.setUniqueId(uniqueId);
         }
         return experience;
     }
 
-    public PlayerTime getPlayerTime() {
+    public PlayerExperience getExperience() {
+        if (isNicked() && getNickname().getFakeExperience() != null) {
+            return getNickname().getFakeExperience();
+        }
+        
+        return getTrueExperience();
+    }
+    
+    public PlayerTime getTrueTime() {
         if (this.playerTime.getUniqueId() == null) {
             this.playerTime.setUniqueId(uniqueId);
         }
         return playerTime;
+    }
+
+    public PlayerTime getPlayerTime() {
+        if (isNicked() && getNickname().getFakeTime() != null) {
+            return getNickname().getFakeTime();
+        }
+        
+        return getTrueTime();
     }
 
     public NexusScoreboard getScoreboard() {
@@ -127,7 +164,7 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
 
     public String getTablistName() {
-        if (getRank() == Rank.MEMBER) {
+        if (getEffectiveRank() == Rank.MEMBER) {
             return Rank.MEMBER.getColor() + getName();
         } else {
             return "&f" + getName();
@@ -140,7 +177,23 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         }
         return this.playerProxy;
     }
-
+    
+    public void setNickname(Nickname nickname) {
+        if (this.nickname != null && nickname != null) {
+            this.nickname.copyFrom(nickname);
+        } else {
+            this.nickname = nickname;
+        }
+    }
+    
+    public Nickname getNickname() {
+        return nickname;
+    }
+    
+    public boolean isNicked() {
+        return nickname != null && nickname.isActive();
+    }
+    
     public NexusPlayer getLastMessage() {
         return NexusAPI.getApi().getPlayerManager().getNexusPlayer(this.lastMessage);
     }
@@ -196,12 +249,32 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     public void setLastLogin(long lastLogin) {
         this.playerTime.setLastLogin(lastLogin);
     }
+    
+    public Rank getEffectiveRank() {
+        if (isNicked()) {
+            return nickname.getRank();
+        } else {
+            return getRank();
+        }
+    }
+    
+    public String getTrueDisplayName() {
+        Rank rank = getRank();
+        
+        if (rank != Rank.MEMBER) {
+            return rank.getPrefix() + " &f" + getTrueName();
+        } else {
+            return rank.getPrefix() + getTrueName();
+        }
+    }
 
     public String getDisplayName() {
-        if (getRank() != Rank.MEMBER) {
-            return getRank().getPrefix() + " &f" + getName();
+        Rank rank = getEffectiveRank();
+        
+        if (rank != Rank.MEMBER) {
+            return rank.getPrefix() + " &f" + getName();
         } else {
-            return getRank().getPrefix() + getName();
+            return rank.getPrefix() + getName();
         }
     }
     
@@ -223,39 +296,31 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public long getLastLogout() {
-        return this.playerTime.getLastLogout();
+        return getPlayerTime().getLastLogout();
     }
     
     public void setLastLogout(long lastLogout) {
-        this.playerTime.setLastLogout(lastLogout);
+        getPlayerTime().setLastLogout(lastLogout);
     }
     
     public void addCredits(int credits) {
-        this.balance.addCredits(credits);
+        getBalance().addCredits(credits);
     }
     
     public void addXp(double xp) {
-        boolean leveledUp = this.experience.addExperience(xp);
+        boolean leveledUp = getExperience().addExperience(xp);
         
         if (leveledUp) {
             if (this.playerProxy != null) {
                 this.playerProxy.sendMessage("");
                 this.playerProxy.sendMessage("&6&l>> &a&lLEVEL UP!");
-                this.playerProxy.sendMessage("&6&l>> &e&l" + (this.experience.getLevel() - 1) + " &a-> &e&l" + this.experience.getLevel());
+                this.playerProxy.sendMessage("&6&l>> &e&l" + (getExperience().getLevel() - 1) + " &a-> &e&l" + getExperience().getLevel());
                 this.playerProxy.sendMessage("");
-                for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(this.experience.getLevel()).getRewards()) {
+                for (Reward reward : NexusAPI.getApi().getLevelManager().getLevel(getExperience().getLevel()).getRewards()) {
                     reward.applyReward(this);
                 }
             }
         }
-    }
-    
-    public long getId() {
-        return id;
-    }
-    
-    public void setId(long id) {
-        this.id = id;
     }
     
     public UUID getUniqueId() {
@@ -267,6 +332,32 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public String getName() {
+        if (isNicked()) {
+            return nickname.getName();
+        }
+        
+        if (mojangProfile != null) {
+            return mojangProfile.getName();
+        }
+        
+        if (getPlayer() != null) {
+            if (getPlayer().getName() != null) {
+                return getPlayer().getName();
+            }
+        }
+                
+        return name;
+    }
+    
+    public String getTrueName() {
+        if (mojangProfile != null) {
+            return mojangProfile.getName();
+        }
+        
+        if (nickname != null) {
+            return nickname.getTrueName();
+        }
+        
         return name;
     }
     
@@ -325,7 +416,11 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public String getColoredName() {
-        return getRank().getColor() + getName();
+        return getEffectiveRank().getColor() + getName();
+    }
+    
+    public String getTrueColoredName() {
+        return getRank().getColor() + getTrueName();
     }
     
     public void removeCredits(int credits) {
@@ -405,6 +500,6 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
 
     @Override
     public int compareTo(NexusPlayer o) {
-        return Long.compare(this.id, o.id);
+        return this.getUniqueId().compareTo(o.getUniqueId());
     }
 }

@@ -5,9 +5,7 @@ import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.interfaces.SQLDB;
 import com.thenexusreborn.api.sql.objects.typehandlers.*;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
@@ -406,8 +404,24 @@ public abstract class SQLDatabase implements SQLDB {
                 updateBuilder.append(", ");
             }
         }
-
-        String sql = "insert into " + table.getName() + " (" + insertColumnBuilder + ") values (" + insertValueBuilder + ") on duplicate key update " + updateBuilder + ";";
+        
+        String columns = insertColumnBuilder.toString();
+        String values = insertValueBuilder.toString();
+        
+        if (columns.charAt(columns.length() - 2) == ',' && columns.charAt(columns.length() - 1) == ' ') {
+            columns = columns.substring(0, columns.length() - 2);
+        }
+        
+        if (values.charAt(values.length() - 2) == ',' && values.charAt(values.length() - 1) == ' ') {
+            values = values.substring(0, values.length() - 2);
+        }
+        
+        String update = "";
+        if (!updateBuilder.isEmpty()) {
+            update = " on duplicate key update " + updateBuilder;
+        }
+        
+        String sql = "insert into " + table.getName() + " (" + columns + ") values (" + values + ") " + update + ";";
         return new PushInfo(sql, getGeneratedKeys, table, handler);
     }
 
@@ -515,7 +529,18 @@ public abstract class SQLDatabase implements SQLDB {
         }
         return 0;
     }
-
+    
+    @Override
+    public int deleteSilent(Class<?> clazz, Object id, Object[] columns, Object[] values) {
+        try {
+            return delete(clazz, id, columns, values);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return 0;
+    }
+    
     /**
      * Deletes an Object from the database<br>
      * Note: This will throw an {@link IllegalArgumentException} if no table is found
@@ -539,11 +564,15 @@ public abstract class SQLDatabase implements SQLDB {
 
         try {
             Object id = primaryColumn.getField().get(object);
-            primaryColumn.getField().set(object, 0);
             return delete(object.getClass(), id);
         } catch (IllegalAccessException e) {
         }
         return 0;
+    }
+    
+    @Override
+    public int delete(Class<?> clazz, Object id) throws SQLException {
+        return delete(clazz, id, null, null);
     }
 
     /**
@@ -554,7 +583,7 @@ public abstract class SQLDatabase implements SQLDB {
      * @throws SQLException Any SQL Errors
      */
     @Override
-    public int delete(Class<?> clazz, Object id) throws SQLException {
+    public int delete(Class<?> clazz, Object id, Object[] columns, Object[] values) throws SQLException {
         Table table = getTable(clazz);
         if (table == null) {
             return 0;
@@ -566,9 +595,25 @@ public abstract class SQLDatabase implements SQLDB {
                 primaryColumn = column;
             }
         }
+        
+        List<String> additionalClauses = new ArrayList<>();
+        if (columns != null && values != null && columns.length == values.length) {
+            for (int i = 0; i < columns.length; i++) {
+                additionalClauses.add(" and `" + columns[i] + "`='" + values[i] + "'");
+            }
+        }
+        
+        StringBuilder sql = new StringBuilder("delete from `" + table.getName() + "` where `" + primaryColumn.getName() + "`='" + id + "'");
+        if (!additionalClauses.isEmpty()) {
+            for (String clause : additionalClauses) {
+                sql.append(clause);
+            }
+        }
+        
+        sql.append(";");
 
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
-            return statement.executeUpdate("delete from `" + table.getName() + "` where `" + primaryColumn.getName() + "`='" + id + "';");
+            return statement.executeUpdate(sql.toString());
         }
     }
 

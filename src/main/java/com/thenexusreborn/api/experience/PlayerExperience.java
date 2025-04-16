@@ -10,11 +10,11 @@ import java.util.UUID;
 @TableName("experience")
 public class PlayerExperience {
     @PrimaryKey
-    private UUID uniqueId;
-    private int level;
-    private double levelXp;
+    protected UUID uniqueId;
+    protected int level;
+    protected double levelXp;
 
-    private PlayerExperience() {}
+    protected PlayerExperience() {}
 
     public PlayerExperience(UUID uniqueId) {
         this.uniqueId = uniqueId;

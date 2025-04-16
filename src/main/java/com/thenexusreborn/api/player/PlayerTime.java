@@ -9,11 +9,11 @@ import java.util.UUID;
 public class PlayerTime {
     @PrimaryKey
     private UUID uniqueId;
-    private long firstJoined;
-    private long lastLogin, lastLogout;
-    private long playtime;
+    protected long firstJoined;
+    protected long lastLogin, lastLogout;
+    protected long playtime;
     
-    private PlayerTime() {}
+    protected PlayerTime() {}
 
     public PlayerTime(UUID uniqueId) {
         this.uniqueId = uniqueId;

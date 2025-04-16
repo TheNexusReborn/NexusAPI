@@ -1,29 +1,32 @@
 package com.thenexusreborn.api.gamearchive;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.stardevllc.helper.StringHelper;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.player.PlayerManager;
-import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
-import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
-import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.column.*;
 import com.thenexusreborn.api.sql.annotations.table.TableHandler;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
-import com.thenexusreborn.api.sql.objects.codecs.StringArrayCodec;
+import com.thenexusreborn.api.sql.objects.codecs.GamePlayerInfoCodec;
 import com.thenexusreborn.api.sql.objects.objecthandler.GamesObjectHandler;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 @TableName("games")
 @TableHandler(GamesObjectHandler.class)
 public class GameInfo implements Comparable<GameInfo> {
+    private static final int CURRENT_VERSION = 2;
+    
+    public static final Set<String> playersWithNoUUID = new HashSet<>();
+    
     private long id;
+    private int version = CURRENT_VERSION;
     private long gameStart, gameEnd;
     private String serverName;
-    @ColumnType("varchar(1000)")
-    @ColumnCodec(StringArrayCodec.class)
-    private String[] players;
+    @ColumnType("json")
+    @ColumnCodec(GamePlayerInfoCodec.class)
+    private Set<PlayerInfo> players = new HashSet<>();
     private String winner, mapName, settings, firstBlood;
     private int playerCount;
     private long length;
@@ -42,21 +45,41 @@ public class GameInfo implements Comparable<GameInfo> {
         this.playerCount = json.get("playercount").getAsInt();
         this.length = json.get("length").getAsLong();
         
-        JsonObject playersObject = json.getAsJsonObject("players");
-        this.players = new String[playerCount];
-        int counter = 0;
-        for (Map.Entry<String, JsonElement> playerEntry : playersObject.entrySet()) {
-            this.players[counter] = playerEntry.getKey();
-            counter++;
+        if (json.has("version")) {
+            this.version = json.get("version").getAsInt();
+            if (this.version != CURRENT_VERSION) {
+                this.version = CURRENT_VERSION; //TODO This is just adding the version to the GameInfo, future things will have a convert method
+            }
         }
         
-        PlayerManager playerManager = NexusAPI.getApi().getPlayerManager();
+        if (json.has("version")) {
+            JsonArray playersArray = json.get("players").getAsJsonArray();
+            for (JsonElement player : playersArray) {
+                PlayerInfo playerInfo = new PlayerInfo(player.getAsJsonObject());
+                this.players.add(playerInfo);
+                if (playerInfo.getUniqueId() == null) {
+                    playersWithNoUUID.add(playerInfo.getName());
+                }
+            }
+        } else {
+            JsonObject playersObject = json.get("players").getAsJsonObject();
+            for (Entry<String, JsonElement> entry : playersObject.entrySet()) {
+                String name = entry.getKey();
+                UUID uuid = null;
+                try {
+                    uuid = UUID.fromString(entry.getValue().getAsString());
+                } catch (Throwable e) {}
+                
+                PlayerInfo playerInfo = new PlayerInfo(name, uuid);
+                this.players.add(playerInfo);
+                if (uuid == null) {
+                    playersWithNoUUID.add(playerInfo.getName());
+                }
+            }
+        }
         
-        UUID winnerUUID = UUID.fromString(json.get("winner").getAsString());
-        this.winner = playerManager.getNameFromUUID(winnerUUID);
-        
-        UUID firstBloodUUID = UUID.fromString(json.get("firstblood").getAsString());
-        this.firstBlood = playerManager.getNameFromUUID(firstBloodUUID);
+        this.winner = json.get("winner").getAsString();
+        this.firstBlood = json.get("firstblood").getAsString();
         
         JsonObject actionsObject = json.getAsJsonObject("actions");
         for (Map.Entry<String, JsonElement> actionEntry : actionsObject.entrySet()) {
@@ -69,6 +92,7 @@ public class GameInfo implements Comparable<GameInfo> {
         JsonObject gameJson = new JsonObject();
 
         gameJson.addProperty("id", getId());
+        gameJson.addProperty("version", this.version);
         gameJson.addProperty("start", getGameStart());
         gameJson.addProperty("end", getGameEnd());
         gameJson.addProperty("server", getServerName());
@@ -76,21 +100,15 @@ public class GameInfo implements Comparable<GameInfo> {
         gameJson.addProperty("playercount", getPlayerCount());
         gameJson.addProperty("length", getLength());
 
-        JsonObject playersObject = new JsonObject();
+        JsonArray playersArray = new JsonArray();
 
         PlayerManager playerManager = NexusAPI.getApi().getPlayerManager();
-
-        for (String playerName : getPlayers()) {
-            UUID uuid = playerManager.getUUIDFromName(playerName);
-
-            if (uuid == null) {
-                playersObject.addProperty(playerName, "Could not get UUID.");
-            } else {
-                playersObject.addProperty(playerName, uuid.toString());
-            }
+        
+        for (PlayerInfo player : this.players) {
+            playersArray.add(player.toJson());
         }
 
-        gameJson.add("players", playersObject);
+        gameJson.add("players", playersArray);
 
         if (!StringHelper.isEmpty(getWinner())) {
             UUID uuid = playerManager.getUUIDFromName(getWinner());
@@ -118,7 +136,7 @@ public class GameInfo implements Comparable<GameInfo> {
         return gameJson;
     }
     
-    public GameInfo(long id, long gameStart, long gameEnd, String serverName, String[] players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
+    public GameInfo(long id, long gameStart, long gameEnd, String serverName, Set<PlayerInfo> players, String winner, String mapName, String settings, String firstBlood, int playerCount, long length) {
         this.id = id;
         this.gameStart = gameStart;
         this.gameEnd = gameEnd;
@@ -160,7 +178,7 @@ public class GameInfo implements Comparable<GameInfo> {
         return gameEnd;
     }
     
-    public String[] getPlayers() {
+    public Set<PlayerInfo> getPlayers() {
         return players;
     }
     
@@ -200,8 +218,16 @@ public class GameInfo implements Comparable<GameInfo> {
         this.gameEnd = gameEnd;
     }
     
-    public void setPlayers(String... players) {
-        this.players = players;
+    public void setPlayers(PlayerInfo... players) {
+        if (players != null) {
+            this.players.clear();
+            this.players.addAll(Arrays.asList(players));
+        }
+    }
+    
+    public void setPlayers(Set<PlayerInfo> players) {
+        this.players.clear();
+        this.players.addAll(players);
     }
     
     public void setMapName(String mapName) {
@@ -233,13 +259,13 @@ public class GameInfo implements Comparable<GameInfo> {
             return false;
         }
         GameInfo gameInfo = (GameInfo) o;
-        return gameStart == gameInfo.gameStart && gameEnd == gameInfo.gameEnd && playerCount == gameInfo.playerCount && length == gameInfo.length && Objects.equals(serverName, gameInfo.serverName) && Arrays.equals(players, gameInfo.players) && Objects.equals(winner, gameInfo.winner) && Objects.equals(mapName, gameInfo.mapName) && Objects.equals(settings, gameInfo.settings) && Objects.equals(firstBlood, gameInfo.firstBlood);
+        return gameStart == gameInfo.gameStart && gameEnd == gameInfo.gameEnd && playerCount == gameInfo.playerCount && length == gameInfo.length && Objects.equals(serverName, gameInfo.serverName) && Objects.equals(winner, gameInfo.winner) && Objects.equals(mapName, gameInfo.mapName) && Objects.equals(settings, gameInfo.settings) && Objects.equals(firstBlood, gameInfo.firstBlood);
     }
     
     @Override
     public int hashCode() {
         int result = Objects.hash(gameStart, gameEnd, serverName, winner, mapName, settings, firstBlood, playerCount, length);
-        result = 31 * result + Arrays.hashCode(players);
+        result = 31 * result;
         return result;
     }
     
