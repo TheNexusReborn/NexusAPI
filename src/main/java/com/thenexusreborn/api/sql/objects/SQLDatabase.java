@@ -5,9 +5,7 @@ import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.interfaces.SQLDB;
 import com.thenexusreborn.api.sql.objects.typehandlers.*;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
@@ -406,8 +404,24 @@ public abstract class SQLDatabase implements SQLDB {
                 updateBuilder.append(", ");
             }
         }
-
-        String sql = "insert into " + table.getName() + " (" + insertColumnBuilder + ") values (" + insertValueBuilder + ") on duplicate key update " + updateBuilder + ";";
+        
+        String columns = insertColumnBuilder.toString();
+        String values = insertValueBuilder.toString();
+        
+        if (columns.charAt(columns.length() - 2) == ',' && columns.charAt(columns.length() - 1) == ' ') {
+            columns = columns.substring(0, columns.length() - 2);
+        }
+        
+        if (values.charAt(values.length() - 2) == ',' && values.charAt(values.length() - 1) == ' ') {
+            values = values.substring(0, values.length() - 2);
+        }
+        
+        String update = "";
+        if (!updateBuilder.isEmpty()) {
+            update = " on duplicate key update " + updateBuilder;
+        }
+        
+        String sql = "insert into " + table.getName() + " (" + columns + ") values (" + values + ") " + update + ";";
         return new PushInfo(sql, getGeneratedKeys, table, handler);
     }
 
