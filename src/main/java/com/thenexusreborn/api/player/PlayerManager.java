@@ -4,19 +4,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.stardevllc.helper.Pair;
-import com.stardevllc.helper.StringHelper;
+import com.stardevllc.mojang.MojangAPI;
+import com.stardevllc.mojang.MojangProfile;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.punishment.Punishment;
 import com.thenexusreborn.api.punishment.PunishmentType;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -77,16 +71,14 @@ public abstract class PlayerManager {
         UUID uuid = getUuidNameMap().inverse().get(new Name(rawName));
         
         if (uuid == null) {
-            try {
-                URL url = new URI(UUID_URL.replace("{name}", rawName)).toURL();
-                URLConnection request = url.openConnection();
-                request.connect();
-
-                JsonObject jsonResponse = new JsonParser().parse(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
-                String rawId = jsonResponse.get("id").getAsString();
-                uuid = StringHelper.toUUID(rawId);
-                this.uuidNameMap.put(uuid, new Name(rawName));
-            } catch (Exception e) {}
+            MojangProfile mojangProfile = MojangAPI.getProfile(rawName);
+            
+            if (mojangProfile == null) {
+                return null;
+            }
+            
+            this.uuidNameMap.put(mojangProfile.getUniqueId(), new Name(mojangProfile.getName()));
+            return uuid;
         }
         
         return uuid;
@@ -95,6 +87,12 @@ public abstract class PlayerManager {
     public String getNameFromUUID(UUID uuid) {
         Name name = this.uuidNameMap.get(uuid);
         if (name == null) {
+            MojangProfile mojangProfile = MojangAPI.getProfile(uuid);
+            if (mojangProfile != null) {
+                this.uuidNameMap.put(uuid, new Name(mojangProfile.getName()));
+                return mojangProfile.getName();
+            }
+            
             return null;
         }
         return name.name;
