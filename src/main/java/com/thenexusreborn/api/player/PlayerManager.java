@@ -158,6 +158,7 @@ public abstract class PlayerManager {
         nexusPlayer.setLastLogin(System.currentTimeMillis());
         nexusPlayer.setLastLogout(System.currentTimeMillis());
         NexusAPI.getApi().getPrimaryDatabase().saveSilent(nexusPlayer);
+        this.cachedPlayers.put(uniqueId, nexusPlayer);
         return nexusPlayer;
     }
     
