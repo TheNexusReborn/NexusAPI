@@ -1,11 +1,13 @@
 package com.thenexusreborn.api.nickname;
 
+import com.thenexusreborn.api.sql.annotations.column.ColumnType;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
 
 @TableName("nameblacklist")
 public class NameBlacklistEntry {
     @PrimaryKey
+    @ColumnType("varchar(32)")
     private String name;
     
     private NameBlacklistEntry() {}
