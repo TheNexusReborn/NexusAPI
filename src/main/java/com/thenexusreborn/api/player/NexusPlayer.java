@@ -8,9 +8,7 @@ import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.reward.Reward;
 import com.thenexusreborn.api.scoreboard.NexusScoreboard;
 import com.thenexusreborn.api.server.NexusServer;
-import com.thenexusreborn.api.sql.annotations.column.ColumnCodec;
-import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
-import com.thenexusreborn.api.sql.annotations.column.ColumnType;
+import com.thenexusreborn.api.sql.annotations.column.*;
 import com.thenexusreborn.api.sql.annotations.table.TableHandler;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
 import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
@@ -23,7 +21,7 @@ import java.util.*;
 @TableHandler(PlayerObjectHandler.class)
 public class NexusPlayer implements Comparable<NexusPlayer> {
     
-    protected long id;
+    @PrimaryKey
     protected UUID uniqueId;
     protected String name;
     
@@ -83,7 +81,6 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
     }
     
     public NexusPlayer(long id, UUID uniqueId, String name) {
-        this.id = id;
         this.name = name;
         this.uniqueId = uniqueId;
         this.toggles = new PlayerToggles();
@@ -326,14 +323,6 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
         }
     }
     
-    public long getId() {
-        return id;
-    }
-    
-    public void setId(long id) {
-        this.id = id;
-    }
-    
     public UUID getUniqueId() {
         return uniqueId;
     }
@@ -511,6 +500,6 @@ public class NexusPlayer implements Comparable<NexusPlayer> {
 
     @Override
     public int compareTo(NexusPlayer o) {
-        return Long.compare(this.id, o.id);
+        return this.getUniqueId().compareTo(o.getUniqueId());
     }
 }
