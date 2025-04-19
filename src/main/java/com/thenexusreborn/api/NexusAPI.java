@@ -60,6 +60,8 @@ public abstract class NexusAPI {
     protected GameLogManager gameLogManager;
     
     protected final ObservableSet<String> nicknameBlacklist = new ObservableHashSet<>();
+    protected final ObservableSet<String> randomNames = new ObservableHashSet<>();
+    protected final ObservableSet<String> randomSkins = new ObservableHashSet<>();
 
     public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager) {
         this.logger = logger;
@@ -141,6 +143,8 @@ public abstract class NexusAPI {
                 database.registerClass(Tag.class);
                 database.registerClass(Session.class);
                 database.registerClass(NameBlacklistEntry.class);
+                database.registerClass(RandomNameEntry.class);
+                database.registerClass(RandomSkinEntry.class);
                 this.primaryDatabase = database;
             }
         }
@@ -179,6 +183,32 @@ public abstract class NexusAPI {
                 getPrimaryDatabase().saveSilent(new NameBlacklistEntry((String) e.added()));
             } else if (e.removed() != null) {
                 getPrimaryDatabase().deleteSilent(NameBlacklistEntry.class, e.removed());
+            }
+        });
+        
+        List<RandomNameEntry> randomNameEntries = primaryDatabase.get(RandomNameEntry.class);
+        for (RandomNameEntry entry : randomNameEntries) {
+            this.randomNames.add(entry.getName());
+        }
+        
+        this.randomNames.addListener(e -> {
+            if (e.added() != null) {
+                getPrimaryDatabase().saveSilent(new RandomNameEntry((String) e.added()));
+            } else if (e.removed() != null) {
+                getPrimaryDatabase().deleteSilent(RandomNameEntry.class, e.removed());
+            }
+        });
+        
+        List<RandomSkinEntry> randomSkinEntries = primaryDatabase.get(RandomSkinEntry.class);
+        for (RandomSkinEntry entry : randomSkinEntries) {
+            this.randomSkins.add(entry.getName());
+        }
+        
+        this.randomSkins.addListener(e -> {
+            if (e.added() != null) {
+                getPrimaryDatabase().saveSilent(new RandomSkinEntry((String) e.added()));
+            } else if (e.removed() != null) {
+                getPrimaryDatabase().deleteSilent(RandomSkinEntry.class, e.removed());
             }
         });
         
@@ -236,6 +266,14 @@ public abstract class NexusAPI {
     
     public ObservableSet<String> getNicknameBlacklist() {
         return nicknameBlacklist;
+    }
+    
+    public ObservableSet<String> getRandomNames() {
+        return randomNames;
+    }
+    
+    public ObservableSet<String> getRandomSkins() {
+        return randomSkins;
     }
     
     public Version getVersion() {
