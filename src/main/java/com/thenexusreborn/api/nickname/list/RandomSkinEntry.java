@@ -1,18 +1,18 @@
-package com.thenexusreborn.api.nickname;
+package com.thenexusreborn.api.nickname.list;
 
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
 import com.thenexusreborn.api.sql.annotations.table.TableName;
 
-@TableName("randomnames")
-public class RandomNameEntry {
+@TableName("randomskins")
+public class RandomSkinEntry {
     @PrimaryKey
-    @ColumnType("varchar(32)")
+    @ColumnType("varchar(40)")
     private String name;
     
-    private RandomNameEntry() {}
+    private RandomSkinEntry() {}
     
-    public RandomNameEntry(String name) {
+    public RandomSkinEntry(String name) {
         this.name = name;
     }
     

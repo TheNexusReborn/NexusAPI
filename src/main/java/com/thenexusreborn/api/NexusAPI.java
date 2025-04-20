@@ -8,6 +8,8 @@ import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.*;
 import com.thenexusreborn.api.nickname.*;
+import com.thenexusreborn.api.nickname.list.*;
+import com.thenexusreborn.api.nickname.player.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
