@@ -64,6 +64,8 @@ public abstract class NexusAPI {
     protected final ObservableSet<String> nicknameBlacklist = new ObservableHashSet<>();
     protected final ObservableSet<String> randomNames = new ObservableHashSet<>();
     protected final ObservableSet<String> randomSkins = new ObservableHashSet<>();
+    
+    protected NickPerms nickPerms;
 
     public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager) {
         this.logger = logger;
@@ -147,6 +149,7 @@ public abstract class NexusAPI {
                 database.registerClass(NameBlacklistEntry.class);
                 database.registerClass(RandomNameEntry.class);
                 database.registerClass(RandomSkinEntry.class);
+                database.registerClass(NickPerms.class);
                 this.primaryDatabase = database;
             }
         }
@@ -213,6 +216,13 @@ public abstract class NexusAPI {
                 getPrimaryDatabase().deleteSilent(RandomSkinEntry.class, e.removed());
             }
         });
+        
+        try {
+            this.nickPerms = getPrimaryDatabase().get(NickPerms.class).getFirst();
+        } catch (Throwable t) {
+            this.nickPerms = new NickPerms();
+            getPrimaryDatabase().saveSilent(this.nickPerms);
+        }
         
         toggleRegistry = new ToggleRegistry();
 
@@ -346,5 +356,9 @@ public abstract class NexusAPI {
 
     public ServerRegistry<NexusServer> getServerRegistry() {
         return serverRegistry;
+    }
+    
+    public NickPerms getNickPerms() {
+        return nickPerms;
     }
 }
