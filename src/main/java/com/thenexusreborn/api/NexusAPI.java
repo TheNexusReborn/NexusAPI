@@ -7,7 +7,8 @@ import com.stardevllc.registry.StringRegistry;
 import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.*;
-import com.thenexusreborn.api.nickname.*;
+import com.thenexusreborn.api.nickname.NickPerms;
+import com.thenexusreborn.api.nickname.Nickname;
 import com.thenexusreborn.api.nickname.list.*;
 import com.thenexusreborn.api.nickname.player.*;
 import com.thenexusreborn.api.player.*;
@@ -256,9 +257,9 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
 
         for (Row row : playerRows) {
-            UUID uniqueId = (UUID) row.getObject("uniqueId");
+            UUID uniqueId = (UUID) row.getObject("uniqueid");
             String name = row.getString("name");
-            PlayerRanks playerRanks = new RanksCodec().decode(row.getString("ranks"));
+            PlayerRanks playerRanks = (PlayerRanks) row.getObject("ranks");
             playerRanks.setUniqueId(uniqueId);
             playerManager.getUuidNameMap().put(uniqueId, new Name(name));
             playerManager.getUuidRankMap().put(uniqueId, playerRanks);
