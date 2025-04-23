@@ -21,7 +21,6 @@ import com.thenexusreborn.api.server.ServerRegistry;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
-import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.util.*;
 
@@ -230,6 +229,7 @@ public abstract class NexusAPI {
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
         toggleRegistry.register("incognito", Rank.MEDIA, "Incognito", "A media+ thing where you can be hidden from others", false);
         toggleRegistry.register("fly", Rank.DIAMOND, "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
+        toggleRegistry.register("debug", Rank.ADMIN, "Debug", "A toggle that allows debugging of things", false);
 
         int initialToggleSize = toggleRegistry.getObjects().size();
         getLogger().info("Registered " + initialToggleSize + " default toggle types.");
