@@ -1,4 +1,4 @@
-package com.thenexusreborn.api.nickname;
+package com.thenexusreborn.api.nickname.player;
 
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;

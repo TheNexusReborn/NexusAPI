@@ -7,7 +7,10 @@ import com.stardevllc.registry.StringRegistry;
 import com.thenexusreborn.api.experience.LevelManager;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.gamearchive.*;
-import com.thenexusreborn.api.nickname.*;
+import com.thenexusreborn.api.nickname.NickPerms;
+import com.thenexusreborn.api.nickname.Nickname;
+import com.thenexusreborn.api.nickname.list.*;
+import com.thenexusreborn.api.nickname.player.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.player.PlayerManager.Name;
 import com.thenexusreborn.api.punishment.Punishment;
@@ -18,7 +21,6 @@ import com.thenexusreborn.api.server.ServerRegistry;
 import com.thenexusreborn.api.sql.DatabaseRegistry;
 import com.thenexusreborn.api.sql.objects.Row;
 import com.thenexusreborn.api.sql.objects.SQLDatabase;
-import com.thenexusreborn.api.sql.objects.codecs.RanksCodec;
 import com.thenexusreborn.api.tags.Tag;
 import com.thenexusreborn.api.util.*;
 
@@ -60,6 +62,10 @@ public abstract class NexusAPI {
     protected GameLogManager gameLogManager;
     
     protected final ObservableSet<String> nicknameBlacklist = new ObservableHashSet<>();
+    protected final ObservableSet<String> randomNames = new ObservableHashSet<>();
+    protected final ObservableSet<String> randomSkins = new ObservableHashSet<>();
+    
+    protected NickPerms nickPerms;
 
     public NexusAPI(Environment environment, Logger logger, PlayerManager playerManager) {
         this.logger = logger;
@@ -141,6 +147,9 @@ public abstract class NexusAPI {
                 database.registerClass(Tag.class);
                 database.registerClass(Session.class);
                 database.registerClass(NameBlacklistEntry.class);
+                database.registerClass(RandomNameEntry.class);
+                database.registerClass(RandomSkinEntry.class);
+                database.registerClass(NickPerms.class);
                 this.primaryDatabase = database;
             }
         }
@@ -182,11 +191,45 @@ public abstract class NexusAPI {
             }
         });
         
+        List<RandomNameEntry> randomNameEntries = primaryDatabase.get(RandomNameEntry.class);
+        for (RandomNameEntry entry : randomNameEntries) {
+            this.randomNames.add(entry.getName());
+        }
+        
+        this.randomNames.addListener(e -> {
+            if (e.added() != null) {
+                getPrimaryDatabase().saveSilent(new RandomNameEntry((String) e.added()));
+            } else if (e.removed() != null) {
+                getPrimaryDatabase().deleteSilent(RandomNameEntry.class, e.removed());
+            }
+        });
+        
+        List<RandomSkinEntry> randomSkinEntries = primaryDatabase.get(RandomSkinEntry.class);
+        for (RandomSkinEntry entry : randomSkinEntries) {
+            this.randomSkins.add(entry.getName());
+        }
+        
+        this.randomSkins.addListener(e -> {
+            if (e.added() != null) {
+                getPrimaryDatabase().saveSilent(new RandomSkinEntry((String) e.added()));
+            } else if (e.removed() != null) {
+                getPrimaryDatabase().deleteSilent(RandomSkinEntry.class, e.removed());
+            }
+        });
+        
+        try {
+            this.nickPerms = getPrimaryDatabase().get(NickPerms.class).getFirst();
+        } catch (Throwable t) {
+            this.nickPerms = new NickPerms();
+            getPrimaryDatabase().saveSilent(this.nickPerms);
+        }
+        
         toggleRegistry = new ToggleRegistry();
 
         toggleRegistry.register("vanish", Rank.HELPER, "Vanish", "A staff only thing where you can be completely invisible", false);
         toggleRegistry.register("incognito", Rank.MEDIA, "Incognito", "A media+ thing where you can be hidden from others", false);
         toggleRegistry.register("fly", Rank.DIAMOND, "Fly", "A donor perk that allows you to fly in hubs and lobbies", false);
+        toggleRegistry.register("debug", Rank.ADMIN, "Debug", "A toggle that allows debugging of things", false);
 
         int initialToggleSize = toggleRegistry.getObjects().size();
         getLogger().info("Registered " + initialToggleSize + " default toggle types.");
@@ -214,9 +257,9 @@ public abstract class NexusAPI {
         List<Row> playerRows = database.executeQuery("select * from players;");
 
         for (Row row : playerRows) {
-            UUID uniqueId = (UUID) row.getObject("uniqueId");
+            UUID uniqueId = (UUID) row.getObject("uniqueid");
             String name = row.getString("name");
-            PlayerRanks playerRanks = new RanksCodec().decode(row.getString("ranks"));
+            PlayerRanks playerRanks = (PlayerRanks) row.getObject("ranks");
             playerRanks.setUniqueId(uniqueId);
             playerManager.getUuidNameMap().put(uniqueId, new Name(name));
             playerManager.getUuidRankMap().put(uniqueId, playerRanks);
@@ -236,6 +279,14 @@ public abstract class NexusAPI {
     
     public ObservableSet<String> getNicknameBlacklist() {
         return nicknameBlacklist;
+    }
+    
+    public ObservableSet<String> getRandomNames() {
+        return randomNames;
+    }
+    
+    public ObservableSet<String> getRandomSkins() {
+        return randomSkins;
     }
     
     public Version getVersion() {
@@ -306,5 +357,9 @@ public abstract class NexusAPI {
 
     public ServerRegistry<NexusServer> getServerRegistry() {
         return serverRegistry;
+    }
+    
+    public NickPerms getNickPerms() {
+        return nickPerms;
     }
 }

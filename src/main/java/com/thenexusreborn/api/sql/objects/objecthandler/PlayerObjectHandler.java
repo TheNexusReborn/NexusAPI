@@ -3,6 +3,7 @@ package com.thenexusreborn.api.sql.objects.objecthandler;
 import com.thenexusreborn.api.NexusAPI;
 import com.thenexusreborn.api.experience.PlayerExperience;
 import com.thenexusreborn.api.nickname.*;
+import com.thenexusreborn.api.nickname.player.*;
 import com.thenexusreborn.api.player.*;
 import com.thenexusreborn.api.sql.objects.*;
 import com.thenexusreborn.api.tags.Tag;

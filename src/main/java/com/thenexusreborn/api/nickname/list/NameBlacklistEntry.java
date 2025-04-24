@@ -1,4 +1,4 @@
-package com.thenexusreborn.api.nickname;
+package com.thenexusreborn.api.nickname.list;
 
 import com.thenexusreborn.api.sql.annotations.column.ColumnType;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;

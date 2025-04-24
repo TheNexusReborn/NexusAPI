@@ -1,5 +1,6 @@
 package com.thenexusreborn.api.nickname;
 
+import com.thenexusreborn.api.nickname.player.*;
 import com.thenexusreborn.api.player.Rank;
 import com.thenexusreborn.api.sql.annotations.column.ColumnIgnored;
 import com.thenexusreborn.api.sql.annotations.column.PrimaryKey;
