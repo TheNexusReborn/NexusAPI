@@ -62,10 +62,6 @@ public class Column implements Comparable<Column> {
             name = field.getAnnotation(ColumnName.class).value();
         }
         
-        if (field.isAnnotationPresent(ColumnType.class)) {
-            type = field.getAnnotation(ColumnType.class).value();
-        }
-        
         if (Property.class.isAssignableFrom(field.getType())) {
             type = "varchar(1000)";
             typeHandler = new PropertyTypeHandler();
@@ -104,6 +100,10 @@ public class Column implements Comparable<Column> {
             } else {
                 throw new IllegalArgumentException("Could not determine a handler or a codec for the field type " + field.getType().getName() + " in class " + table.getModelClass().getName());
             }
+        }
+        
+        if (field.isAnnotationPresent(ColumnType.class)) {
+            type = field.getAnnotation(ColumnType.class).value();
         }
         
         Class<?> fieldType = field.getType();
