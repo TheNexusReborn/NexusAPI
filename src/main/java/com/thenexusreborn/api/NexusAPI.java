@@ -166,12 +166,12 @@ public abstract class NexusAPI {
             if (gameActions.isEmpty()) {
                 getLogger().info("Importing games from JSON Files...");
                 List<GameInfo> games = this.gameLogManager.importGames();
-                System.out.println("Loaded from json files");
+                getLogger().info("Loaded from json files");
                 for (GameInfo game : games) {
                     primaryDatabase.queue(game);
                 }
                 
-                System.out.println("Saving to database...");
+                getLogger().info("Saving to database...");
                 primaryDatabase.flush();
                 
                 getLogger().info("Game import complete");

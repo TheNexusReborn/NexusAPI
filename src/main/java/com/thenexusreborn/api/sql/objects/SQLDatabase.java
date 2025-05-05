@@ -167,11 +167,8 @@ public abstract class SQLDatabase implements SQLDB {
                 if (Property.class.isAssignableFrom(field.getType())) {
                     Object fieldValue = field.get(object);
                     Property<Object> property = (Property<Object>) fieldValue;
-                    System.out.println(property.getTypeClass());
-                    System.out.println(this.typeHandlers.size());
                     for (TypeHandler typeHandler : this.typeHandlers) {
                         if (typeHandler.matches(property.getTypeClass())) {
-                            System.out.println("Found type handler: " + typeHandler.getClass().getSimpleName());
                             data = typeHandler.deserializer.deserialize(column, data);
                             break;
                         }
