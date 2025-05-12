@@ -9,17 +9,12 @@ public class Session {
     private long id;
     private UUID uniqueId;
     private long start, end;
-    private int gamesPlayed;
 
     private Session() {
     }
 
     public Session(UUID uniqueId) {
         this.uniqueId = uniqueId;
-    }
-
-    public void setGamesPlayed(int gamesPlayed) {
-        this.gamesPlayed = gamesPlayed;
     }
 
     public void start() {
@@ -44,9 +39,5 @@ public class Session {
 
     public long getEnd() {
         return end;
-    }
-
-    public int getGamesPlayed() {
-        return this.gamesPlayed;
     }
 }
