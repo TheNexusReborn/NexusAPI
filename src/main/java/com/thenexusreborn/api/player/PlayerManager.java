@@ -25,7 +25,6 @@ public abstract class PlayerManager {
     protected final Map<UUID, PlayerRanks> uuidRankMap = new HashMap<>();
     protected final Set<IPEntry> ipHistory = new HashSet<>();
     protected final Map<UUID, Set<String>> ipsUsedByPlayers = new HashMap<>();
-    protected final Map<String, Set<UUID>> playersByIP = new HashMap<>();
     
     public static class Name {
         private String name;
@@ -180,10 +179,6 @@ public abstract class PlayerManager {
     }
 
     public Set<UUID> getPlayersByIp(String ip) {
-        if (this.playersByIP.containsKey(ip)) {
-            return new HashSet<>(this.playersByIP.get(ip));
-        }
-        
         Set<UUID> players = new HashSet<>();
 
         for (IPEntry ipEntry : this.ipHistory) {
@@ -192,8 +187,6 @@ public abstract class PlayerManager {
             }
         }
         
-        this.playersByIP.put(ip, players);
-
         return players;
     }
 
@@ -230,11 +223,6 @@ public abstract class PlayerManager {
         IPEntry ipEntry = new IPEntry(hostName, uniqueId);
         NexusAPI.getApi().getPrimaryDatabase().saveSilent(ipEntry);
         playerManager.getIpHistory().add(ipEntry);
-        if (this.playersByIP.containsKey(hostName)) {
-            this.playersByIP.get(hostName).add(uniqueId);
-        } else {
-            this.playersByIP.put(hostName, new HashSet<>(Set.of(uniqueId)));
-        }
         
         if (this.ipsUsedByPlayers.containsKey(uniqueId)) {
             this.ipsUsedByPlayers.get(uniqueId).add(hostName);
